@@ -1,0 +1,44 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+body {
+    background-color: var(--dust-grey) !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.room-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #dee2e6;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.room-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.btn-success {
+    background-color: var(--fern);
+    border-color: var(--fern);
+}
+
+.btn-success:hover {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}

@@ -1,0 +1,77 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+/* Custom Navbar Styles */
+.custom-navbar {
+    background-color: var(--hunter-green) !important;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.custom-navbar .navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+}
+
+.custom-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 0.5rem;
+}
+
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link:focus {
+    color: #ffffff !important;
+    background-color: var(--fern);
+}
+
+.custom-navbar .nav-link.active {
+    color: #ffffff !important;
+    background-color: var(--pine-teal);
+    font-weight: 600;
+}
+
+.custom-navbar .navbar-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.25rem rgba(163, 177, 138, 0.5);
+    /* Dry Sage glow */
+}
+
+/* Dropdown Menu Customization (if used) */
+.custom-navbar .dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    background-color: var(--dust-grey);
+    overflow: hidden;
+}
+
+.custom-navbar .dropdown-item {
+    color: var(--pine-teal);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+}
+
+.custom-navbar .dropdown-item:hover {
+    background-color: var(--dry-sage);
+    color: var(--hunter-green);
+}

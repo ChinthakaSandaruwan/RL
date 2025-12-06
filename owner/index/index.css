@@ -1,0 +1,33 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+body {
+    background-color: var(--dust-grey);
+}
+
+.stat-card {
+    border-left: 4px solid var(--fern);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.owner-header {
+    background: linear-gradient(135deg, var(--fern), var(--hunter-green));
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+}

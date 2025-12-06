@@ -1,0 +1,48 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+body {
+    background-color: var(--dust-grey) !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.property-main-image {
+    height: 500px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+.feature-badge {
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--fern);
+}
+
+.table td {
+    border: none;
+    padding: 0.5rem 0;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 50px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 20px;
+}

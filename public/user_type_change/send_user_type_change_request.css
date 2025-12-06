@@ -1,0 +1,32 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+body {
+    background-color: var(--dust-grey) !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 2px solid var(--fern);
+}
+
+.btn-success {
+    background-color: var(--fern);
+    border-color: var(--fern);
+}
+
+.btn-success:hover {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}

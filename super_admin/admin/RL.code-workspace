@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../Users/chint/OneDrive/Desktop/RL"
+		},
+		{
+			"path": "../../admin"
+		},
+		{
+			"path": "../../auth"
+		},
+		{
+			"path": "../../bootstrap-5.3.8-dist"
+		},
+		{
+			"path": "../../config"
+		},
+		{
+			"path": "../../customer"
+		},
+		{
+			"path": "../../owner"
+		},
+		{
+			"path": "../../phpMyAdmin"
+		},
+		{
+			"path": "../../public"
+		},
+		{
+			"path": "../../services"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
