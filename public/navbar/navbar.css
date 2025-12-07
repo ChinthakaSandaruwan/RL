@@ -75,3 +75,9 @@
     background-color: var(--dry-sage);
     color: var(--hunter-green);
 }
+
+.custom-navbar .dropdown-item.active,
+.custom-navbar .dropdown-item:active {
+    background-color: var(--fern);
+    color: #ffffff;
+}

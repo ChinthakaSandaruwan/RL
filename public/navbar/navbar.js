@@ -1,12 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Active Link Highlighting
     const currentLocation = window.location.href;
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link, .navbar-nav .dropdown-item');
 
     navLinks.forEach(link => {
         if (link.href === currentLocation) {
             link.classList.add('active');
             link.setAttribute('aria-current', 'page');
+
+            // If it's a dropdown item, also highlight the parent dropdown toggle
+            if (link.classList.contains('dropdown-item')) {
+                const parentDropdown = link.closest('.nav-item.dropdown');
+                if (parentDropdown) {
+                    const toggle = parentDropdown.querySelector('.dropdown-toggle');
+                    if (toggle) {
+                        toggle.classList.add('active');
+                    }
+                }
+            }
         }
     });
 

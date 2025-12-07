@@ -48,6 +48,16 @@
                             Owner Dashboard
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ownerCreateDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Create
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ownerCreateDropdown">
+                            <li><a class="dropdown-item" href="<?= app_url('owner/property/create/property_create.php') ?>">Add Property</a></li>
+                            <li><a class="dropdown-item" href="<?= app_url('owner/room/create/room_create.php') ?>">Add Room</a></li>
+                            <li><a class="dropdown-item" href="<?= app_url('owner/vehicle/create/vehicle_create.php') ?>">Add Vehicle</a></li>
+                        </ul>
+                    </li>
                     <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('public/profile/profile.php') ?>">
