@@ -146,7 +146,7 @@ function check_owner_package_quota($userId, $type) {
             'success' => false, 
             'message' => 'You must purchase an ads package before adding a ' . $type . '. Please buy a package to continue.',
             'package_id' => null,
-            'redirect_url' => app_url('owner/ads_packge/buy/buy.php')
+            'redirect_url' => app_url('owner/ads_package/buy/buy.php')
         ];
     }
     
@@ -158,6 +158,7 @@ function check_owner_package_quota($userId, $type) {
         'remaining' => $package[$column]
     ];
 }
+
 
 /**
  * Decrement package quota after successful listing creation
@@ -186,4 +187,70 @@ function decrement_package_quota($packageId, $type) {
         WHERE bought_package_id = ? AND $column > 0
     ");
     return $stmt->execute([$packageId]);
+}
+
+/**
+ * Increment package quota after listing rejection or deletion
+ * @param int $userId
+ * @param string $type - 'property', 'room', or 'vehicle'
+ * @return bool
+ */
+function increment_package_quota($userId, $type) {
+    $pdo = get_pdo();
+    
+    $columnMap = [
+        'property' => 'remaining_properties',
+        'room' => 'remaining_rooms',
+        'vehicle' => 'remaining_vehicles'
+    ];
+    
+    if (!isset($columnMap[$type])) {
+        return false;
+    }
+    
+    $column = $columnMap[$type];
+    
+    // Find the latest approved package for this user (Active or Expired)
+    // We prioritize Active/Future packages, but fallback to Expired ones if necessary
+    $stmt = $pdo->prepare("
+        SELECT bought_package_id FROM bought_package 
+        WHERE user_id = ? 
+          AND payment_status_id IN (2, 4)
+        ORDER BY (expires_date IS NULL OR expires_date > NOW()) DESC, expires_date ASC, created_at ASC 
+        LIMIT 1
+    ");
+    $stmt->execute([$userId]);
+    $package = $stmt->fetch();
+    
+    if ($package) {
+        $stmt = $pdo->prepare("
+            UPDATE bought_package 
+            SET $column = $column + 1 
+            WHERE bought_package_id = ?
+        ");
+        return $stmt->execute([$package['bought_package_id']]);
+    }
+    
+    return false;
+}
+
+/**
+ * Create a notification for a user
+ * @param int $userId
+ * @param string $title
+ * @param string $message
+ * @param int $typeId (default 1)
+ * @param int|null $propertyId (optional)
+ * @return bool
+ */
+function create_notification($userId, $title, $message, $typeId = 1, $propertyId = null) {
+    $pdo = get_pdo();
+    try {
+        $stmt = $pdo->prepare("INSERT INTO notification (user_id, title, message, type_id, property_id) VALUES (?, ?, ?, ?, ?)");
+        return $stmt->execute([$userId, $title, $message, $typeId, $propertyId]);
+    } catch (PDOException $e) {
+        // Log error if needed
+        error_log("Notification Error: " . $e->getMessage());
+        return false;
+    }
 }

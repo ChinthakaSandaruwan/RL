@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../../../config/db.php';
+require __DIR__ . '/../../notification/owner/property_approval_notification/property_approval_notification_auto.php';
 
-ensure_session_started();
 $user = current_user();
 
 // Check if user is Admin (role_id = 2)
@@ -28,10 +28,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $propertyId = intval($_POST['property_id'] ?? 0);
 
+    // Fetch Property & Owner Details
+    $stmt = $pdo->prepare("SELECT p.title, p.owner_id, u.email, u.name 
+                           FROM property p 
+                           JOIN user u ON p.owner_id = u.user_id 
+                           WHERE p.property_id = ?");
+    $stmt->execute([$propertyId]);
+    $propInfo = $stmt->fetch();
+
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE property SET status_id = 1 WHERE property_id = ?");
         $stmt->execute([$propertyId]);
-        
+        if ($propInfo) {
+            notify_owner_property_status($propInfo['owner_id'], $propInfo['title'], 'approved');
+        }
+
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/property/approval/property_approval.php?success=approved'));
         exit;
@@ -39,6 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE property SET status_id = 3 WHERE property_id = ?");
         $stmt->execute([$propertyId]);
         
+        if ($propInfo) {
+            notify_owner_property_status($propInfo['owner_id'], $propInfo['title'], 'rejected');
+            // Refund the quota since it was rejected
+            increment_package_quota($propInfo['owner_id'], 'property');
+        }
+
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/property/approval/property_approval.php?success=rejected'));
         exit;

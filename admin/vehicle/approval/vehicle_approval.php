@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/../../../config/db.php';
+require __DIR__ . '/../../notification/owner/vehicle_approval_notification/vehicle_approval_notification_auto.php';
 
 ensure_session_started();
 $user = current_user();
@@ -28,9 +29,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $vehicleId = intval($_POST['vehicle_id'] ?? 0);
 
+    // Fetch Vehicle & Owner Details
+    $stmt = $pdo->prepare("SELECT v.title, v.owner_id, u.email, u.name 
+                           FROM vehicle v 
+                           JOIN user u ON v.owner_id = u.user_id 
+                           WHERE v.vehicle_id = ?");
+    $stmt->execute([$vehicleId]);
+    $vehicleInfo = $stmt->fetch();
+
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE vehicle SET status_id = 1 WHERE vehicle_id = ?");
         $stmt->execute([$vehicleId]);
+        
+        if ($vehicleInfo) {
+            notify_owner_vehicle_status($vehicleInfo['owner_id'], $vehicleInfo['title'], 'approved');
+        }
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=approved'));
@@ -38,6 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'reject') {
         $stmt = $pdo->prepare("UPDATE vehicle SET status_id = 3 WHERE vehicle_id = ?");
         $stmt->execute([$vehicleId]);
+        
+        if ($vehicleInfo) {
+            notify_owner_vehicle_status($vehicleInfo['owner_id'], $vehicleInfo['title'], 'rejected');
+            // Refund the quota
+            increment_package_quota($vehicleInfo['owner_id'], 'vehicle');
+        }
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=rejected'));

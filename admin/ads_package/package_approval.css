@@ -1,0 +1,58 @@
+:root {
+    --hunter-green: #3a5a40;
+    --fern: #588157;
+    --pine-teal: #344e41;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background-color: var(--fern);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.badge-package {
+    background-color: #e9ecef;
+    color: var(--pine-teal);
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.btn-action-approve {
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+}
+
+.btn-action-reject {
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+}
+
+.action-form {
+    display: inline-block;
+}
+
+#modalProofImage {
+    max-height: 80vh;
+    object-fit: contain;
+}

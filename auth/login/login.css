@@ -1,82 +1,218 @@
 :root {
-    --dust-grey: #dad7cdff;
-    --dry-sage: #a3b18aff;
-    --fern: #588157ff;
-    --hunter-green: #3a5a40ff;
-    --pine-teal: #344e41ff;
+    --dust-grey: #dad7cd;
+    --dry-sage: #a3b18a;
+    --fern: #588157;
+    --hunter-green: #3a5a40;
+    --pine-teal: #344e41;
+    --white: #ffffff;
+    --shadow-soft: 0 10px 40px -10px rgba(52, 78, 65, 0.3);
+    --shadow-sharp: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 body {
-    background-color: var(--dust-grey) !important;
-    color: var(--pine-teal) !important;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, var(--dust-grey) 0%, var(--dry-sage) 100%);
+    color: var(--pine-teal);
+    font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 !important;
+    padding: 20px;
 }
 
-.card {
-    border: none;
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(52, 78, 65, 0.15);
-    background-color: #fff;
-    overflow: hidden;
+.login-wrapper {
+    width: 100%;
+    max-width: 440px;
+    perspective: 1000px;
 }
 
-.card-header {
-    background-color: transparent;
-    border-bottom: none;
-    padding: 2rem 1rem 1rem;
+.glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: var(--shadow-soft);
+    padding: 3rem 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card-header h2 {
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px -10px rgba(52, 78, 65, 0.4);
+}
+
+.brand-logo {
+    max-width: 150px;
+    margin: 0 auto;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.login-header h2 {
     color: var(--hunter-green);
     font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
 }
 
-.form-floating>.form-control:focus~label,
-.form-floating>.form-control:not(:placeholder-shown)~label {
-    color: var(--hunter-green) !important;
+.login-header p {
+    color: var(--fern);
+    font-size: 0.95rem;
+    margin: 0;
 }
 
-.form-control:focus {
-    border-color: var(--fern) !important;
-    box-shadow: 0 0 0 0.25rem rgba(88, 129, 87, 0.25) !important;
-}
-
-.btn-primary {
-    background-color: var(--fern) !important;
-    border-color: var(--fern) !important;
-    padding: 0.8rem;
+/* Custom Input Group */
+.input-group-custom label {
+    display: block;
+    font-size: 0.85rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    color: var(--hunter-green);
+    margin-bottom: 0.5rem;
+    margin-left: 0.2rem;
 }
 
-.btn-primary:hover {
-    background-color: var(--hunter-green) !important;
-    border-color: var(--hunter-green) !important;
+.input-field-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.btn-success {
-    background-color: var(--hunter-green) !important;
-    border-color: var(--hunter-green) !important;
-    padding: 0.8rem;
-    font-weight: 600;
+.input-field-wrapper .icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--fern);
+    font-size: 1.1rem;
+    z-index: 10;
+    pointer-events: none;
+    transition: color 0.3s ease;
 }
 
-.btn-success:hover {
-    background-color: var(--pine-teal) !important;
-    border-color: var(--pine-teal) !important;
-}
-
-a {
-    color: var(--hunter-green) !important;
-    text-decoration: none;
+.input-field-wrapper input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.8rem;
+    border: 2px solid #eef1ec;
+    border-radius: 12px !important;
+    background: #fdfdfd;
+    font-size: 1rem;
+    color: var(--pine-teal);
     font-weight: 500;
+    transition: all 0.2s ease;
+    outline: none;
 }
 
-a:hover {
-    color: var(--fern) !important;
+.input-field-wrapper input:focus {
+    border-color: var(--fern);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(88, 129, 87, 0.1);
+}
+
+.input-field-wrapper input:focus+.icon {
+    color: var(--hunter-green);
+}
+
+.form-text {
+    font-size: 0.75rem;
+    color: var(--dry-sage);
+    margin-top: 0.4rem;
+    margin-left: 0.2rem;
+}
+
+/* Button */
+.btn-login {
+    width: 100%;
+    background: var(--hunter-green);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sharp);
+}
+
+.btn-login:hover {
+    background: var(--pine-teal);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(52, 78, 65, 0.2);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* Links and Footer */
+.login-footer {
+    margin-top: 2rem;
+    text-align: center;
+
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(163, 177, 138, 0.2);
+}
+
+.login-footer p {
+    font-size: 0.9rem;
+    color: var(--fern);
+    margin-bottom: 0.5rem;
+}
+
+.login-footer a,
+.change-number-link,
+.btn-link-custom {
+    color: var(--hunter-green);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.login-footer a:hover,
+.change-number-link:hover,
+.btn-link-custom:hover {
+    color: var(--fern);
     text-decoration: underline;
+}
+
+.home-link {
+    font-size: 0.85rem;
+    color: var(--dry-sage) !important;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.home-link:hover {
+    color: var(--hunter-green) !important;
+}
+
+/* Sent State */
+.text-mobile-sent {
+    font-size: 0.95rem;
+    color: var(--pine-teal);
+    background: rgba(163, 177, 138, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.badge.bg-soft-success {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: #27ae60;
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
 }

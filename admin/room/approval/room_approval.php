@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/../../../config/db.php';
+require __DIR__ . '/../../notification/owner/room_approval_notification/room_approval_notification_auto.php';
 
 ensure_session_started();
 $user = current_user();
@@ -28,9 +29,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $roomId = intval($_POST['room_id'] ?? 0);
 
+    // Fetch Room & Owner Details
+    $stmt = $pdo->prepare("SELECT r.title, r.owner_id, u.email, u.name 
+                           FROM room r 
+                           JOIN user u ON r.owner_id = u.user_id 
+                           WHERE r.room_id = ?");
+    $stmt->execute([$roomId]);
+    $roomInfo = $stmt->fetch();
+
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE room SET status_id = 1 WHERE room_id = ?");
         $stmt->execute([$roomId]);
+        
+        if ($roomInfo) {
+            notify_owner_room_status($roomInfo['owner_id'], $roomInfo['title'], 'approved');
+        }
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/room/approval/room_approval.php?success=approved'));
@@ -38,6 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'reject') {
         $stmt = $pdo->prepare("UPDATE room SET status_id = 3 WHERE room_id = ?");
         $stmt->execute([$roomId]);
+        
+        if ($roomInfo) {
+            notify_owner_room_status($roomInfo['owner_id'], $roomInfo['title'], 'rejected');
+            // Refund the quota
+            increment_package_quota($roomInfo['owner_id'], 'room');
+        }
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/room/approval/room_approval.php?success=rejected'));

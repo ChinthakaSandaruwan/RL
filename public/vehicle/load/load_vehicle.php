@@ -1,14 +1,55 @@
 <?php
-// Fetch latest active vehicles
+// Search Filters
+$s_keyword = $_GET['keyword'] ?? '';
+$s_province = $_GET['province'] ?? '';
+$s_district = $_GET['district'] ?? '';
+$s_city = $_GET['city'] ?? '';
+$s_category = $_GET['category'] ?? '';
+
+// If searching for other categories, hide this section
+if ($s_category && $s_category !== 'vehicle') {
+    return;
+}
+
 $pdo = get_pdo();
-$stmt = $pdo->query("SELECT v.*, vt.type_name, vm.model_name, vb.brand_name,
+$query = "SELECT v.*, vt.type_name, vm.model_name, vb.brand_name,
     (SELECT image_path FROM vehicle_image WHERE vehicle_id = v.vehicle_id AND primary_image = 1 LIMIT 1) as primary_image
     FROM vehicle v 
     LEFT JOIN vehicle_type vt ON v.vehicle_type_id = vt.type_id
     LEFT JOIN vehicle_model vm ON v.model_id = vm.model_id
     LEFT JOIN vehicle_brand vb ON vm.brand_id = vb.brand_id
-    WHERE v.status_id = 1 
-    ORDER BY v.created_at DESC LIMIT 6");
+    LEFT JOIN vehicle_location vl ON v.vehicle_id = vl.vehicle_id
+    LEFT JOIN cities c ON vl.city_id = c.id
+    LEFT JOIN districts d ON c.district_id = d.id
+    WHERE v.status_id = 1";
+
+$params = [];
+
+if ($s_keyword) {
+    $titleKeyword = "%$s_keyword%";
+    $query .= " AND (v.title LIKE ? OR v.description LIKE ? OR vl.address LIKE ? OR vb.brand_name LIKE ? OR vm.model_name LIKE ?)";
+    $params[] = $titleKeyword;
+    $params[] = $titleKeyword;
+    $params[] = $titleKeyword;
+    $params[] = $titleKeyword;
+    $params[] = $titleKeyword;
+}
+
+if ($s_city) {
+    $query .= " AND vl.city_id = ?";
+    $params[] = $s_city;
+} elseif ($s_district) {
+    $query .= " AND c.district_id = ?";
+    $params[] = $s_district;
+} elseif ($s_province) {
+    $query .= " AND d.province_id = ?";
+    $params[] = $s_province;
+}
+
+$query .= " ORDER BY v.created_at DESC LIMIT 6";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $vehicles = $stmt->fetchAll();
 ?>
 

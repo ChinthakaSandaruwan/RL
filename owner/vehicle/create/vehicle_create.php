@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
     // Vehicle Details
+    $typeId = intval($_POST['type_id'] ?? 0); // Added missing type_id
     $modelId = intval($_POST['model_id'] ?? 0);
     
     // Handle Color Input (Text -> ID)
@@ -129,14 +130,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validation
     // Validation
-    if (!$title || !$modelId || !$colorId || !$address) {
-        $errors[] = 'Title, Model, Color, and Address are required.';
+    if (!$title || !$typeId || !$modelId || !$colorId || !$address) {
+        $errors[] = 'Title, Type, Model, Color, and Address are required.';
     }
     if ($pricingTypeId == 1 && $pricePerDay <= 0) {
         $errors[] = 'Daily Price is required.';
     }
     if ($pricingTypeId == 2 && $pricePerKm <= 0) {
         $errors[] = 'Price Per KM is required.';
+    }
+    if ($year < 1900 || $year > 2100) {
+        $errors[] = 'Please enter a valid vehicle year.';
     }
 
     // Image Upload - Primary and Gallery
@@ -192,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
+        $pdo->beginTransaction();
         try {
             $vehicleCode = 'VEH-' . strtoupper(uniqid());
             $stmt = $pdo->prepare("INSERT INTO `vehicle` (
@@ -272,6 +277,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <h2 class="mb-4 fw-bold text-dark">List Your Vehicle</h2>
+
+            <?php if (isset($packageCheck) && $packageCheck['success']): ?>
+                <div class="alert alert-info shadow-sm d-flex align-items-center mb-4">
+                    <i class="bi bi-briefcase-fill me-3 fs-3 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Active Package: <?= htmlspecialchars($packageCheck['package_name']) ?></h6>
+                        <p class="mb-0 small">You have <strong><?= $packageCheck['remaining'] ?></strong> vehicle listing(s) remaining in this package.</p>
+                    </div>
+                </div>
+            <?php endif; ?>
             
             <?php if ($success): ?>
                 <div class="alert alert-success shadow-sm"><?= $success ?></div>
@@ -494,127 +509,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="stylesheet" href="vehicle_create.css">
 <script src="vehicle_create.js"></script>
 <script>
-// Location data from PHP
-const districts = <?= json_encode($districts) ?>;
-const cities = <?= json_encode($cities) ?>;
-const models = <?= json_encode($models) ?>;
-
-// Brand change handler
-document.getElementById('brand').addEventListener('change', function() {
-    const brandId = parseInt(this.value);
-    const modelSelect = document.getElementById('model');
-    
-    // Clear models
-    modelSelect.innerHTML = '<option value="" selected>Select Model</option>';
-    
-    // Filter models
-    const filteredModels = models.filter(m => m.brand_id == brandId);
-    
-    if (filteredModels.length > 0) {
-        filteredModels.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model.model_id;
-            option.textContent = model.model_name;
-            modelSelect.appendChild(option);
-        });
-        modelSelect.disabled = false;
-    } else {
-        modelSelect.disabled = true;
-    }
-});
-
-// Driver details toggle
-const driverCheck = document.getElementById('driverCheck');
-if(driverCheck){
-    driverCheck.addEventListener('change', function() {
-        const costInput = document.getElementById('driverCost');
-        costInput.disabled = !this.checked;
-        if (!this.checked) costInput.value = '';
-    });
-}
-
-// Province change handler
-document.getElementById('province').addEventListener('change', function() {
-    const provinceId = parseInt(this.value);
-    const districtSelect = document.getElementById('district');
-    const citySelect = document.getElementById('city');
-    
-    // Clear and disable district and city
-    districtSelect.innerHTML = '<option value="" selected>Select District</option>';
-    citySelect.innerHTML = '<option value="" selected>Select Province first</option>';
-    citySelect.disabled = true;
-    
-    // Filter districts by province
-    const filteredDistricts = districts.filter(d => d.province_id == provinceId);
-    
-    if (filteredDistricts.length > 0) {
-        filteredDistricts.forEach(district => {
-            const option = document.createElement('option');
-            option.value = district.id;
-            option.textContent = district.name_en;
-            districtSelect.appendChild(option);
-        });
-        districtSelect.disabled = false;
-    } else {
-        districtSelect.disabled = true;
-    }
-});
-
-// District change handler
-document.getElementById('district').addEventListener('change', function() {
-    const districtId = parseInt(this.value);
-    const citySelect = document.getElementById('city');
-    
-    // Clear city
-    citySelect.innerHTML = '<option value="" selected>Select City</option>';
-    
-    // Filter cities by district
-    const filteredCities = cities.filter(c => c.district_id == districtId);
-    
-    if (filteredCities.length > 0) {
-        filteredCities.forEach(city => {
-            const option = document.createElement('option');
-            option.value = city.id;
-            option.textContent = city.name_en;
-            citySelect.appendChild(option);
-        });
-        citySelect.disabled = false;
-    } else {
-        citySelect.disabled = true;
-    }
-});
-
-// Pricing Toggle Handler
-document.addEventListener('DOMContentLoaded', function() {
-    const radioDaily = document.getElementById('priceOption1');
-    const radioKm = document.getElementById('priceOption2');
-    const containerDaily = document.getElementById('dailyPriceContainer');
-    const containerKm = document.getElementById('kmPriceContainer');
-    const inputDaily = document.getElementById('inputDailyPrice');
-    const inputKm = document.getElementById('inputKmPrice');
-
-    function updatePricingUI() {
-        if (radioDaily.checked) {
-            containerDaily.style.display = 'block';
-            containerKm.style.display = 'none';
-            inputDaily.required = true;
-            inputKm.required = false;
-            inputKm.value = ''; // Clear value
-        } else {
-            containerDaily.style.display = 'none';
-            containerKm.style.display = 'block';
-            inputDaily.required = false;
-            inputKm.required = true;
-            inputDaily.value = ''; // Clear value
-        }
-    }
-
-    radioDaily.addEventListener('change', updatePricingUI);
-    radioKm.addEventListener('change', updatePricingUI);
-    
-    // Initialize
-    updatePricingUI();
-});
+// Pass PHP data to JavaScript
+window.vehicleData = {
+    districts: <?= json_encode($districts) ?>,
+    cities: <?= json_encode($cities) ?>,
+    models: <?= json_encode($models) ?>
+};
 </script>
 </body>
 </html>

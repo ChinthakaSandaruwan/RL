@@ -1,0 +1,84 @@
+/* buy.css */
+:root {
+    --hunter-green: #3a5a40;
+    --fern: #588157;
+    --pine-teal: #344e41;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.package-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.package-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.package-title {
+    color: var(--pine-teal);
+}
+
+.price-section .currency {
+    vertical-align: top;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.price-section .amount {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--hunter-green);
+    line-height: 1;
+}
+
+.price-section .period {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    font-size: 1.05rem;
+}
+
+.features-list li {
+    margin-bottom: 0.8rem;
+    color: #495057;
+}
+
+.btn-buy {
+    background-color: var(--fern);
+    border-color: var(--fern);
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-buy:hover {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}
+
+.badge-recommend {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ffc107;
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-bottom-left-radius: 12px;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 20px;
+}

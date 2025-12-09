@@ -122,3 +122,84 @@ function send_welcome_email($email, $name) {
     
     return send_email($email, $subject, $body, $name);
 }
+
+/**
+ * Send a beautifully formatted email for package status updates
+ * 
+ * @param string $email
+ * @param string $name
+ * @param string $packageName
+ * @param string $status 'approved' or 'rejected'
+ * @return bool
+ */
+function send_package_status_email($email, $name, $packageName, $status) {
+    
+    $isApproved = ($status === 'approved');
+    $subject = $isApproved ? "Package Request Approved - Rental Lanka" : "Package Request Update - Rental Lanka";
+    
+    $color = $isApproved ? "#2D5016" : "#dc3545"; // Green or Red
+    $icon = $isApproved ? "✅" : "❌";
+    $headline = $isApproved ? "You're All Set! 🎉" : "Action Required";
+    
+    $messageContent = "";
+    if ($isApproved) {
+        $messageContent = "
+            <p>Your request for the <strong>" . htmlspecialchars($packageName) . "</strong> package has been <strong style='color: #2D5016;'>APPROVED</strong>.</p>
+            <p>You can now start listing your properties, rooms, and vehicles immediately.</p>
+            <div style='background: #f0f7e6; padding: 15px; border-left: 4px solid #2D5016; margin: 20px 0;'>
+                <p style='margin: 0;'><strong>What's Next?</strong><br>Log in to your dashboard and click 'Add Property' to get started!</p>
+            </div>
+        ";
+    } else {
+        $messageContent = "
+            <p>We regret to inform you that your request for the <strong>" . htmlspecialchars($packageName) . "</strong> package has been <strong style='color: #dc3545;'>REJECTED</strong>.</p>
+            <p>This is usually due to an unclear payment slip or invalid transaction details.</p>
+            <div style='background: #fdeaea; padding: 15px; border-left: 4px solid #dc3545; margin: 20px 0;'>
+                <p style='margin: 0;'><strong>What to do?</strong><br>Please contact our support team or try purchasing the package again with a clear proof of payment.</p>
+            </div>
+        ";
+    }
+
+    $body = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #444; background-color: #f4f4f4; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+            .header { background: linear-gradient(135deg, {$color} 0%, #1e3a0f 100%); color: white; padding: 40px 20px; text-align: center; }
+            .content { padding: 40px 30px; }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #888; font-size: 13px; border-top: 1px solid #eee; }
+            .btn { display: inline-block; padding: 12px 30px; background-color: {$color}; color: white !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+            h1 { margin: 0; font-size: 24px; font-weight: 700; }
+            p { margin-bottom: 15px; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                 <div style='font-size: 40px; margin-bottom: 10px;'>{$icon}</div>
+                <h1>{$headline}</h1>
+            </div>
+            <div class='content'>
+                <h3 style='color: #333;'>Hello " . htmlspecialchars($name) . ",</h3>
+                {$messageContent}
+                
+                <p>Thank you for choosing <strong>Rental Lanka</strong>.</p>
+                
+                <div style='text-align: center;'>
+                    <a href='" . app_url('auth/login') . "' class='btn'>Go to Dashboard</a>
+                </div>
+            </div>
+            <div class='footer'>
+                <p>&copy; " . date('Y') . " Rental Lanka. All rights reserved.</p>
+                <p>Need help? Contact us at support@rentallanka.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+
+    return send_email($email, $subject, $body, $name);
+}

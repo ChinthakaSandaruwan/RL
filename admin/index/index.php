@@ -103,6 +103,11 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
+                    <a href="<?= app_url('admin/vehicle/approval/vehicle_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-building-check"></i> Vehicle Approval
+                    </a>
+                </div>
+                <div class="col-md-3">
                     <a href="<?= app_url('admin/user_type_change/sent_user_type_change_request.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-person-check"></i> User Type Requests
                         <?php if ($pendingRequests > 0): ?>
@@ -141,8 +146,8 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/vehicle/vehicle_brand/vehicle_brand.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-copyright"></i> Vehicle Brands
+                    <a href="<?= app_url('admin/brand_&_model/brand_&_model.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-copyright"></i> Brand & Model
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -158,6 +163,11 @@ try {
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/notification/cutomer/send_to_customer.php') ?>" class="btn btn-outline-warning w-100 py-3">
                         <i class="bi bi-bell"></i> Notify Customers
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/ads_package/package_approval.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-bell"></i> Ads Package Approval
                     </a>
                 </div>
                 

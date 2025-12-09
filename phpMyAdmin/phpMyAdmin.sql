@@ -212,6 +212,7 @@ CREATE TABLE IF NOT EXISTS `bought_package` (
   `remaining_rooms` INT DEFAULT 0,
   `remaining_vehicles` INT DEFAULT 0,
   `status_id` INT NOT NULL DEFAULT 1, -- Default active (subscription_statuses)
+  `payment_slip` VARCHAR(255) NULL,
   `payment_status_id` INT NOT NULL DEFAULT 1, -- Default pending (payment_statuses)
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`bought_package_id`),
@@ -570,6 +571,7 @@ CREATE TABLE IF NOT EXISTS `vehicle` (
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT NULL,
   `model_id` INT NOT NULL,
+  `year` INT NOT NULL,
   `vehicle_type_id` INT NOT NULL,
   `fuel_type_id` INT NOT NULL,
   `transmission_type_id` INT NOT NULL,

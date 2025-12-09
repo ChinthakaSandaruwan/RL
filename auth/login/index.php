@@ -15,6 +15,12 @@ $errors = [];
 $success = null;
 $csrf_token = generate_csrf_token();
 
+// Handle 'Change Number' request (GET)
+if (isset($_GET['action']) && $_GET['action'] === 'change_number') {
+    unset($_SESSION['pending_login_user_id'], $_SESSION['pending_login_mobile']);
+    header('Location: ' . app_url('auth/login/index.php'));
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -64,6 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success = 'OTP Warning: SMS failed but bypassed for LOCAL ENV. Code: ' . $otp;
                 } else {
                     $errors[] = 'Failed to send OTP SMS. Please try again later.';
+                    // If SMS fails, maybe don't change state? For now, we set session so UI changes.
+                    // If critical failure, we might want to unset session.
                 }
             }
         }
@@ -103,6 +111,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+    } elseif ($action === 'resend_otp') {
+        // Resend Logic
+        $pendingUserId = $_SESSION['pending_login_user_id'] ?? null;
+        $mobile = $_SESSION['pending_login_mobile'] ?? null;
+
+        if ($pendingUserId && $mobile) {
+            $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $expiresAt = (new DateTime('+5 minutes'))->format('Y-m-d H:i:s');
+            
+             $pdo->prepare('DELETE FROM `otp_verification` WHERE `user_id` = ?')->execute([$pendingUserId]);
+             $stmt = $pdo->prepare('INSERT INTO `otp_verification` (`user_id`, `otp_code`, `expires_at`, `is_verified`) VALUES (?, ?, ?, 0)');
+             $stmt->execute([$pendingUserId, $otp, $expiresAt]);
+             
+             $formattedMobile = $mobile;
+                if (str_starts_with($formattedMobile, '0')) {
+                    $formattedMobile = '+94' . substr($formattedMobile, 1);
+                }
+
+            $smsMessage = 'Your RentalLanka login OTP is ' . $otp . ' (valid for 5 minutes).';
+            $sent = smslenz_send_sms($formattedMobile, $smsMessage);
+            
+             $isLocal = env('APP_ENV') === 'local';
+             if ($sent) {
+                 $success = 'OTP resent via SMS.';
+             } elseif ($isLocal) {
+                 $success = 'OTP Resent (Local): ' . $otp;
+             } else {
+                 $errors[] = 'Failed to resend OTP SMS.';
+             }
+        }
     }
 }
 
@@ -118,53 +156,82 @@ $pendingMobile = $_SESSION['pending_login_mobile'] ?? '';
     <link rel="icon" type="image/png" sizes="32x32" href="<?= app_url('public/favicon/favicon-32x32.png') ?>">
     <link rel="icon" type="image/png" sizes="16x16" href="<?= app_url('public/favicon/favicon-16x16.png') ?>">
     <link rel="manifest" href="<?= app_url('public/favicon/site.webmanifest') ?>">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="login.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header text-center border-0 pt-4 pb-2 bg-transparent">
-                    <h2 class="mb-1" style="color: var(--hunter-green);">Welcome Back</h2>
-                    <p class="text-muted small mb-0">Login with your mobile number</p>
-                </div>
-                <div class="card-body">
+<body>
 
+<div class="login-wrapper">
+    <div class="glass-card">
+        <div class="login-header">
+            <img src="<?= app_url('public/assets/images/logo.png') ?>" alt="Rental Lanka Logo" class="brand-logo mb-3" style="max-height: 60px; display: none;"> <!-- Placeholder if logo exists -->
+            <h2>Welcome Back</h2>
+            <p>Access your rental dashboard</p>
+        </div>
 
-
-                    <h5>1. Request OTP</h5>
-                    <form method="post" class="mb-4">
-                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                        <input type="hidden" name="action" value="request_otp">
-                        <div class="form-floating mb-3">
-                            <input type="text" name="mobile" class="form-control" id="mobileInput" placeholder="Mobile Number" required value="<?= htmlspecialchars($pendingMobile, ENT_QUOTES, 'UTF-8') ?>">
-                            <label for="mobileInput">Mobile Number</label>
+        <div class="login-body">
+            <?php if (empty($pendingMobile)): ?>
+                <!-- Step 1: Mobile Number -->
+                <form method="post" id="mobileForm" class="login-form">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <input type="hidden" name="action" value="request_otp">
+                    
+                    <div class="input-group-custom mb-4">
+                        <label for="mobileInput" class="form-label">Mobile Number</label>
+                        <div class="input-field-wrapper">
+                            <i class="fa-solid fa-mobile-screen-button icon"></i>
+                            <input type="text" name="mobile" id="mobileInput" placeholder="07XXXXXXXX" required autofocus autocomplete="tel">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 shadow-sm">Send OTP</button>
-                    </form>
+                        <div class="form-text">We'll send you a verification code.</div>
+                    </div>
 
-                    <h5>2. Verify OTP</h5>
-                    <form method="post">
+                    <button type="submit" class="btn-login">
+                        Send OTPCode <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            <?php else: ?>
+                <!-- Step 2: Verify OTP -->
+                 <div class="otp-verification-state">
+                    <div class="mb-4 text-center">
+                        <span class="badge bg-soft-success text-success mb-2">OTP Sent</span>
+                        <p class="text-mobile-sent">
+                            Enter the code sent to <strong><?= htmlspecialchars($pendingMobile) ?></strong>
+                            <a href="?action=change_number" class="change-number-link" title="Change Number"><i class="fa-solid fa-pen-to-square"></i></a>
+                        </p>
+                    </div>
+
+                    <form method="post" id="otpForm" class="login-form">
                         <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                         <input type="hidden" name="action" value="verify_otp">
-                        <div class="form-floating mb-3">
-                            <input type="text" name="otp" class="form-control" id="otpInput" placeholder="OTP Code" required>
-                            <label for="otpInput">OTP Code</label>
+                        
+                        <div class="input-group-custom mb-4">
+                            <label for="otpInput" class="form-label">Verification Code</label>
+                            <div class="input-field-wrapper">
+                                <i class="fa-solid fa-shield-halved icon"></i>
+                                <input type="text" name="otp" id="otpInput" placeholder="Enter 6-digit code" required maxlength="6" pattern="\d{6}" autofocus autocomplete="one-time-code">
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100 shadow-sm">Login</button>
+
+                        <button type="submit" class="btn-login">
+                            Verify & Login <i class="fa-solid fa-check ms-2"></i>
+                        </button>
                     </form>
 
-                    <div class="mt-4 text-center">
-                        <p class="mb-0 text-muted">Don't have an account?</p>
-                        <a href="<?= app_url('auth/register') ?>" class="fw-bold">Create an account</a>
-                        <div class="mt-2">
-                             <a href="<?= app_url('index.php') ?>" class="small text-muted">Back to home</a>
-                        </div>
-                    </div>
+                    <form method="post" class="mt-3 text-center">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <input type="hidden" name="action" value="resend_otp">
+                        <button type="submit" class="btn-link-custom">Resend OTP</button>
+                    </form>
                 </div>
-            </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="login-footer">
+            <p>New to Rental Lanka? <a href="<?= app_url('auth/register') ?>">Create Account</a></p>
+            <a href="<?= app_url('index.php') ?>" class="home-link"><i class="fa-solid fa-house me-1"></i> Back to Home</a>
         </div>
     </div>
 </div>

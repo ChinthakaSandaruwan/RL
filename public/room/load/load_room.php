@@ -1,10 +1,48 @@
 <?php
-// Fetch latest active rooms
+// Search Filters
+$s_keyword = $_GET['keyword'] ?? '';
+$s_province = $_GET['province'] ?? '';
+$s_district = $_GET['district'] ?? '';
+$s_city = $_GET['city'] ?? '';
+$s_category = $_GET['category'] ?? '';
+
+// If searching for other categories, hide this section
+if ($s_category && $s_category !== 'room') {
+    return;
+}
+
 $pdo = get_pdo();
-$stmt = $pdo->query("SELECT r.* 
+$query = "SELECT r.* 
     FROM room r 
-    WHERE r.status_id = 1 
-    ORDER BY r.created_at DESC LIMIT 6");
+    LEFT JOIN room_location rl ON r.room_id = rl.room_id
+    LEFT JOIN cities c ON rl.city_id = c.id
+    LEFT JOIN districts d ON c.district_id = d.id
+    WHERE r.status_id = 1";
+
+$params = [];
+
+if ($s_keyword) {
+    $query .= " AND (r.title LIKE ? OR r.description LIKE ? OR rl.address LIKE ?)";
+    $params[] = "%$s_keyword%";
+    $params[] = "%$s_keyword%";
+    $params[] = "%$s_keyword%";
+}
+
+if ($s_city) {
+    $query .= " AND rl.city_id = ?";
+    $params[] = $s_city;
+} elseif ($s_district) {
+    $query .= " AND c.district_id = ?";
+    $params[] = $s_district;
+} elseif ($s_province) {
+    $query .= " AND d.province_id = ?";
+    $params[] = $s_province;
+}
+
+$query .= " ORDER BY r.created_at DESC LIMIT 6";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $rooms = $stmt->fetchAll();
 ?>
 

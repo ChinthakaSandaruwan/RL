@@ -86,3 +86,133 @@ document.getElementById('vehicleImages').addEventListener('change', function (e)
         reader.readAsDataURL(file);
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const { districts, cities, models } = window.vehicleData || { districts: [], cities: [], models: [] };
+
+    // Brand change handler
+    const brandSelect = document.getElementById('brand');
+    if (brandSelect) {
+        brandSelect.addEventListener('change', function () {
+            const brandId = parseInt(this.value);
+            const modelSelect = document.getElementById('model');
+
+            // Clear models
+            modelSelect.innerHTML = '<option value="" selected>Select Model</option>';
+
+            // Filter models
+            const filteredModels = models.filter(m => m.brand_id == brandId);
+
+            if (filteredModels.length > 0) {
+                filteredModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.model_id;
+                    option.textContent = model.model_name;
+                    modelSelect.appendChild(option);
+                });
+                modelSelect.disabled = false;
+            } else {
+                modelSelect.disabled = true;
+            }
+        });
+    }
+
+    // Driver details toggle
+    const driverCheck = document.getElementById('driverCheck');
+    if (driverCheck) {
+        driverCheck.addEventListener('change', function () {
+            const costInput = document.getElementById('driverCost');
+            costInput.disabled = !this.checked;
+            if (!this.checked) costInput.value = '';
+        });
+    }
+
+    // Province change handler
+    const provinceSelect = document.getElementById('province');
+    if (provinceSelect) {
+        provinceSelect.addEventListener('change', function () {
+            const provinceId = parseInt(this.value);
+            const districtSelect = document.getElementById('district');
+            const citySelect = document.getElementById('city');
+
+            // Clear and disable district and city
+            districtSelect.innerHTML = '<option value="" selected>Select District</option>';
+            citySelect.innerHTML = '<option value="" selected>Select Province first</option>';
+            citySelect.disabled = true;
+
+            // Filter districts by province
+            const filteredDistricts = districts.filter(d => d.province_id == provinceId);
+
+            if (filteredDistricts.length > 0) {
+                filteredDistricts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.id;
+                    option.textContent = district.name_en;
+                    districtSelect.appendChild(option);
+                });
+                districtSelect.disabled = false;
+            } else {
+                districtSelect.disabled = true;
+            }
+        });
+    }
+
+    // District change handler
+    const districtSelect = document.getElementById('district');
+    if (districtSelect) {
+        districtSelect.addEventListener('change', function () {
+            const districtId = parseInt(this.value);
+            const citySelect = document.getElementById('city');
+
+            // Clear city
+            citySelect.innerHTML = '<option value="" selected>Select City</option>';
+
+            // Filter cities by district
+            const filteredCities = cities.filter(c => c.district_id == districtId);
+
+            if (filteredCities.length > 0) {
+                filteredCities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.id;
+                    option.textContent = city.name_en;
+                    citySelect.appendChild(option);
+                });
+                citySelect.disabled = false;
+            } else {
+                citySelect.disabled = true;
+            }
+        });
+    }
+
+    // Pricing Toggle Handler
+    const radioDaily = document.getElementById('priceOption1');
+    const radioKm = document.getElementById('priceOption2');
+    const containerDaily = document.getElementById('dailyPriceContainer');
+    const containerKm = document.getElementById('kmPriceContainer');
+    const inputDaily = document.getElementById('inputDailyPrice');
+    const inputKm = document.getElementById('inputKmPrice');
+
+    if (radioDaily && radioKm) {
+        function updatePricingUI() {
+            if (radioDaily.checked) {
+                containerDaily.style.display = 'block';
+                containerKm.style.display = 'none';
+                inputDaily.required = true;
+                inputKm.required = false;
+                inputKm.value = ''; // Clear value
+            } else {
+                containerDaily.style.display = 'none';
+                containerKm.style.display = 'block';
+                inputDaily.required = false;
+                inputKm.required = true;
+                inputDaily.value = ''; // Clear value
+            }
+        }
+
+        radioDaily.addEventListener('change', updatePricingUI);
+        radioKm.addEventListener('change', updatePricingUI);
+
+        // Initialize
+        updatePricingUI();
+    }
+});

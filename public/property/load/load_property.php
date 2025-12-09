@@ -1,12 +1,50 @@
 <?php
-// Fetch latest active properties
+// Search Filters
+$s_keyword = $_GET['keyword'] ?? '';
+$s_province = $_GET['province'] ?? '';
+$s_district = $_GET['district'] ?? '';
+$s_city = $_GET['city'] ?? '';
+$s_category = $_GET['category'] ?? '';
+
+// If searching for other categories, hide this section
+if ($s_category && $s_category !== 'property') {
+    return;
+}
+
 $pdo = get_pdo();
-$stmt = $pdo->query("SELECT p.*, pt.type_name, 
+$query = "SELECT p.*, pt.type_name, 
     (SELECT image_path FROM property_image WHERE property_id = p.property_id AND primary_image = 1 LIMIT 1) as primary_image
     FROM property p 
     LEFT JOIN property_type pt ON p.property_type_id = pt.type_id
-    WHERE p.status_id = 1 
-    ORDER BY p.created_at DESC LIMIT 6");
+    LEFT JOIN property_location pl ON p.property_id = pl.property_id
+    LEFT JOIN cities c ON pl.city_id = c.id
+    LEFT JOIN districts d ON c.district_id = d.id
+    WHERE p.status_id = 1";
+
+$params = [];
+
+if ($s_keyword) {
+    $query .= " AND (p.title LIKE ? OR p.description LIKE ? OR pl.address LIKE ?)";
+    $params[] = "%$s_keyword%";
+    $params[] = "%$s_keyword%";
+    $params[] = "%$s_keyword%";
+}
+
+if ($s_city) {
+    $query .= " AND pl.city_id = ?";
+    $params[] = $s_city;
+} elseif ($s_district) {
+    $query .= " AND c.district_id = ?";
+    $params[] = $s_district;
+} elseif ($s_province) {
+    $query .= " AND d.province_id = ?";
+    $params[] = $s_province;
+}
+
+$query .= " ORDER BY p.created_at DESC LIMIT 6";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $properties = $stmt->fetchAll();
 ?>
 

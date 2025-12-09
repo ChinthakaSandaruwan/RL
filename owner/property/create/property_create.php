@@ -220,6 +220,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <h2 class="mb-4 fw-bold text-dark">List Your Property</h2>
+
+            <?php if (isset($packageCheck) && $packageCheck['success']): ?>
+                <div class="alert alert-info shadow-sm d-flex align-items-center mb-4">
+                    <i class="bi bi-briefcase-fill me-3 fs-3 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Active Package: <?= htmlspecialchars($packageCheck['package_name']) ?></h6>
+                        <p class="mb-0 small">You have <strong><?= $packageCheck['remaining'] ?></strong> property listing(s) remaining in this package.</p>
+                    </div>
+                </div>
+            <?php endif; ?>
             
             <?php if ($success): ?>
                 <div class="alert alert-success shadow-sm"><?= $success ?></div>

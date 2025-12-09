@@ -116,7 +116,7 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
         <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>No Active Package</h5>
         <p class="mb-2">You need to purchase an ads package before you can add properties, rooms, or vehicles.</p>
         <hr>
-        <a href="<?= app_url('owner/ads_packge/buy/buy.php') ?>" class="btn btn-warning">
+        <a href="<?= app_url('owner/ads_package/buy/buy.php') ?>" class="btn btn-warning">
             <i class="bi bi-cart-plus me-2"></i>Purchase Package Now
         </a>
     </div>
@@ -138,7 +138,7 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
             </div>
         </div>
         <hr class="my-2">
-        <a href="<?= app_url('owner/ads_packge/buy/buy.php') ?>" class="btn btn-sm btn-outline-success">
+        <a href="<?= app_url('owner/ads_package/buy/buy.php') ?>" class="btn btn-sm btn-outline-success">
             <i class="bi bi-plus-circle me-1"></i>Buy More Packages
         </a>
     </div>
