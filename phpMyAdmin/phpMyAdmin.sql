@@ -21,6 +21,19 @@ CREATE TABLE IF NOT EXISTS `user_status` (
   UNIQUE KEY `uk_user_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `user_status_log` (
+  `log_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `changed_by` INT NOT NULL,
+  `old_status_id` INT NULL,
+  `new_status_id` INT NOT NULL,
+  `reason` TEXT NULL,
+  `changed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  KEY `idx_user_status_log_user` (`user_id`),
+  KEY `idx_user_status_log_changed_by` (`changed_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `payment_status` (
   `status_id` INT NOT NULL AUTO_INCREMENT,
   `status_name` VARCHAR(50) NOT NULL,
@@ -33,6 +46,13 @@ CREATE TABLE IF NOT EXISTS `payment_method` (
   `method_name` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`method_id`),
   UNIQUE KEY `uk_payment_method_name` (`method_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `package_type` (
+  `type_id` INT NOT NULL AUTO_INCREMENT,
+  `type_name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`type_id`),
+  UNIQUE KEY `uk_package_type_name` (`type_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `provinces` (
@@ -499,7 +519,7 @@ CREATE TABLE IF NOT EXISTS `property_rent` (
   CONSTRAINT `fk_property_rents_status` FOREIGN KEY (`status_id`) REFERENCES `rent_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `bank` (
+CREATE TABLE IF NOT EXISTS `admin_bank` (
   `bank_id` INT NOT NULL AUTO_INCREMENT,
   `bank_name` VARCHAR(100) NOT NULL,
   PRIMARY KEY (`bank_id`),
@@ -515,7 +535,7 @@ CREATE TABLE IF NOT EXISTS `admin_bank_account` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`account_id`),
   KEY `idx_admin_bank_bank` (`bank_id`),
-  CONSTRAINT `fk_admin_bank_bank` FOREIGN KEY (`bank_id`) REFERENCES `bank` (`bank_id`)
+  CONSTRAINT `fk_admin_bank_bank` FOREIGN KEY (`bank_id`) REFERENCES `admin_bank` (`bank_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `vehicle_type` (

@@ -86,9 +86,11 @@ try {
     </div>
 
     <!-- Quick Actions -->
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
-            <h5 class="mb-0 fw-bold">Quick Actions</h5>
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-check2-square me-2"></i>Approvals & Requests
+            </h5>
         </div>
         <div class="card-body">
             <div class="row g-3">
@@ -99,12 +101,12 @@ try {
                 </div>
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/room/approval/room_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
-                        <i class="bi bi-building-check"></i> Room Approval
+                        <i class="bi bi-door-closed-fill"></i> Room Approval
                     </a>
                 </div>
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/vehicle/approval/vehicle_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
-                        <i class="bi bi-building-check"></i> Vehicle Approval
+                        <i class="bi bi-car-front-fill"></i> Vehicle Approval
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -116,6 +118,24 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
+                    <a href="<?= app_url('admin/bought_ads_package/approve/package_approval.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-box-seam"></i> Ads Package Approval
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-people me-2"></i>User Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
                     <a href="<?= app_url('admin/users/owner/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-person-badge"></i> Manage Owners
                     </a>
@@ -126,18 +146,59 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/listings/manage_listings.php') ?>" class="btn btn-outline-warning w-100 py-3">
-                        <i class="bi bi-list-check"></i> Manage Listings
+                    <a href="<?= app_url('admin/users/customer/customer_stauts/status_change.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-person-gear"></i> Customer Status
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/footer/footer_details.php') ?>" class="btn btn-outline-warning w-100 py-3">
-                        <i class="bi bi-list-check"></i> Footer Details 
+                    <a href="<?= app_url('admin/users/owner/owner_stauts/status_change.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-person-gear"></i> Owner Status
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Package & Payment Management -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-box-seam me-2"></i>Package & Payment Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/ads_package/manage/manage.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-boxes"></i> Manage Packages
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/ads_package/create/create_package.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-plus-circle"></i> Create Package
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/bank_details/bank_details.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-bank"></i> Bank Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Configuration -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-gear me-2"></i>System Configuration
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/amenity/amenity.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-tools"></i> Manage Amenities
+                        <i class="bi bi-stars"></i> Manage Amenities
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -147,30 +208,42 @@ try {
                 </div>
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/brand_&_model/brand_&_model.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-copyright"></i> Brand & Model
+                        <i class="bi bi-tags"></i> Brands & Models
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/available_meals_&_prices/meal_type.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-egg-fried"></i> Available Meals
+                    <a href="<?= app_url('admin/meals_&_prices/meal_type.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-egg-fried"></i> Meal Types
                     </a>
                 </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/footer/footer_details.php') ?>" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-layout-text-window"></i> Footer Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communication -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-bell me-2"></i>Communication
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/notification/owner/send_to_owner.php') ?>" class="btn btn-outline-warning w-100 py-3">
-                        <i class="bi bi-bell"></i> Notify Owners
+                        <i class="bi bi-send"></i> Notify Owners
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/notification/cutomer/send_to_customer.php') ?>" class="btn btn-outline-warning w-100 py-3">
-                        <i class="bi bi-bell"></i> Notify Customers
+                    <a href="<?= app_url('admin/notification/customer/send_to_customer.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-send"></i> Notify Customers
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/ads_package/package_approval.php') ?>" class="btn btn-outline-warning w-100 py-3">
-                        <i class="bi bi-bell"></i> Ads Package Approval
-                    </a>
-                </div>
-                
             </div>
         </div>
     </div>

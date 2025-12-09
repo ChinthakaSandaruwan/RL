@@ -21,17 +21,17 @@
             <!-- Category Links (After Brand) -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/property/view_all.php') ?>">
+                    <a class="nav-link" href="<?= app_url('public/property/view_all/view_all.php') ?>">
                         <i class="bi bi-house-door me-1"></i> All Properties
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/room/view_all.php') ?>">
+                    <a class="nav-link" href="<?= app_url('public/room/view_all/view_all.php') ?>">
                         <i class="bi bi-door-closed me-1"></i> All Rooms
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/vehicle/view_all.php') ?>">
+                    <a class="nav-link" href="<?= app_url('public/vehicle/view_all/view_all.php') ?>">
                         <i class="bi bi-car-front me-1"></i> All Vehicles
                     </a>
                 </li>
@@ -80,9 +80,9 @@
                             Create
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ownerCreateDropdown">
-                            <li><a class="dropdown-item" href="<?= app_url('owner/property/create/property_create.php') ?>">Add Property</a></li>
-                            <li><a class="dropdown-item" href="<?= app_url('owner/room/create/room_create.php') ?>">Add Room</a></li>
-                            <li><a class="dropdown-item" href="<?= app_url('owner/vehicle/create/vehicle_create.php') ?>">Add Vehicle</a></li>
+                            <li><a class="dropdown-item" href="<?= app_url('owner/property/manage/create/property_create.php') ?>">Add Property</a></li>
+                            <li><a class="dropdown-item" href="<?= app_url('owner/room/manage/create/room_create.php') ?>">Add Room</a></li>
+                            <li><a class="dropdown-item" href="<?= app_url('owner/vehicle/manage/create/vehicle_create.php') ?>">Add Vehicle</a></li>
                         </ul>
                     </li>
                     <?php endif; ?>

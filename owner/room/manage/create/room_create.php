@@ -1,3 +1,4 @@
+<?php
 require __DIR__ . '/../../../../config/db.php';
 
 ensure_session_started();
@@ -97,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if (!$errors) {
-            $uploadDir = __DIR__ . '/../../../public/uploads/rooms/';
+            $uploadDir = __DIR__ . '/../../../../public/uploads/rooms/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }

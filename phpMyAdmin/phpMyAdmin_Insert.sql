@@ -58,9 +58,22 @@ INSERT INTO `user_status` (`status_id`, `status_name`) VALUES
 (1, 'active'), (2, 'inactive'), (3, 'banned')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
--- Package Types
+-- Package Types (Duration + Category Combinations)
 INSERT INTO `package_type` (`type_id`, `type_name`) VALUES
-(1, 'monthly'), (2, 'yearly'), (3, 'property_based'), (4, 'room_based'), (5, 'vehicle_based')
+(1, 'Monthly - Property'),
+(2, 'Monthly - Room'),
+(3, 'Monthly - Vehicle'),
+(4, 'Monthly - Property & Room'),
+(5, 'Monthly - Property & Vehicle'),
+(6, 'Monthly - Room & Vehicle'),
+(7, 'Monthly - All (Property, Room & Vehicle)'),
+(8, 'Yearly - Property'),
+(9, 'Yearly - Room'),
+(10, 'Yearly - Vehicle'),
+(11, 'Yearly - Property & Room'),
+(12, 'Yearly - Property & Vehicle'),
+(13, 'Yearly - Room & Vehicle'),
+(14, 'Yearly - All (Property, Room & Vehicle)')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Package Statuses
@@ -145,14 +158,17 @@ ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- 2. Core Data
 
--- Packages
+-- Packages (Sample Data)
 INSERT INTO `package` (`package_name`, `package_type_id`, `duration_days`, `max_properties`, `max_rooms`, `max_vehicles`, `price`, `description`, `status_id`) VALUES
-  ('Property Monthly 10', 1, 30, 10, 0, 0, 1999.00, 'List up to 10 properties for 30 days.', 1),
-  ('Property Yearly 120', 2, 365, 120, 0, 0, 19999.00, 'List up to 120 properties for 1 year.', 1),
-  ('Room Monthly 10', 1, 30, 0, 10, 0, 1499.00, 'List up to 10 rooms for 30 days.', 1),
-  ('Room Yearly 120', 2, 365, 0, 120, 0, 14999.00, 'List up to 120 rooms for 1 year.', 1),
-  ('Vehicle Monthly 5', 1, 30, 0, 0, 5, 999.00, 'List up to 5 vehicles for 30 days.', 1),
-  ('Vehicle Yearly 60', 2, 365, 0, 0, 60, 9999.00, 'List up to 60 vehicles for 1 year.', 1)
+  ('Basic Monthly Property', 1, 30, 5, 0, 0, 2999.00, 'List up to 5 properties for 1 month', 1),
+  ('Basic Monthly Room', 2, 30, 0, 10, 0, 1999.00, 'List up to 10 rooms for 1 month', 1),
+  ('Basic Monthly Vehicle', 3, 30, 0, 0, 5, 1499.00, 'List up to 5 vehicles for 1 month', 1),
+  ('Combo Monthly - Property & Room', 4, 30, 5, 10, 0, 4499.00, 'List 5 properties and 10 rooms for 1 month', 1),
+  ('All-In-One Monthly', 7, 30, 5, 10, 5, 5999.00, 'Complete package: 5 properties, 10 rooms, 5 vehicles for 1 month', 1),
+  ('Pro Yearly Property', 8, 365, 50, 0, 0, 29999.00, 'List up to 50 properties for 1 year', 1),
+  ('Pro Yearly Room', 9, 365, 0, 100, 0, 19999.00, 'List up to 100 rooms for 1 year', 1),
+  ('Pro Yearly Vehicle', 10, 365, 0, 0, 50, 14999.00, 'List up to 50 vehicles for 1 year', 1),
+  ('Premium Yearly - All Categories', 14, 365, 50, 100, 50, 59999.00, 'Ultimate package: 50 properties, 100 rooms, 50 vehicles for 1 year', 1)
 ON DUPLICATE KEY UPDATE
   `package_type_id`=VALUES(`package_type_id`),
   `duration_days`=VALUES(`duration_days`),
@@ -201,7 +217,7 @@ INSERT IGNORE INTO `vehicle_model` (`model_id`, `brand_id`, `model_name`) VALUES
 ON DUPLICATE KEY UPDATE `model_name`=`model_name`;
 
 -- Banks
-INSERT IGNORE INTO `bank` (`bank_id`, `bank_name`) VALUES
+INSERT IGNORE INTO `admin_bank` (`bank_id`, `bank_name`) VALUES
 (1, 'Bank of Ceylon'), (2, 'Peoples Bank'), (3, 'Commercial Bank'), (4, 'Hatton National Bank'),
 (5, 'Sampath Bank'), (6, 'Seylan Bank'), (7, 'Nations Trust Bank')
 ON DUPLICATE KEY UPDATE `bank_name`=`bank_name`;
@@ -284,9 +300,9 @@ INSERT INTO `room_meal` (`room_id`, `meal_type_id`, `price`) VALUES
 ON DUPLICATE KEY UPDATE `price`=`price`;
 
 -- Vehicles
-INSERT INTO `vehicle` (`vehicle_id`, `vehicle_code`, `owner_id`, `title`, `description`, `model_id`, `vehicle_type_id`, `fuel_type_id`, `transmission_type_id`, `pricing_type_id`, `price_per_day`, `price_per_km`, `status_id`, `color_id`, `license_plate`) VALUES
-(1, 'VEH001', 3, 'Toyota Prius for Rent', 'Well maintained hybrid car for city run.', 2, 1, 4, 2, 1, 8000.00, 0.00, 1, 1, 'CAB-1234'),
-(2, 'VEH002', 3, 'Suzuki Alto Budget Car', 'Low fuel consumption, best for long trips.', 10, 1, 1, 1, 2, 0.00, 60.00, 1, 3, 'BCC-5678')
+INSERT INTO `vehicle` (`vehicle_id`, `vehicle_code`, `owner_id`, `title`, `description`, `model_id`, `vehicle_type_id`, `fuel_type_id`, `transmission_type_id`, `pricing_type_id`, `price_per_day`, `price_per_km`, `status_id`, `color_id`, `license_plate`, `year`, `number_of_seats`) VALUES
+(1, 'VEH001', 3, 'Toyota Prius for Rent', 'Well maintained hybrid car for city run.', 2, 1, 4, 2, 1, 8000.00, 0.00, 1, 1, 'CAB-1234', 2020, 5),
+(2, 'VEH002', 3, 'Suzuki Alto Budget Car', 'Low fuel consumption, best for long trips.', 10, 1, 1, 1, 2, 0.00, 60.00, 1, 3, 'BCC-5678', 2019, 4)
 ON DUPLICATE KEY UPDATE `title`=`title`;
 
 -- Vehicle Location

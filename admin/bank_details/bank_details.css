@@ -1,0 +1,25 @@
+/* Bank Details Management Styles */
+
+.table code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.card {
+    border: none;
+}
+
+.table> :not(caption)>*>* {
+    padding: 0.75rem 0.5rem;
+}

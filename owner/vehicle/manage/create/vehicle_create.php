@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../../config/db.php';
+require __DIR__ . '/../../../../config/db.php';
 
 ensure_session_started();
 $user = current_user();
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if (!$errors) {
-            $uploadDir = __DIR__ . '/../../../public/uploads/vehicles/';
+            $uploadDir = __DIR__ . '/../../../../public/uploads/vehicles/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<?php require __DIR__ . '/../../../public/navbar/navbar.php'; ?>
+<?php require __DIR__ . '/../../../../public/navbar/navbar.php'; ?>
 
 <div class="container py-5 profile-container">
     <div class="row justify-content-center">

@@ -1,0 +1,28 @@
+/* Create Package Styles */
+
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+}
+
+.card {
+    border: none;
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--fern);
+    box-shadow: 0 0 0 0.2rem rgba(88, 129, 87, 0.25);
+}
+
+.alert {
+    border-radius: 0.5rem;
+}

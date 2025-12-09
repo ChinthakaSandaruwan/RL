@@ -36,7 +36,7 @@ $packages = $stmt->fetchAll();
 $stmt = $pdo->query("
     SELECT aba.*, b.bank_name 
     FROM admin_bank_account aba
-    JOIN bank b ON aba.bank_id = b.bank_id
+    JOIN admin_bank b ON aba.bank_id = b.bank_id
 ");
 $bankAccounts = $stmt->fetchAll();
 
