@@ -19,6 +19,15 @@ $errors = [];
 $success = null;
 $csrf_token = generate_csrf_token();
 
+// Check if owner has an active package with available room slots
+$packageCheck = check_owner_package_quota($user['user_id'], 'room');
+if (!$packageCheck['success']) {
+    // Redirect to package purchase page
+    $_SESSION['package_required_message'] = $packageCheck['message'];
+    header('Location: ' . $packageCheck['redirect_url']);
+    exit;
+}
+
 // Fetch Room Types
 $stmt = $pdo->query("SELECT * FROM `room_type` ORDER BY `type_name` ASC");
 $roomTypes = $stmt->fetchAll();
@@ -33,6 +42,14 @@ $districts = $stmt->fetchAll();
 
 $stmt = $pdo->query("SELECT * FROM `cities` ORDER BY `name_en` ASC");
 $cities = $stmt->fetchAll();
+
+// Fetch Amenities dynamically
+$stmt = $pdo->query("SELECT * FROM `amenity` WHERE `category` IN ('room', 'both') ORDER BY `amenity_name` ASC");
+$available_amenities = $stmt->fetchAll();
+
+// Fetch Meal Types
+$stmt = $pdo->query("SELECT * FROM `meal_type` ORDER BY `type_name` ASC");
+$meal_types = $stmt->fetchAll();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,12 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id'] ?? 0);
 
-    // Amenities (exact match to database fields)
-    $ac = isset($_POST['ac']) ? 1 : 0;
-    $wifi = isset($_POST['wifi']) ? 1 : 0;
-    $parking = isset($_POST['parking']) ? 1 : 0;
-    $kitchen = isset($_POST['kitchen']) ? 1 : 0;
-    $attachedBathroom = isset($_POST['attached_bathroom']) ? 1 : 0;
+    // Selected Amenities & Meals
+    $selected_amenities = $_POST['amenities'] ?? [];
+    $selected_meals = $_POST['meals'] ?? []; // Array of meal_type_ids
+    $meal_prices = $_POST['meal_prices'] ?? []; // Array mapped by meal_type_id key
 
     // Validation
     if (!$title || !$price || !$typeId || !$address) {
@@ -127,22 +142,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $roomCode = 'ROOM-' . strtoupper(uniqid());
             $stmt = $pdo->prepare("INSERT INTO `room` (
                 `room_code`, `owner_id`, `title`, `description`, `price_per_day`, 
-                `beds`, `bathrooms`, `maximum_guests`, `ac`, `wifi`, `parking`, 
-                `kitchen`, `attached_bathroom`, `room_type_id`, `status_id`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
+                `beds`, `bathrooms`, `maximum_guests`, `room_type_id`, `status_id`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
             
             $stmt->execute([
                 $roomCode, $user['user_id'], $title, $description, $price,
-                $beds, $bathrooms, $maxGuests, $ac, $wifi, $parking,
-                $kitchen, $attachedBathroom, $typeId
+                $beds, $bathrooms, $maxGuests, $typeId
             ]);
             $roomId = $pdo->lastInsertId();
 
-            // 2. Insert Location
+            // 2. Insert Location (Only City ID)
             $stmt = $pdo->prepare("INSERT INTO `room_location` (
-                `room_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`, `google_map_link`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$roomId, $provinceId, $districtId, $cityId, $address, $postalCode, $googleMapLink]);
+                `room_id`, `city_id`, `address`, `postal_code`, `google_map_link`
+            ) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$roomId, $cityId, $address, $postalCode, $googleMapLink]);
 
             // 3. Insert Images (first image is primary)
             if (!empty($uploadedImages)) {
@@ -154,8 +167,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            // 4. Insert Amenities
+            if (!empty($selected_amenities)) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO `room_amenity` (`room_id`, `amenity_id`) VALUES (?, ?)");
+                foreach ($selected_amenities as $amenityId) {
+                    $stmt->execute([$roomId, intval($amenityId)]);
+                }
+            }
+
+            // 5. Insert Meals
+            $mealOption = $_POST['meal_option'] ?? 'none';
+            if ($mealOption === 'available' && !empty($selected_meals)) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO `room_meal` (`room_id`, `meal_type_id`, `price`) VALUES (?, ?, ?)");
+                foreach ($selected_meals as $mealId) {
+                    $price = floatval($meal_prices[$mealId] ?? 0);
+                    $stmt->execute([$roomId, intval($mealId), $price]);
+                }
+            }
+
+            // 6. Decrement package quota
+            decrement_package_quota($packageCheck['package_id'], 'room');
+
             $pdo->commit();
-            $success = "Room listed successfully! It is pending approval.";
+            $success = "Room listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " room slot(s) remaining.";
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "Database Error: " . $e->getMessage();
@@ -271,23 +305,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <label class="form-label mb-3 d-block">Amenities</label>
-                        <div class="row g-3">
-                            <?php 
-                            $amenities = [
-                                'ac' => 'Air Conditioning',
-                                'wifi' => 'WiFi',
-                                'attached_bathroom' => 'Attached Bathroom',
-                                'kitchen' => 'Kitchen Access',
-                                'parking' => 'Parking'
-                            ];
-                            foreach ($amenities as $key => $label): 
-                            ?>
+                        <div class="row g-3 mb-4">
+                            <?php foreach ($available_amenities as $amenity): ?>
                             <div class="col-6 col-md-3">
                                 <div class="form-check feature-checkbox-card">
-                                    <input class="form-check-input" type="checkbox" name="<?= $key ?>" id="check_<?= $key ?>">
-                                    <label class="form-check-label w-100" for="check_<?= $key ?>">
-                                        <?= $label ?>
+                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $amenity['amenity_id'] ?>" id="check_<?= $amenity['amenity_id'] ?>">
+                                    <label class="form-check-label w-100" for="check_<?= $amenity['amenity_id'] ?>">
+                                        <?= htmlspecialchars($amenity['amenity_name']) ?>
                                     </label>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <label class="form-label mb-3 d-block">Meal Plan Options</label>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="meal_option" id="mealsNone" value="none" checked>
+                                <label class="form-check-label" for="mealsNone">No Meals Provided</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="meal_option" id="mealsAvailable" value="available">
+                                <label class="form-check-label" for="mealsAvailable">Meals Available</label>
+                            </div>
+                        </div>
+
+                        <div id="mealSelectionContainer" class="row g-3" style="display:none;">
+                            <div class="col-12"><small class="text-muted">Select available meals and set their price. Check "Free" if included in rent.</small></div>
+                            <?php foreach ($meal_types as $meal): ?>
+                            <div class="col-12 col-md-6">
+                                <div class="card p-2 border-primary-subtle">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="form-check me-auto">
+                                            <input class="form-check-input meal-check" type="checkbox" name="meals[]" value="<?= $meal['type_id'] ?>" id="meal_<?= $meal['type_id'] ?>">
+                                            <label class="form-check-label fw-medium" for="meal_<?= $meal['type_id'] ?>"><?= htmlspecialchars($meal['type_name']) ?></label>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">LKR</span>
+                                        <input type="number" step="0.01" class="form-control meal-price" name="meal_prices[<?= $meal['type_id'] ?>]" id="price_<?= $meal['type_id'] ?>" placeholder="Price" disabled>
+                                        <div class="input-group-text bg-white">
+                                            <input class="form-check-input mt-0 me-1 meal-free-check" type="checkbox" value="1" id="free_<?= $meal['type_id'] ?>" disabled>
+                                            <label for="free_<?= $meal['type_id'] ?>" class="small mb-0">Free</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -424,6 +486,73 @@ document.getElementById('district').addEventListener('change', function() {
         citySelect.disabled = true;
     }
 });
+
+// Meal Options Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const radioNone = document.getElementById('mealsNone');
+    const radioAvailable = document.getElementById('mealsAvailable');
+    const container = document.getElementById('mealSelectionContainer');
+    
+    function toggleMeals() {
+        if (radioAvailable.checked) {
+            container.style.display = 'flex';
+        } else {
+            container.style.display = 'none';
+            // Optional: Uncheck all if hidden? prefer to keep state
+        }
+    }
+    
+    radioNone.addEventListener('change', toggleMeals);
+    radioAvailable.addEventListener('change', toggleMeals);
+    
+    // Per Meal Logic
+    const mealChecks = document.querySelectorAll('.meal-check');
+    mealChecks.forEach(check => {
+        check.addEventListener('change', function() {
+            const id = this.value;
+            const priceInput = document.getElementById('price_' + id);
+            const freeCheck = document.getElementById('free_' + id);
+            
+            if (this.checked) {
+                priceInput.disabled = freeCheck.checked; // If Free is checked, keep disabled
+                freeCheck.disabled = false;
+            } else {
+                priceInput.disabled = true;
+                freeCheck.disabled = true;
+                priceInput.value = '';
+                freeCheck.checked = false;
+            }
+        });
+    });
+
+    const freeChecks = document.querySelectorAll('.meal-free-check');
+    freeChecks.forEach(check => {
+        check.addEventListener('change', function() {
+            // Find sibling price input (traversing DOM or using ID logic)
+            // ID format: free_X -> price_X
+            const id = this.id.split('_')[1];
+            const priceInput = document.getElementById('price_' + id);
+            
+            if (this.checked) {
+                priceInput.value = 0;
+                priceInput.disabled = true;
+                // Add hidden input to force sending 0 if disabled inputs aren't sent?
+                // Disabled inputs are NOT sent in POST.
+                // We handle this: if checkbox checked but price missing, defaulting to 0 in PHP?
+                // No, PHP reads 'price'. If disabled, 'price' key is missing.
+                // We should rely on JS to Enable it before submit OR change logic.
+                // Better: Set Readonly? Readonly inputs ARE sent.
+                priceInput.readOnly = true;
+                priceInput.disabled = false; // Enable but readonly
+            } else {
+                priceInput.readOnly = false;
+                priceInput.disabled = false;
+                priceInput.value = '';
+            }
+        });
+    });
+});
+
 </script>
 </body>
 </html>

@@ -36,6 +36,22 @@ $activeListings = $pdo->prepare("SELECT
     (SELECT COUNT(*) FROM room WHERE owner_id = ? AND status_id = 1) as total");
 $activeListings->execute([$user['user_id'], $user['user_id'], $user['user_id']]);
 $active = $activeListings->fetchColumn();
+
+// Get active package quotas
+$stmt = $pdo->prepare("
+    SELECT 
+        SUM(remaining_properties) as total_properties,
+        SUM(remaining_rooms) as total_rooms,
+        SUM(remaining_vehicles) as total_vehicles
+    FROM bought_package
+    WHERE user_id = ? 
+      AND status_id = 1 
+      AND payment_status_id IN (2, 4)
+      AND (expires_date IS NULL OR expires_date > NOW())
+");
+$stmt->execute([$user['user_id']]);
+$packageQuota = $stmt->fetch();
+$hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || $packageQuota['total_rooms'] > 0 || $packageQuota['total_vehicles'] > 0));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,6 +109,40 @@ $active = $activeListings->fetchColumn();
             </div>
         </div>
     </div>
+
+    <!-- Package Status Alert -->
+    <?php if (!$hasActivePackage): ?>
+    <div class="alert alert-warning shadow-sm mb-4">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>No Active Package</h5>
+        <p class="mb-2">You need to purchase an ads package before you can add properties, rooms, or vehicles.</p>
+        <hr>
+        <a href="<?= app_url('owner/ads_packge/buy/buy.php') ?>" class="btn btn-warning">
+            <i class="bi bi-cart-plus me-2"></i>Purchase Package Now
+        </a>
+    </div>
+    <?php else: ?>
+    <div class="alert alert-success shadow-sm mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-check-circle-fill me-2"></i>Active Package Quota</h6>
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Properties:</strong> 
+                <span class="badge bg-success"><?= $packageQuota['total_properties'] ?? 0 ?> remaining</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Rooms:</strong> 
+                <span class="badge bg-info"><?= $packageQuota['total_rooms'] ?? 0 ?> remaining</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Vehicles:</strong> 
+                <span class="badge bg-warning text-dark"><?= $packageQuota['total_vehicles'] ?? 0 ?> remaining</span>
+            </div>
+        </div>
+        <hr class="my-2">
+        <a href="<?= app_url('owner/ads_packge/buy/buy.php') ?>" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-plus-circle me-1"></i>Buy More Packages
+        </a>
+    </div>
+    <?php endif; ?>
 
     <!-- Quick Actions -->
     <div class="card shadow-sm">

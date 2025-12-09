@@ -1,0 +1,23 @@
+# Disable directory browsing
+Options -Indexes
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Protect sensitive files (dotfiles like .env, .git)
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect dependency definition files
+<FilesMatch "^(composer\.json|composer\.lock|package\.json|package-lock\.json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to log files
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>

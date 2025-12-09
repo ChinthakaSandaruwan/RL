@@ -19,6 +19,15 @@ $errors = [];
 $success = null;
 $csrf_token = generate_csrf_token();
 
+// Check if owner has an active package with available property slots
+$packageCheck = check_owner_package_quota($user['user_id'], 'property');
+if (!$packageCheck['success']) {
+    // Redirect to package purchase page
+    $_SESSION['package_required_message'] = $packageCheck['message'];
+    header('Location: ' . $packageCheck['redirect_url']);
+    exit;
+}
+
 
 // Fetch Property Types
 $stmt = $pdo->query("SELECT * FROM `property_type` ORDER BY `type_name` ASC");
@@ -35,6 +44,10 @@ $districts = $stmt->fetchAll();
 $stmt = $pdo->query("SELECT * FROM `cities` ORDER BY `name_en` ASC");
 $cities = $stmt->fetchAll();
 
+// Fetch Amenities dynamically
+$stmt = $pdo->query("SELECT * FROM `amenity` WHERE `category` IN ('property', 'both') ORDER BY `amenity_name` ASC");
+$available_amenities = $stmt->fetchAll();
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -49,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sqft = floatval($_POST['sqft'] ?? 0);
     $bedrooms = intval($_POST['bedrooms'] ?? 0);
     $bathrooms = intval($_POST['bathrooms'] ?? 0);
+    $living_rooms = intval($_POST['living_rooms'] ?? 0);
     $address = trim($_POST['address'] ?? '');
     $postalCode = trim($_POST['postal_code'] ?? '');
     $googleMapLink = trim($_POST['google_map_link'] ?? '');
@@ -58,16 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id'] ?? 0);
 
-
-    // Amenities
-    $living_rooms = isset($_POST['living_rooms']) ? 1 : 0;
-    $garden = isset($_POST['garden']) ? 1 : 0;
-    $gym = isset($_POST['gym']) ? 1 : 0;
-    $pool = isset($_POST['pool']) ? 1 : 0;
-    $kitchen = isset($_POST['kitchen']) ? 1 : 0;
-    $parking = isset($_POST['parking']) ? 1 : 0;
-    $water = isset($_POST['water']) ? 1 : 0;
-    $electricity = isset($_POST['electricity']) ? 1 : 0;
+    // Selected Amenities
+    $selected_amenities = $_POST['amenities'] ?? []; // Array of amenity IDs
 
     // Validation
     if (!$title || !$price || !$typeId || !$address) {
@@ -132,24 +138,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $propCode = 'PROP-' . strtoupper(uniqid());
             $stmt = $pdo->prepare("INSERT INTO `property` (
                 `property_code`, `owner_id`, `title`, `description`, `price_per_month`, 
-                `bedrooms`, `bathrooms`, `living_rooms`, `garden`, `gym`, `pool`, 
-                `kitchen`, `parking`, `water_supply`, `electricity_supply`, `sqft`, 
+                `bedrooms`, `bathrooms`, `living_rooms`, `sqft`, 
                 `property_type_id`, `status_id`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
             
             $stmt->execute([
                 $propCode, $user['user_id'], $title, $description, $price,
-                $bedrooms, $bathrooms, $living_rooms, $garden, $gym, $pool,
-                $kitchen, $parking, $water, $electricity, $sqft,
+                $bedrooms, $bathrooms, $living_rooms, $sqft, // Removed old amenity columns
                 $typeId
             ]);
             $propertyId = $pdo->lastInsertId();
 
-            // 2. Insert Location
+            // 2. Insert Location (Only City ID is stored now, derived from Province->District->City)
             $stmt = $pdo->prepare("INSERT INTO `property_location` (
-                `property_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`, `google_map_link`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$propertyId, $provinceId, $districtId, $cityId, $address, $postalCode, $googleMapLink]);
+                `property_id`, `city_id`, `address`, `postal_code`, `google_map_link`
+            ) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$propertyId, $cityId, $address, $postalCode, $googleMapLink]);
 
             // 3. Insert Images (first image is primary)
             if (!empty($uploadedImages)) {
@@ -161,8 +165,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            // 4. Insert Amenities (New Normalized Table)
+            if (!empty($selected_amenities)) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO `property_amenity` (`property_id`, `amenity_id`) VALUES (?, ?)");
+                foreach ($selected_amenities as $amenityId) {
+                    $stmt->execute([$propertyId, intval($amenityId)]);
+                }
+            }
+
+            // 5. Decrement package quota
+            decrement_package_quota($packageCheck['package_id'], 'property');
+
             $pdo->commit();
-            $success = "Property listed successfully! It is pending approval.";
+            $success = "Property listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " property slot(s) remaining.";
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "Database Error: " . $e->getMessage();
@@ -275,28 +290,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">Square Ft</label>
                                 <input type="number" step="0.01" name="sqft" class="form-control">
                             </div>
+                        <div class="col-md-3">
+                                <label class="form-label">Living Rooms</label>
+                                <input type="number" name="living_rooms" class="form-control">
+                            </div>
                         </div>
                         
                         <label class="form-label mb-3 d-block">Amenities</label>
                         <div class="row g-3">
-                            <?php 
-                            $amenities = [
-                                'living_rooms' => 'Living Area',
-                                'kitchen' => 'Kitchen',
-                                'garden' => 'Garden',
-                                'gym' => 'Gym',
-                                'pool' => 'Swimming Pool',
-                                'parking' => 'Parking',
-                                'water' => 'Water Supply',
-                                'electricity' => 'Electricity'
-                            ];
-                            foreach ($amenities as $key => $label): 
-                            ?>
+                            <?php foreach ($available_amenities as $amenity): ?>
                             <div class="col-6 col-md-3">
                                 <div class="form-check feature-checkbox-card">
-                                    <input class="form-check-input" type="checkbox" name="<?= $key ?>" id="check_<?= $key ?>">
-                                    <label class="form-check-label w-100" for="check_<?= $key ?>">
-                                        <?= $label ?>
+                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $amenity['amenity_id'] ?>" id="check_<?= $amenity['amenity_id'] ?>">
+                                    <label class="form-check-label w-100" for="check_<?= $amenity['amenity_id'] ?>">
+                                        <?= htmlspecialchars($amenity['amenity_name']) ?>
                                     </label>
                                 </div>
                             </div>

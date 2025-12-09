@@ -19,6 +19,15 @@ $errors = [];
 $success = null;
 $csrf_token = generate_csrf_token();
 
+// Check if owner has an active package with available vehicle slots
+$packageCheck = check_owner_package_quota($user['user_id'], 'vehicle');
+if (!$packageCheck['success']) {
+    // Redirect to package purchase page
+    $_SESSION['package_required_message'] = $packageCheck['message'];
+    header('Location: ' . $packageCheck['redirect_url']);
+    exit;
+}
+
 // Fetch Vehicle Types
 $stmt = $pdo->query("SELECT * FROM `vehicle_type` ORDER BY `type_name` ASC");
 $vehicleTypes = $stmt->fetchAll();
@@ -34,6 +43,18 @@ $transmissionTypes = $stmt->fetchAll();
 // Fetch Pricing Types
 $stmt = $pdo->query("SELECT * FROM `pricing_type` ORDER BY `type_name` ASC");
 $pricingTypes = $stmt->fetchAll();
+
+// Fetch Brands
+$stmt = $pdo->query("SELECT * FROM `vehicle_brand` ORDER BY `brand_name` ASC");
+$brands = $stmt->fetchAll();
+
+// Fetch Models (for JS cascading)
+$stmt = $pdo->query("SELECT * FROM `vehicle_model` ORDER BY `model_name` ASC");
+$models = $stmt->fetchAll();
+
+// Fetch Colors
+$stmt = $pdo->query("SELECT * FROM `vehicle_color` ORDER BY `color_name` ASC");
+$colors = $stmt->fetchAll();
 
 // Fetch Provinces
 $stmt = $pdo->query("SELECT * FROM `provinces` ORDER BY `name_en` ASC");
@@ -55,17 +76,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Inputs
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $typeId = intval($_POST['type_id'] ?? 0);
-    $make = trim($_POST['make'] ?? '');
-    $model = trim($_POST['model'] ?? '');
+    // Vehicle Details
+    $modelId = intval($_POST['model_id'] ?? 0);
+    
+    // Handle Color Input (Text -> ID)
+    $colorName = trim($_POST['color'] ?? '');
+    $colorId = 0;
+    if ($colorName) {
+        // Check if color exists
+        $stmt = $pdo->prepare("SELECT color_id FROM vehicle_color WHERE color_name = ?");
+        $stmt->execute([$colorName]);
+        $existingId = $stmt->fetchColumn();
+        
+        if ($existingId) {
+            $colorId = $existingId;
+        } else {
+            // Create new color
+            $stmt = $pdo->prepare("INSERT INTO vehicle_color (color_name) VALUES (?)");
+            $stmt->execute([$colorName]);
+            $colorId = $pdo->lastInsertId();
+        }
+    }
     $year = intval($_POST['year'] ?? 0);
     $fuelTypeId = intval($_POST['fuel_type_id'] ?? 0);
     $transmissionTypeId = intval($_POST['transmission_type_id'] ?? 0);
     $seats = intval($_POST['seats'] ?? 0);
     $pricingTypeId = intval($_POST['pricing_type_id'] ?? 0);
     $pricePerDay = floatval($_POST['price_per_day'] ?? 0);
+    $pricePerKm = floatval($_POST['price_per_km'] ?? 0); // Added per km
     $licensePlate = trim($_POST['license_plate'] ?? '');
-    $color = trim($_POST['color'] ?? '');
+    
+    // Driver Options
+    $isDriverAvailable = isset($_POST['is_driver_available']) ? 1 : 0;
+    $driverCost = floatval($_POST['driver_cost_per_day'] ?? 0);
+    
+    // address/postal/link...
     $address = trim($_POST['address'] ?? '');
     $postalCode = trim($_POST['postal_code'] ?? '');
     $googleMapLink = trim($_POST['google_map_link'] ?? '');
@@ -83,8 +128,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usbCharger = isset($_POST['usb_charger']) ? 1 : 0;
 
     // Validation
-    if (!$title || !$make || !$model || !$year || !$pricePerDay || !$address) {
-        $errors[] = 'Title, Make, Model, Year, Price, and Address are required.';
+    // Validation
+    if (!$title || !$modelId || !$colorId || !$address) {
+        $errors[] = 'Title, Model, Color, and Address are required.';
+    }
+    if ($pricingTypeId == 1 && $pricePerDay <= 0) {
+        $errors[] = 'Daily Price is required.';
+    }
+    if ($pricingTypeId == 2 && $pricePerKm <= 0) {
+        $errors[] = 'Price Per KM is required.';
     }
 
     // Image Upload - Primary and Gallery
@@ -141,28 +193,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errors) {
         try {
-            $pdo->beginTransaction();
             $vehicleCode = 'VEH-' . strtoupper(uniqid());
             $stmt = $pdo->prepare("INSERT INTO `vehicle` (
                 `vehicle_code`, `owner_id`, `title`, `description`, `vehicle_type_id`,
-                `make`, `model`, `year`, `fuel_type_id`, `transmission_type_id`,
-                `number_of_seats`, `pricing_type_id`, `price_per_day`, `license_plate`, `color`,
-                `ac`, `gps`, `bluetooth`, `child_seat`, `usb_charger`, `status_id`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
+                `model_id`, `year`, `fuel_type_id`, `transmission_type_id`,
+                `number_of_seats`, `pricing_type_id`, `price_per_day`, `price_per_km`, `license_plate`, `color_id`,
+                `is_driver_available`, `driver_cost_per_day`, `status_id`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 4)"); // Status 4 = Pending
             
             $stmt->execute([
                 $vehicleCode, $user['user_id'], $title, $description, $typeId,
-                $make, $model, $year, $fuelTypeId, $transmissionTypeId,
-                $seats, $pricingTypeId, $pricePerDay, $licensePlate, $color,
-                $ac, $gps, $bluetooth, $childSeat, $usbCharger
+                $modelId, $year, $fuelTypeId, $transmissionTypeId,
+                $seats, $pricingTypeId, $pricePerDay, $pricePerKm, $licensePlate, $colorId,
+                $isDriverAvailable, $driverCost
             ]);
             $vehicleId = $pdo->lastInsertId();
 
             // 2. Insert Location
             $stmt = $pdo->prepare("INSERT INTO `vehicle_location` (
-                `vehicle_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`, `google_map_link`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$vehicleId, $provinceId, $districtId, $cityId, $address, $postalCode, $googleMapLink]);
+                `vehicle_id`, `city_id`, `address`, `postal_code`, `google_map_link`
+            ) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$vehicleId, $cityId, $address, $postalCode, $googleMapLink]);
 
             // 3. Insert Images (first image is primary)
             if (!empty($uploadedImages)) {
@@ -174,8 +225,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            // 4. Decrement package quota
+            decrement_package_quota($packageCheck['package_id'], 'vehicle');
+
             $pdo->commit();
-            $success = "Vehicle listed successfully! It is pending approval.";
+            $success = "Vehicle listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " vehicle slot(s) remaining.";
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "Database Error: " . $e->getMessage();
@@ -258,17 +312,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div class="col-md-6">
                                 <label class="form-label">Pricing Type <span class="text-danger">*</span></label>
-                                <select name="pricing_type_id" class="form-select" required>
-                                    <option value="" selected disabled>Select Pricing Type</option>
-                                    <?php foreach ($pricingTypes as $type): ?>
-                                        <option value="<?= $type['type_id'] ?>"><?= htmlspecialchars($type['type_name']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption1" value="1" autocomplete="off" checked>
+                                    <label class="btn btn-outline-success" for="priceOption1">Daily (Per Day)</label>
+
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption2" value="2" autocomplete="off">
+                                    <label class="btn btn-outline-success" for="priceOption2">Price Per KM</label>
+                                </div>
                             </div>
                             
-                            <div class="col-md-12">
-                                <label class="form-label">Daily Price (LKR) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="price_per_day" class="form-control" required>
+                            <div class="col-md-6">
+                                <div id="dailyPriceContainer">
+                                    <label class="form-label">Daily Price (LKR) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" name="price_per_day" class="form-control" id="inputDailyPrice">
+                                </div>
+                                <div id="kmPriceContainer" style="display:none;">
+                                    <label class="form-label">Price Per KM (LKR) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" name="price_per_km" class="form-control" id="inputKmPrice">
+                                </div>
                             </div>
                             
                             <div class="col-12">
@@ -287,12 +348,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body p-4">
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Make <span class="text-danger">*</span></label>
-                                <input type="text" name="make" class="form-control" placeholder="e.g. Toyota" required>
+                                <label class="form-label">Brand (Make) <span class="text-danger">*</span></label>
+                                <select name="brand_id" id="brand" class="form-select" required>
+                                    <option value="" selected disabled>Select Brand</option>
+                                    <?php foreach ($brands as $brand): ?>
+                                        <option value="<?= $brand['brand_id'] ?>"><?= htmlspecialchars($brand['brand_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Model <span class="text-danger">*</span></label>
-                                <input type="text" name="model" class="form-control" placeholder="e.g. Prius" required>
+                                <select name="model_id" id="model" class="form-select" required disabled>
+                                    <option value="" selected>Select Brand first</option>
+                                </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Year <span class="text-danger">*</span></label>
@@ -322,35 +390,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">License Plate</label>
-                                <input type="text" name="license_plate" class="form-control" placeholder="e.g. ABC-1234">
+                                <input type="text" name="license_plate" class="form-control" placeholder="ABC-1234">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Color</label>
-                                <input type="text" name="color" class="form-control" placeholder="e.g. White">
+                                <label class="form-label">Color <span class="text-danger">*</span></label>
+                                <input type="text" name="color" class="form-control" placeholder="e.g. Red, Metallic Blue" required list="colorList">
+                                <datalist id="colorList">
+                                    <?php foreach ($colors as $color): ?>
+                                        <option value="<?= htmlspecialchars($color['color_name']) ?>">
+                                    <?php endforeach; ?>
+                                </datalist>
                             </div>
                         </div>
-                        
-                        <label class="form-label mb-3 d-block">Features</label>
+
+                        <label class="form-label mb-3 d-block">Additional Options</label>
                         <div class="row g-3">
-                            <?php 
-                            $features = [
-                                'ac' => 'Air Conditioning',
-                                'gps' => 'GPS Navigation',
-                                'bluetooth' => 'Bluetooth',
-                                'child_seat' => 'Child Seat Available',
-                                'usb_charger' => 'USB Charger'
-                            ];
-                            foreach ($features as $key => $label): 
-                            ?>
-                            <div class="col-6 col-md-3">
+                            <div class="col-md-6">
                                 <div class="form-check feature-checkbox-card">
-                                    <input class="form-check-input" type="checkbox" name="<?= $key ?>" id="check_<?= $key ?>">
-                                    <label class="form-check-label w-100" for="check_<?= $key ?>">
-                                        <?= $label ?>
-                                    </label>
+                                    <input class="form-check-input" type="checkbox" name="is_driver_available" id="driverCheck">
+                                    <label class="form-check-label" for="driverCheck">Driver Available</label>
                                 </div>
                             </div>
-                            <?php endforeach; ?>
+                            <div class="col-md-6">
+                                <label class="form-label">Driver Cost Per Day (LKR)</label>
+                                <input type="number" step="0.01" name="driver_cost_per_day" class="form-control" id="driverCost" disabled>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -433,6 +497,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Location data from PHP
 const districts = <?= json_encode($districts) ?>;
 const cities = <?= json_encode($cities) ?>;
+const models = <?= json_encode($models) ?>;
+
+// Brand change handler
+document.getElementById('brand').addEventListener('change', function() {
+    const brandId = parseInt(this.value);
+    const modelSelect = document.getElementById('model');
+    
+    // Clear models
+    modelSelect.innerHTML = '<option value="" selected>Select Model</option>';
+    
+    // Filter models
+    const filteredModels = models.filter(m => m.brand_id == brandId);
+    
+    if (filteredModels.length > 0) {
+        filteredModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.model_id;
+            option.textContent = model.model_name;
+            modelSelect.appendChild(option);
+        });
+        modelSelect.disabled = false;
+    } else {
+        modelSelect.disabled = true;
+    }
+});
+
+// Driver details toggle
+const driverCheck = document.getElementById('driverCheck');
+if(driverCheck){
+    driverCheck.addEventListener('change', function() {
+        const costInput = document.getElementById('driverCost');
+        costInput.disabled = !this.checked;
+        if (!this.checked) costInput.value = '';
+    });
+}
 
 // Province change handler
 document.getElementById('province').addEventListener('change', function() {
@@ -483,6 +582,38 @@ document.getElementById('district').addEventListener('change', function() {
     } else {
         citySelect.disabled = true;
     }
+});
+
+// Pricing Toggle Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const radioDaily = document.getElementById('priceOption1');
+    const radioKm = document.getElementById('priceOption2');
+    const containerDaily = document.getElementById('dailyPriceContainer');
+    const containerKm = document.getElementById('kmPriceContainer');
+    const inputDaily = document.getElementById('inputDailyPrice');
+    const inputKm = document.getElementById('inputKmPrice');
+
+    function updatePricingUI() {
+        if (radioDaily.checked) {
+            containerDaily.style.display = 'block';
+            containerKm.style.display = 'none';
+            inputDaily.required = true;
+            inputKm.required = false;
+            inputKm.value = ''; // Clear value
+        } else {
+            containerDaily.style.display = 'none';
+            containerKm.style.display = 'block';
+            inputDaily.required = false;
+            inputKm.required = true;
+            inputDaily.value = ''; // Clear value
+        }
+    }
+
+    radioDaily.addEventListener('change', updatePricingUI);
+    radioKm.addEventListener('change', updatePricingUI);
+    
+    // Initialize
+    updatePricingUI();
 });
 </script>
 </body>

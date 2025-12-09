@@ -47,8 +47,12 @@ function get_pdo(): PDO {
 function ensure_session_started(): void {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         // Session hardening
+        // Session configuration: 1 month lifetime
+        $lifetime = 30 * 24 * 60 * 60; // 2,592,000 seconds
+        ini_set('session.gc_maxlifetime', $lifetime);
+        
         session_set_cookie_params([
-            'lifetime' => 0,
+            'lifetime' => $lifetime,
             'path' => '/',
             'domain' => '', // Default to current domain
             'secure' => isset($_SERVER['HTTPS']), // Only secure if HTTPS
@@ -95,4 +99,91 @@ function logout_user(): void {
         );
     }
     session_destroy();
+}
+
+/**
+ * Check if owner has an active package with available quota for a specific type
+ * @param int $userId - Owner's user ID
+ * @param string $type - 'property', 'room', or 'vehicle'
+ * @return array Returns ['success' => bool, 'message' => string, 'package_id' => int|null]
+ */
+function check_owner_package_quota($userId, $type) {
+    $pdo = get_pdo();
+    
+    // Map type to column name
+    $columnMap = [
+        'property' => 'remaining_properties',
+        'room' => 'remaining_rooms',
+        'vehicle' => 'remaining_vehicles'
+    ];
+    
+    if (!isset($columnMap[$type])) {
+        return ['success' => false, 'message' => 'Invalid listing type.', 'package_id' => null];
+    }
+    
+    $column = $columnMap[$type];
+    
+    // Find active package with remaining quota
+    // status_id = 1 (active subscription), payment_status_id = 2 or 4 (paid/success)
+    // expires_date NULL or future date
+    $stmt = $pdo->prepare("
+        SELECT bp.bought_package_id, bp.$column, bp.expires_date, p.package_name
+        FROM bought_package bp
+        JOIN package p ON bp.package_id = p.package_id
+        WHERE bp.user_id = ? 
+          AND bp.status_id = 1 
+          AND bp.payment_status_id IN (2, 4)
+          AND bp.$column > 0
+          AND (bp.expires_date IS NULL OR bp.expires_date > NOW())
+        ORDER BY bp.expires_date ASC, bp.bought_package_id ASC
+        LIMIT 1
+    ");
+    $stmt->execute([$userId]);
+    $package = $stmt->fetch();
+    
+    if (!$package) {
+        return [
+            'success' => false, 
+            'message' => 'You must purchase an ads package before adding a ' . $type . '. Please buy a package to continue.',
+            'package_id' => null,
+            'redirect_url' => app_url('owner/ads_packge/buy/buy.php')
+        ];
+    }
+    
+    return [
+        'success' => true,
+        'message' => 'Package available with ' . $package[$column] . ' ' . $type . '(s) remaining.',
+        'package_id' => $package['bought_package_id'],
+        'package_name' => $package['package_name'],
+        'remaining' => $package[$column]
+    ];
+}
+
+/**
+ * Decrement package quota after successful listing creation
+ * @param int $packageId - bought_package_id
+ * @param string $type - 'property', 'room', or 'vehicle'
+ * @return bool
+ */
+function decrement_package_quota($packageId, $type) {
+    $pdo = get_pdo();
+    
+    $columnMap = [
+        'property' => 'remaining_properties',
+        'room' => 'remaining_rooms',
+        'vehicle' => 'remaining_vehicles'
+    ];
+    
+    if (!isset($columnMap[$type])) {
+        return false;
+    }
+    
+    $column = $columnMap[$type];
+    
+    $stmt = $pdo->prepare("
+        UPDATE bought_package 
+        SET $column = $column - 1 
+        WHERE bought_package_id = ? AND $column > 0
+    ");
+    return $stmt->execute([$packageId]);
 }

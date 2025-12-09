@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS `user_status` (
   UNIQUE KEY `uk_user_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE IF NOT EXISTS `payment_status` (
   `status_id` INT NOT NULL AUTO_INCREMENT,
   `status_name` VARCHAR(50) NOT NULL,
@@ -36,6 +35,41 @@ CREATE TABLE IF NOT EXISTS `payment_method` (
   UNIQUE KEY `uk_payment_method_name` (`method_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `provinces` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name_en` varchar(45) NOT NULL,
+  `name_si` varchar(45) DEFAULT NULL,
+  `name_ta` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
+
+CREATE TABLE IF NOT EXISTS `districts` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `province_id` INT NOT NULL,
+  `name_en` varchar(45) DEFAULT NULL,
+  `name_si` varchar(45) DEFAULT NULL,
+  `name_ta` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `provinces_id` (`province_id`),
+  CONSTRAINT `fk_districts_provinces` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
+
+CREATE TABLE IF NOT EXISTS `cities` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `district_id` INT NOT NULL,
+  `name_en` VARCHAR(45) DEFAULT NULL,
+  `name_si` VARCHAR(45) DEFAULT NULL,
+  `name_ta` VARCHAR(45) DEFAULT NULL,
+  `sub_name_en` VARCHAR(45) DEFAULT NULL,
+  `sub_name_si` VARCHAR(45) DEFAULT NULL,
+  `sub_name_ta` VARCHAR(45) DEFAULT NULL,
+  `postcode` VARCHAR(15) DEFAULT NULL,
+  `latitude` DOUBLE DEFAULT NULL,
+  `longitude` DOUBLE DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_cities_districts1_idx` (`district_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
+
 CREATE TABLE IF NOT EXISTS `property_type` (
   `type_id` INT NOT NULL AUTO_INCREMENT,
   `type_name` VARCHAR(100) NOT NULL,
@@ -49,8 +83,6 @@ CREATE TABLE IF NOT EXISTS `listing_status` (
   PRIMARY KEY (`status_id`),
   UNIQUE KEY `uk_listing_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
 
 CREATE TABLE IF NOT EXISTS `rent_status` (
   `status_id` INT NOT NULL AUTO_INCREMENT,
@@ -73,7 +105,27 @@ CREATE TABLE IF NOT EXISTS `request_status` (
   UNIQUE KEY `uk_request_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `amenity` (
+  `amenity_id` INT NOT NULL AUTO_INCREMENT,
+  `amenity_name` VARCHAR(100) NOT NULL,
+  `category` ENUM('property', 'room', 'both') NOT NULL DEFAULT 'both',
+  PRIMARY KEY (`amenity_id`),
+  UNIQUE KEY `uk_amenity_name` (`amenity_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `vehicle_brand` (
+  `brand_id` INT NOT NULL AUTO_INCREMENT,
+  `brand_name` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`brand_id`),
+  UNIQUE KEY `uk_vehicle_brand_name` (`brand_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `meal_type` (
+  `type_id` INT NOT NULL AUTO_INCREMENT,
+  `type_name` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`type_id`),
+  UNIQUE KEY `uk_meal_type_name` (`type_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
@@ -109,8 +161,6 @@ CREATE TABLE IF NOT EXISTS `otp_verification` (
   CONSTRAINT `fk_otp_verifications_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
 CREATE TABLE IF NOT EXISTS `package_type` (
   `type_id` INT NOT NULL AUTO_INCREMENT,
   `type_name` VARCHAR(50) NOT NULL,
@@ -124,8 +174,6 @@ CREATE TABLE IF NOT EXISTS `package_status` (
   PRIMARY KEY (`status_id`),
   UNIQUE KEY `uk_package_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
 
 CREATE TABLE IF NOT EXISTS `package` (
   `package_id` INT NOT NULL AUTO_INCREMENT,
@@ -147,15 +195,12 @@ CREATE TABLE IF NOT EXISTS `package` (
   CONSTRAINT `fk_packages_status` FOREIGN KEY (`status_id`) REFERENCES `package_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
 CREATE TABLE IF NOT EXISTS `subscription_status` (
   `status_id` INT NOT NULL AUTO_INCREMENT,
   `status_name` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`status_id`),
   UNIQUE KEY `uk_subscription_status_name` (`status_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE IF NOT EXISTS `bought_package` (
   `bought_package_id` INT NOT NULL AUTO_INCREMENT,
@@ -180,8 +225,6 @@ CREATE TABLE IF NOT EXISTS `bought_package` (
   CONSTRAINT `fk_bought_packages_payment_status` FOREIGN KEY (`payment_status_id`) REFERENCES `payment_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
 CREATE TABLE IF NOT EXISTS `property` (
   `property_id` INT NOT NULL AUTO_INCREMENT,
   `property_code` VARCHAR(255) NOT NULL,
@@ -193,12 +236,7 @@ CREATE TABLE IF NOT EXISTS `property` (
   `bathrooms` INT NULL DEFAULT 0,
   `living_rooms` INT NULL DEFAULT 0,
   `garden` INT NULL DEFAULT 0,
-  `gym` INT NULL DEFAULT 0,
-  `pool` INT NULL DEFAULT 0,
-  `kitchen` TINYINT NOT NULL DEFAULT 0,
-  `parking` TINYINT NOT NULL DEFAULT 0,
-  `water_supply` TINYINT NOT NULL DEFAULT 0,
-  `electricity_supply` TINYINT NOT NULL DEFAULT 0,
+  /* Amenities moved to property_amenity table */
   `sqft` DECIMAL(10,2) NULL,
   `property_type_id` INT NULL,
   `status_id` INT NOT NULL DEFAULT 4, -- Default pending (listing_statuses)
@@ -215,6 +253,14 @@ CREATE TABLE IF NOT EXISTS `property` (
   CONSTRAINT `fk_properties_status` FOREIGN KEY (`status_id`) REFERENCES `listing_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `property_amenity` (
+  `property_id` INT NOT NULL,
+  `amenity_id` INT NOT NULL,
+  PRIMARY KEY (`property_id`, `amenity_id`),
+  CONSTRAINT `fk_pa_property` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pa_amenity` FOREIGN KEY (`amenity_id`) REFERENCES `amenity` (`amenity_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `property_image` (
   `image_id` INT NOT NULL AUTO_INCREMENT,
   `property_id` INT NOT NULL,
@@ -226,26 +272,20 @@ CREATE TABLE IF NOT EXISTS `property_image` (
   CONSTRAINT `fk_property_images_property` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE IF NOT EXISTS `property_location` (
   `location_id` INT NOT NULL AUTO_INCREMENT,
   `property_id` INT NOT NULL,
-  `province_id` INT NOT NULL,
-  `district_id` INT NOT NULL,
-  `city_id` INT NOT NULL,
+  `city_id` INT NULL,
   `address` VARCHAR(255) NULL,
   `google_map_link` VARCHAR(255) NULL,
   `postal_code` VARCHAR(10) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`location_id`),
   KEY `idx_locations_property_id` (`property_id`),
-  KEY `idx_locations_province_id` (`province_id`),
-  KEY `idx_locations_district_id` (`district_id`),
   KEY `idx_locations_city_id` (`city_id`),
-  KEY `idx_locations_prop_prov_dist` (`property_id`, `province_id`, `district_id`),
-  CONSTRAINT `fk_property_locations_property` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_property_locations_property` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_property_locations_city` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE IF NOT EXISTS `room_type` (
   `type_id` INT NOT NULL AUTO_INCREMENT,
@@ -253,7 +293,6 @@ CREATE TABLE IF NOT EXISTS `room_type` (
   PRIMARY KEY (`type_id`),
   UNIQUE KEY `uk_room_type_name` (`type_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE IF NOT EXISTS `room` (
   `room_id` INT NOT NULL AUTO_INCREMENT,
@@ -266,12 +305,7 @@ CREATE TABLE IF NOT EXISTS `room` (
   `bathrooms` INT NOT NULL DEFAULT 1,
   `maximum_guests` INT NOT NULL DEFAULT 1,
   `price_per_day` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `ac` TINYINT NOT NULL DEFAULT 0,
-  `wifi` TINYINT NOT NULL DEFAULT 0,
-  `parking` TINYINT NOT NULL DEFAULT 0,
-  `kitchen` TINYINT NOT NULL DEFAULT 0,
-  `attached_bathroom` TINYINT NOT NULL DEFAULT 0,
-  `status_id` INT NOT NULL DEFAULT 4, -- Default pending
+  `status_id` INT NOT NULL DEFAULT 4,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  `update_disable` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`room_id`),
@@ -282,6 +316,14 @@ CREATE TABLE IF NOT EXISTS `room` (
   CONSTRAINT `fk_rooms_owner` FOREIGN KEY (`owner_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rooms_type` FOREIGN KEY (`room_type_id`) REFERENCES `room_type` (`type_id`),
   CONSTRAINT `fk_rooms_status` FOREIGN KEY (`status_id`) REFERENCES `listing_status` (`status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `room_amenity` (
+  `room_id` INT NOT NULL,
+  `amenity_id` INT NOT NULL,
+  PRIMARY KEY (`room_id`, `amenity_id`),
+  CONSTRAINT `fk_ra_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ra_amenity` FOREIGN KEY (`amenity_id`) REFERENCES `amenity` (`amenity_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `room_image` (
@@ -298,56 +340,17 @@ CREATE TABLE IF NOT EXISTS `room_image` (
 CREATE TABLE IF NOT EXISTS `room_location` (
   `location_id` INT NOT NULL AUTO_INCREMENT,
   `room_id` INT NOT NULL,
-  `province_id` INT NOT NULL,
-  `district_id` INT NOT NULL,
-  `city_id` INT NOT NULL,
+  `city_id` INT NULL,
   `address` VARCHAR(255) NULL,
   `google_map_link` VARCHAR(255) NULL,
   `postal_code` VARCHAR(10) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`location_id`),
   KEY `idx_locations_room_id` (`room_id`),
-  KEY `idx_locations_province_id` (`province_id`),
-  KEY `idx_locations_district_id` (`district_id`),
   KEY `idx_locations_city_id` (`city_id`),
-  KEY `idx_locations_room_prov_dist` (`room_id`, `province_id`, `district_id`),
-  CONSTRAINT `fk_room_locations_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_room_locations_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_room_locations_city` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE IF NOT EXISTS `provinces` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name_en` varchar(45) NOT NULL,
-  `name_si` varchar(45) DEFAULT NULL,
-  `name_ta` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
-
-  CREATE TABLE IF NOT EXISTS `districts` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `province_id` INT NOT NULL,
-    `name_en` varchar(45) DEFAULT NULL,
-    `name_si` varchar(45) DEFAULT NULL,
-    `name_ta` varchar(45) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `provinces_id` (`province_id`)
-  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
-
-CREATE TABLE IF NOT EXISTS `cities` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `district_id` INT NOT NULL,
-  `name_en` VARCHAR(45) DEFAULT NULL,
-  `name_si` VARCHAR(45) DEFAULT NULL,
-  `name_ta` VARCHAR(45) DEFAULT NULL,
-  `sub_name_en` VARCHAR(45) DEFAULT NULL,
-  `sub_name_si` VARCHAR(45) DEFAULT NULL,
-  `sub_name_ta` VARCHAR(45) DEFAULT NULL,
-  `postcode` VARCHAR(15) DEFAULT NULL,
-  `latitude` DOUBLE DEFAULT NULL,
-  `longitude` DOUBLE DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_cities_districts1_idx` (`district_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
 
 CREATE TABLE IF NOT EXISTS `setting` (
   `setting_id` INT NOT NULL AUTO_INCREMENT,
@@ -356,6 +359,28 @@ CREATE TABLE IF NOT EXISTS `setting` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`setting_id`),
   UNIQUE KEY `uk_settings_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `footer_content` (
+  `footer_id` INT NOT NULL AUTO_INCREMENT,
+  `company_name` VARCHAR(100) NOT NULL,
+  `about_text` TEXT NULL,
+  `address` VARCHAR(255) NULL,
+  `email` VARCHAR(100) NULL,
+  `phone` VARCHAR(20) NULL,
+  `facebook_link` VARCHAR(255) NULL,
+  `twitter_link` VARCHAR(255) NULL,
+  `google_link` VARCHAR(255) NULL,
+  `instagram_link` VARCHAR(255) NULL,
+  `linkedin_link` VARCHAR(255) NULL,
+  `github_link` VARCHAR(255) NULL,
+  `copyright_text` VARCHAR(255) NULL,
+  `show_social_links` TINYINT(1) DEFAULT 1,
+  `show_products` TINYINT(1) DEFAULT 1,
+  `show_useful_links` TINYINT(1) DEFAULT 1,
+  `show_contact` TINYINT(1) DEFAULT 1,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`footer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `property_wishlist` (
@@ -428,11 +453,11 @@ CREATE TABLE IF NOT EXISTS `advertiser_request` (
 
 CREATE TABLE IF NOT EXISTS `room_meal` (
   `room_id` INT NOT NULL,
-  `meal_id` INT NOT NULL,
-  `meal_name` VARCHAR(50) NOT NULL,
+  `meal_type_id` INT NOT NULL,
   `price` DECIMAL(10,2) NOT NULL,
-  PRIMARY KEY (`room_id`, `meal_id`),
-  CONSTRAINT `fk_room_meals_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE
+  PRIMARY KEY (`room_id`, `meal_type_id`),
+  CONSTRAINT `fk_room_meals_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_room_meals_type` FOREIGN KEY (`meal_type_id`) REFERENCES `meal_type` (`type_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `room_rent` (
@@ -473,17 +498,24 @@ CREATE TABLE IF NOT EXISTS `property_rent` (
   CONSTRAINT `fk_property_rents_status` FOREIGN KEY (`status_id`) REFERENCES `rent_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `bank_detail` (
+CREATE TABLE IF NOT EXISTS `bank` (
   `bank_id` INT NOT NULL AUTO_INCREMENT,
   `bank_name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`bank_id`),
+  UNIQUE KEY `uk_bank_name` (`bank_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `admin_bank_account` (
+  `account_id` INT NOT NULL AUTO_INCREMENT,
+  `bank_id` INT NOT NULL,
   `branch` VARCHAR(100) NOT NULL,
   `account_number` VARCHAR(50) NOT NULL,
   `account_holder_name` VARCHAR(100) NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`bank_id`)
+  PRIMARY KEY (`account_id`),
+  KEY `idx_admin_bank_bank` (`bank_id`),
+  CONSTRAINT `fk_admin_bank_bank` FOREIGN KEY (`bank_id`) REFERENCES `bank` (`bank_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
 
 CREATE TABLE IF NOT EXISTS `vehicle_type` (
   `type_id` INT NOT NULL AUTO_INCREMENT,
@@ -513,28 +545,45 @@ CREATE TABLE IF NOT EXISTS `pricing_type` (
   UNIQUE KEY `uk_pricing_type_name` (`type_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `vehicle_color` (
+  `color_id` INT NOT NULL AUTO_INCREMENT,
+  `color_name` VARCHAR(50) NOT NULL,
+  `hex_code` VARCHAR(7) NULL,
+  PRIMARY KEY (`color_id`),
+  UNIQUE KEY `uk_vehicle_color_name` (`color_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `vehicle_model` (
+  `model_id` INT NOT NULL AUTO_INCREMENT,
+  `brand_id` INT NOT NULL,
+  `model_name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`model_id`),
+  UNIQUE KEY `uk_vehicle_model_name` (`model_name`),
+  KEY `idx_vehicle_model_brand` (`brand_id`),
+  CONSTRAINT `fk_vehicle_model_brand` FOREIGN KEY (`brand_id`) REFERENCES `vehicle_brand` (`brand_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `vehicle` (
   `vehicle_id` INT NOT NULL AUTO_INCREMENT,
   `vehicle_code` VARCHAR(255) NOT NULL,
   `owner_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT NULL,
-  `model` VARCHAR(100) NOT NULL,
+  `model_id` INT NOT NULL,
   `vehicle_type_id` INT NOT NULL,
-  `primary_image` VARCHAR(255) NULL,
   `fuel_type_id` INT NOT NULL,
   `transmission_type_id` INT NOT NULL,
   `number_of_seats` INT NULL,
   `mileage` DECIMAL(8,2) NULL,
-  `pricing_type_id` INT NOT NULL DEFAULT 1, -- Default per_day (pricing_types)
+  `pricing_type_id` INT NOT NULL DEFAULT 1,
   `price_per_day` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `price_per_km` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `price_per_week` DECIMAL(10,2) NULL,
-  `price_per_month` DECIMAL(10,2) NULL,
   `security_deposit` DECIMAL(10,2) NULL DEFAULT 0.00,
   `license_plate` VARCHAR(20) NULL,
-  `color` VARCHAR(50) NULL,
-  `status_id` INT NOT NULL DEFAULT 4, -- Default pending (listing_statuses)
+  `color_id` INT NOT NULL,
+  `is_driver_available` TINYINT(1) NOT NULL DEFAULT 0,
+  `driver_cost_per_day` DECIMAL(10,2) NULL DEFAULT 0.00,
+  `status_id` INT NOT NULL DEFAULT 4,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  `update_disable` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`vehicle_id`),
@@ -546,9 +595,11 @@ CREATE TABLE IF NOT EXISTS `vehicle` (
   KEY `idx_vehicles_transmission` (`transmission_type_id`),
   FULLTEXT KEY `idx_ft_vehicles_title_desc` (`title`, `description`),
   CONSTRAINT `fk_vehicles_owner` FOREIGN KEY (`owner_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_vehicles_model` FOREIGN KEY (`model_id`) REFERENCES `vehicle_model` (`model_id`),
   CONSTRAINT `fk_vehicles_type` FOREIGN KEY (`vehicle_type_id`) REFERENCES `vehicle_type` (`type_id`),
   CONSTRAINT `fk_vehicles_fuel` FOREIGN KEY (`fuel_type_id`) REFERENCES `fuel_type` (`type_id`),
   CONSTRAINT `fk_vehicles_transmission` FOREIGN KEY (`transmission_type_id`) REFERENCES `transmission_type` (`type_id`),
+  CONSTRAINT `fk_vehicles_color` FOREIGN KEY (`color_id`) REFERENCES `vehicle_color` (`color_id`),
   CONSTRAINT `fk_vehicles_pricing` FOREIGN KEY (`pricing_type_id`) REFERENCES `pricing_type` (`type_id`),
   CONSTRAINT `fk_vehicles_status` FOREIGN KEY (`status_id`) REFERENCES `listing_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -620,7 +671,6 @@ CREATE TABLE IF NOT EXISTS `vehicle_wishlist` (
   CONSTRAINT `fk_vw_vehicle` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle` (`vehicle_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE IF NOT EXISTS `user_type_change_request` (
   `request_id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
@@ -635,4 +685,101 @@ CREATE TABLE IF NOT EXISTS `user_type_change_request` (
   KEY `idx_user_type_change_user` (`user_id`),
   KEY `idx_user_type_change_status` (`status_id`),
   CONSTRAINT `fk_user_type_change_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `review` (
+  `review_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `target_id` INT NOT NULL, -- ID of the property/room/vehicle
+  `target_type` ENUM('property', 'room', 'vehicle') NOT NULL,
+  `rating` DECIMAL(2,1) NOT NULL, -- e.g., 4.5
+  `comment` TEXT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`review_id`),
+  KEY `idx_reviews_user` (`user_id`),
+  KEY `idx_reviews_target` (`target_id`, `target_type`),
+  CONSTRAINT `fk_reviews_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `transaction` (
+  `transaction_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `currency` VARCHAR(3) NOT NULL DEFAULT 'LKR',
+  `reference_id` VARCHAR(100) NULL, -- Gateway Ref or Bank Slip Ref
+  `payment_method_id` INT NOT NULL,
+  `status` ENUM('pending', 'success', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
+  `related_type` ENUM('package', 'rent') NOT NULL,
+  `related_id` INT NOT NULL, -- package_id or rent_id
+  `proof_image` VARCHAR(255) NULL, -- For bank slips
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transaction_id`),
+  KEY `idx_transactions_user` (`user_id`),
+  CONSTRAINT `fk_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_transactions_method` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_method` (`method_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `chat` (
+  `chat_id` INT NOT NULL AUTO_INCREMENT,
+  `user1_id` INT NOT NULL, -- Usually customer
+  `user2_id` INT NOT NULL, -- Usually owner/admin
+  `related_type` ENUM('property', 'room', 'vehicle', 'general') NULL,
+  `related_id` INT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`chat_id`),
+  UNIQUE KEY `uk_chat_users_topic` (`user1_id`, `user2_id`, `related_type`, `related_id`),
+  CONSTRAINT `fk_chat_user1` FOREIGN KEY (`user1_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_chat_user2` FOREIGN KEY (`user2_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `chat_message` (
+  `message_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `chat_id` INT NOT NULL,
+  `sender_id` INT NOT NULL,
+  `message` TEXT NOT NULL,
+  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`message_id`),
+  KEY `idx_messages_chat` (`chat_id`),
+  CONSTRAINT `fk_messages_chat` FOREIGN KEY (`chat_id`) REFERENCES `chat` (`chat_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_messages_sender` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `availability_block` (
+  `block_id` INT NOT NULL AUTO_INCREMENT,
+  `item_id` INT NOT NULL,
+  `item_type` ENUM('property', 'room', 'vehicle') NOT NULL,
+  `start_date` DATE NOT NULL,
+  `end_date` DATE NOT NULL,
+  `reason` VARCHAR(255) NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`block_id`),
+  KEY `idx_blocks_item` (`item_id`, `item_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `coupon` (
+  `coupon_id` INT NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(50) NOT NULL,
+  `discount_amount` DECIMAL(10,2) NULL,
+  `discount_percentage` DECIMAL(5,2) NULL, -- e.g. 10.50 for 10.5%
+  `min_spend` DECIMAL(10,2) NULL,
+  `expiry_date` DATETIME NOT NULL,
+  `usage_limit` INT NOT NULL DEFAULT 100,
+  `usage_count` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`coupon_id`),
+  UNIQUE KEY `uk_coupon_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_document` (
+  `document_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `document_type` ENUM('nic_front', 'nic_back', 'license_front', 'license_back', 'passport', 'business_reg') NOT NULL,
+  `image_path` VARCHAR(255) NOT NULL,
+  `is_verified` TINYINT(1) NOT NULL DEFAULT 0, -- 0: Pending, 1: Verified, 2: Rejected
+  `uploaded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`document_id`),
+  KEY `idx_docs_user` (`user_id`),
+  CONSTRAINT `fk_docs_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

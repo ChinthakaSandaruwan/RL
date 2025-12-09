@@ -1,0 +1,41 @@
+/* Room View Custom Styles */
+
+.room-main-img {
+    height: 500px;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+
+.room-thumb {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+    border: 2px solid transparent;
+}
+
+.room-thumb:hover {
+    opacity: 1;
+}
+
+.room-thumb.active-thumb {
+    opacity: 1;
+    border-color: var(--bs-primary);
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: var(--bs-secondary);
+}
+
+.breadcrumb-item.active {
+    color: var(--bs-primary);
+}
+
+@media (max-width: 768px) {
+    .room-main-img {
+        height: 300px;
+    }
+}

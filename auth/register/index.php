@@ -2,6 +2,7 @@
 // Basic registration form (processing can be added later)
 
 require __DIR__ . '/../../config/db.php';
+require __DIR__ . '/../../services/email.php';
 
 ensure_session_started();
 
@@ -58,7 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $stmt = $pdo->prepare('INSERT INTO `user` (`email`, `name`, `mobile_number`, `nic`, `role_id`, `status_id`, `created_at`) VALUES (?, ?, ?, ?, 4, 1, NOW())');
         $stmt->execute([$email, $name, $mobile, $nic]);
-        $success = 'Registration successful. You can now request an OTP to login.';
+        
+        // Send welcome email (non-blocking - registration succeeds even if email fails)
+        $emailSent = send_welcome_email($email, $name);
+        
+        if ($emailSent) {
+            $success = 'Registration successful! A welcome email has been sent to your inbox. You can now request an OTP to login.';
+        } else {
+            $success = 'Registration successful! You can now request an OTP to login.';
+        }
     }
 }
 ?>

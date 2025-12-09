@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Email Preview - RentalLanka</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .preview-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: white;
+        }
+        .header { 
+            background: linear-gradient(135deg, #2D5016 0%, #4A7C2C 100%); 
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+            border-radius: 10px 10px 0 0; 
+        }
+        .content { 
+            background: #ffffff; 
+            padding: 30px; 
+            border: 1px solid #e0e0e0; 
+        }
+        .button { 
+            display: inline-block; 
+            padding: 12px 30px; 
+            background: #2D5016; 
+            color: white !important; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+        }
+        .button:hover {
+            background: #3d6b1f;
+        }
+        .footer { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            text-align: center; 
+            color: #666; 
+            font-size: 14px; 
+            border-radius: 0 0 10px 10px; 
+        }
+        .highlight { 
+            background: #f0f7e6; 
+            padding: 15px; 
+            border-left: 4px solid #2D5016; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-note">
+        <strong>📧 Email Preview</strong><br>
+        This is how the welcome email will appear when sent to new users
+    </div>
+
+    <div class='container'>
+        <div class='header'>
+            <h1 style='margin: 0; font-size: 28px;'>Welcome to RentalLanka!</h1>
+        </div>
+        <div class='content'>
+            <h2 style='color: #2D5016;'>Hello John Doe! 🎉</h2>
+            <p>Thank you for registering with <strong>RentalLanka</strong>, Sri Lanka's premier platform for property, room, and vehicle rentals!</p>
+            
+            <div class='highlight'>
+                <p style='margin: 0;'><strong>Your registration was successful!</strong></p>
+            </div>
+            
+            <p>You can now:</p>
+            <ul>
+                <li>Browse thousands of properties, rooms, and vehicles</li>
+                <li>Save your favorite listings to your wishlist</li>
+                <li>Contact property owners directly</li>
+                <li>Manage your bookings with ease</li>
+            </ul>
+            
+            <div style='text-align: center;'>
+                <a href='http://localhost/RL' class='button'>Start Exploring</a>
+            </div>
+            
+            <p>To log in, simply use your registered mobile number and request an OTP on our login page.</p>
+            
+            <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
+            
+            <p style='margin-top: 30px;'>Best regards,<br><strong>The RentalLanka Team</strong></p>
+        </div>
+        <div class='footer'>
+            <p style='margin: 0 0 10px 0;'>© 2025 RentalLanka. All rights reserved.</p>
+            <p style='margin: 0;'>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

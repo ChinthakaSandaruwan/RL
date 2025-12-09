@@ -1,0 +1,43 @@
+/* Vehicle View Custom Styles */
+
+.vehicle-main-img {
+    height: 500px;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+
+.vehicle-thumb {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+    border: 2px solid transparent;
+}
+
+.vehicle-thumb:hover {
+    opacity: 1;
+}
+
+.vehicle-thumb.active-thumb {
+    opacity: 1;
+    border-color: var(--bs-warning);
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: var(--bs-secondary);
+}
+
+/* Use dark text for warning color legibility */
+.breadcrumb-item.active {
+    color: #cc9a06;
+    /* Darker yellow/gold */
+}
+
+@media (max-width: 768px) {
+    .vehicle-main-img {
+        height: 300px;
+    }
+}

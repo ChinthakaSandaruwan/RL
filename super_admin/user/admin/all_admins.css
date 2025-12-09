@@ -1,0 +1,43 @@
+/* Super Admin - Admin Management Styles */
+.user-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #dc3545;
+    /* Red for admins */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.status-badge {
+    font-size: 0.8em;
+    padding: 0.35em 0.65em;
+    border-radius: 10rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(220, 53, 69, 0.05);
+    /* Light red tint */
+}

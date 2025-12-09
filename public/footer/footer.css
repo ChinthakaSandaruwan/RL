@@ -1,0 +1,42 @@
+/* Rental Lanka Footer Styles */
+
+footer {
+    background-color: #f8f9fa;
+    /* Light Gray */
+    color: #6c757d;
+}
+
+footer section.border-bottom {
+    border-color: #e9ecef !important;
+}
+
+footer a {
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+footer a:hover {
+    color: #2D6A4F !important;
+    /* Fern Green hover */
+}
+
+footer .text-reset {
+    color: inherit !important;
+}
+
+footer .fab {
+    font-size: 1.1rem;
+}
+
+footer h6 {
+    color: #2D6A4F;
+    /* Fern Green Headers */
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 768px) {
+    footer .me-5 {
+        margin-right: 0 !important;
+        margin-bottom: 1rem;
+    }
+}

@@ -1,0 +1,167 @@
+/* My Rent Styles */
+:root {
+    --hunter-green: #2D5016;
+    --sage-green: #7A9B76;
+    --dry-sage: #C9D5B5;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.rental-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: var(--hunter-green);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--hunter-green);
+    background-color: transparent;
+    border-color: transparent transparent var(--hunter-green);
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+}
+
+/* Stats Cards */
+.bg-opacity-10 {
+    opacity: 0.1;
+}
+
+.card-body .bg-opacity-10 {
+    opacity: 1;
+}
+
+.card-body .bg-primary.bg-opacity-10 {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.card-body .bg-info.bg-opacity-10 {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.card-body .bg-warning.bg-opacity-10 {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+/* Empty State */
+.bi-inbox {
+    color: #dee2e6;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rental-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.tab-pane {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .rental-card .col-md-3 {
+        text-align: center;
+    }
+
+    .rental-card .text-md-end {
+        text-align: center !important;
+        margin-top: 1rem;
+    }
+}
+
+/* Status Badge Colors */
+.badge.bg-warning {
+    color: #000;
+}
+
+.badge.bg-success {
+    background-color: #2D5016 !important;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}
+
+.btn-primary:hover {
+    background-color: #1f3810;
+    border-color: #1f3810;
+}
+
+.btn-outline-primary {
+    color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+    color: white;
+}
+
+.btn-success {
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Image Styles */
+img.img-fluid {
+    transition: transform 0.3s ease;
+}
+
+.rental-card:hover img.img-fluid {
+    transform: scale(1.05);
+}

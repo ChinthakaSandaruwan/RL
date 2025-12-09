@@ -111,8 +111,13 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/view_users.php') ?>" class="btn btn-outline-secondary w-100 py-3">
-                        <i class="bi bi-people"></i> Manage Users
+                    <a href="<?= app_url('admin/users/owner/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-person-badge"></i> Manage Owners
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/users/customer/all_customers.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-people"></i> Manage Customers
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -120,6 +125,42 @@ try {
                         <i class="bi bi-list-check"></i> Manage Listings
                     </a>
                 </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/footer/footer_details.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-list-check"></i> Footer Details 
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/amenity/amenity.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-tools"></i> Manage Amenities
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/vehicle/vehicle_type/vehicle_type.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-car-front"></i> Vehicle Types
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/vehicle/vehicle_brand/vehicle_brand.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-copyright"></i> Vehicle Brands
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/available_meals_&_prices/meal_type.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-egg-fried"></i> Available Meals
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/notification/owner/send_to_owner.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-bell"></i> Notify Owners
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/notification/cutomer/send_to_customer.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-bell"></i> Notify Customers
+                    </a>
+                </div>
+                
             </div>
         </div>
     </div>

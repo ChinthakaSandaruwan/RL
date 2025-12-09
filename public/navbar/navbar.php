@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= app_url('public/navbar/navbar.css') ?>">
 
 <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
@@ -28,6 +29,13 @@
                             <span class="badge bg-secondary ms-2" style="font-size: 0.75rem; vertical-align: middle;"><?= htmlspecialchars($user['role_name'] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
                         </span>
                     </li>
+                    <?php if ($user['role_id'] == 1): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= app_url('super_admin/index/index.php') ?>">
+                            <i class="bi bi-shield-lock me-1"></i> Super Admin Dashboard
+                        </a>
+                    </li>
+                    <?php endif; ?>
                     <?php if ($user['role_id'] == 2): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('admin/index/index.php') ?>">
@@ -59,6 +67,80 @@
                         </ul>
                     </li>
                     <?php endif; ?>
+                    <?php
+                    // Fetch unread notification count & latest notifications
+                    $unread_count = 0;
+                    $navbar_notifications = [];
+                    if (isset($user['user_id'])) {
+                        $pdo_nav = get_pdo();
+                        // Count
+                        $stmt = $pdo_nav->prepare("SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0");
+                        $stmt->execute([$user['user_id']]);
+                        $unread_count = $stmt->fetchColumn();
+                        
+                        // Latest 5
+                        $stmt_list = $pdo_nav->prepare("
+                            SELECT * FROM notification 
+                            WHERE user_id = ? 
+                            ORDER BY created_at DESC 
+                            LIMIT 5
+                        ");
+                        $stmt_list->execute([$user['user_id']]);
+                        $navbar_notifications = $stmt_list->fetchAll();
+                    }
+                    ?>
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill" style="font-size: 1.2rem;"></i>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                    <?= $unread_count > 99 ? '99+' : $unread_count ?>
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
+                            <?php endif; ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end p-0 shadow overflow-hidden" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                            <li class="p-2 border-bottom d-flex justify-content-between align-items-center bg-white">
+                                <span class="fw-bold small ms-1">Notifications</span>
+                                <a href="<?= app_url('public/notification/notification.php') ?>" class="text-decoration-none small text-success">View All</a>
+                            </li>
+                            <?php if (empty($navbar_notifications)): ?>
+                                <li class="p-3 text-center text-muted small">
+                                    No notifications
+                                </li>
+                            <?php else: ?>
+                                <?php foreach ($navbar_notifications as $notif): ?>
+                                    <li>
+                                        <a class="dropdown-item p-2 text-wrap" href="<?= app_url('public/property/view/property_view.php?id=' . $notif['property_id']) ?>">
+                                            <div class="d-flex align-items-start gap-2">
+                                                <div class="mt-1">
+                                                    <?php if (!$notif['is_read']): ?>
+                                                        <i class="bi bi-circle-fill text-success" style="font-size: 0.5rem;"></i>
+                                                    <?php else: ?>
+                                                        <i class="bi bi-circle text-muted" style="font-size: 0.5rem;"></i>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold small text-truncate" style="max-width: 230px;"><?= htmlspecialchars($notif['title']) ?></div>
+                                                    <div class="small text-muted text-truncate" style="max-width: 230px;"><?= htmlspecialchars($notif['message']) ?></div>
+                                                    <div class="text-muted" style="font-size: 0.7rem;"><?= date('M d, H:i', strtotime($notif['created_at'])) ?></div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-0"></li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            <li class="text-center p-2 bg-light">
+                                <a href="<?= app_url('public/notification/notification.php') ?>" class="small text-decoration-none fw-bold text-secondary">See all notifications</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= app_url('public/my_rent/my_rent.php') ?>">
+                            <i class="bi bi-calendar-check me-1"></i> My Rent
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('public/profile/profile.php') ?>">
                             Profile

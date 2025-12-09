@@ -1,0 +1,43 @@
+/* Super Admin Dashboard Styles */
+
+.super-admin-header {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    padding: 3rem 0;
+    margin-bottom: -2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card {
+    transition: all 0.3s;
+    border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-card.border-danger {
+    border-left-color: #dc3545;
+}
+
+.stat-card.border-primary {
+    border-left-color: #0d6efd;
+}
+
+.stat-card.border-success {
+    border-left-color: #198754;
+}
+
+.stat-card.border-warning {
+    border-left-color: #ffc107;
+}
+
+.btn-outline-danger:hover,
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-secondary:hover,
+.btn-outline-info:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
