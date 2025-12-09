@@ -1,0 +1,45 @@
+/* Advanced Search Modal CSS */
+
+#advancedSearchModal .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#advancedSearchModal .list-group-item.active {
+    background-color: #f0fdf4;
+    /* Mint green tint */
+    color: var(--hunter-green, #155724);
+    border-color: transparent;
+    border-left: 4px solid var(--hunter-green, #155724);
+}
+
+#advancedSearchModal .list-group-item {
+    transition: all 0.2s;
+    border-left: 4px solid transparent;
+}
+
+#advancedSearchModal .list-group-item:hover:not(.active):not(label) {
+    background-color: #f8f9fa;
+}
+
+#advancedSearchModal .form-label {
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+#advancedSearchModal .form-control:focus,
+#advancedSearchModal .form-select:focus {
+    border-color: var(--fern, #4CAF50);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.15);
+}
+
+#advancedSearchModal .modal-header {
+    background: linear-gradient(135deg, var(--hunter-green, #2E7D32), var(--fern, #4CAF50));
+}
+
+#advancedSearchModal .btn-check:checked+.btn-outline-secondary {
+    background-color: var(--fern, #4CAF50);
+    border-color: var(--fern, #4CAF50);
+    color: white;
+}

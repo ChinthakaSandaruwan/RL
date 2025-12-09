@@ -1,0 +1,39 @@
+/* Vehicle Detail View Styles */
+
+.gallery-card {
+    border-radius: 12px;
+}
+
+.main-image-container {
+    height: 450px;
+    background-color: #f8f9fa;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.object-fit-cover {
+    object-fit: contain;
+    object-position: center;
+}
+
+.gallery-thumb {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.gallery-thumb:hover {
+    border-color: var(--fern, #28a745);
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

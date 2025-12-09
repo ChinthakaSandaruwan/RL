@@ -5,26 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const provinceImage = document.getElementById('province_image');
     const provinceNameDisplay = document.getElementById('province_name_display');
 
-    // Initial Image Setup
-    if (typeof initialImage !== 'undefined' && initialImage) {
-        // If initialImage is just filename, prepend path
-        const isUrl = initialImage.indexOf('/') !== -1;
-        const src = isUrl ? initialImage : (provinceImagesPath + initialImage);
-
-        // Only set if we really have a value, otherwise keep default "central" or whatever is hardcoded
-        // Actually PHP provides filename like "central.jpg"
-        if (initialImage !== 'default_map.jpg') {
-            provinceImage.src = provinceImagesPath + initialImage;
-        } else {
-            // Keep default or set to a specific default map image
-            // For now we default to central in HTML if nothing selected
-            // If "All Provinces" selected, maybe switch to generic?
-            // Let's stick to Central or a random one for "All"
-            provinceImage.src = provinceImagesPath + 'central.jpg';
-            provinceNameDisplay.textContent = "Discover Sri Lanka";
-        }
-    }
-
     // Helper to populate select
     function populateSelect(select, items, valueKey, textKey, selectedValue) {
         select.innerHTML = select.options[0].outerHTML; // Keep first option
@@ -76,27 +56,45 @@ document.addEventListener('DOMContentLoaded', function () {
         const imageName = selectedOption.getAttribute('data-image');
         const provinceName = selectedOption.text;
 
+        let targetSrc = "";
+        let targetName = "";
+
         if (imageName && imageName !== 'default_map.jpg') {
-            // Check if image exists? We assume it does based on strict naming
-            provinceImage.style.opacity = 0;
-            setTimeout(() => {
-                provinceImage.src = provinceImagesPath + imageName;
-                provinceNameDisplay.textContent = provinceName;
-                provinceImage.onload = () => {
-                    provinceImage.style.opacity = 1;
-                };
-                // Fallback transparency fix if cached
-                if (provinceImage.complete) provinceImage.style.opacity = 1;
-            }, 200);
+            targetSrc = provinceImagesPath + imageName;
+            targetName = provinceName;
         } else {
-            // Default to central or generic
-            provinceImage.style.opacity = 0;
-            setTimeout(() => {
-                provinceImage.src = provinceImagesPath + 'central.jpg';
-                provinceNameDisplay.textContent = "Discover Sri Lanka";
-                provinceImage.style.opacity = 1;
-            }, 200);
+            // Default fallback
+            targetSrc = provinceImagesPath + 'central.jpg';
+            targetName = "Discover Sri Lanka";
         }
+
+        // 1. Start transition (fade out)
+        provinceImage.style.opacity = 0;
+
+        // 2. Wait briefly for fade out, then swap source
+        setTimeout(() => {
+            provinceImage.src = targetSrc;
+            provinceNameDisplay.textContent = targetName;
+
+            // Define handlers for the new load
+            provinceImage.onload = () => {
+                provinceImage.style.opacity = 1;
+            };
+
+            provinceImage.onerror = () => {
+                console.warn("Map image failed to load:", targetSrc);
+                // Fallback to central if specific fails, ensuring we show SOMETHING
+                if (targetSrc !== provinceImagesPath + 'central.jpg') {
+                    provinceImage.src = provinceImagesPath + 'central.jpg';
+                }
+                provinceImage.style.opacity = 1;
+            };
+
+            // 3. Check if already cached/complete immediately
+            if (provinceImage.complete) {
+                provinceImage.style.opacity = 1;
+            }
+        }, 150);
     }
 
     // Event Listeners
@@ -112,9 +110,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial Load Logic
     if (provinceSelect.value) {
         updateDistricts(provinceSelect.value);
-        // Image is partly handled by PHP generation but JS listener ensures consistency
-        // Text name needs update
-        const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
-        provinceNameDisplay.textContent = selectedOption.text;
     }
+
+    // Always call this on init to ensure image state is correct (even if default)
+    updateProvinceImage(provinceSelect.value);
 });

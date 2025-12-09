@@ -1,7 +1,7 @@
 <?php
 // Ensure partial inclusion safety
 if (!function_exists('get_pdo')) {
-    // Ideally this shouldn't happen if included in index.php, but for safety
+    // This file should be included, handled by parent
 }
 
 $pdo = get_pdo();
@@ -28,17 +28,29 @@ $s_category = $_GET['category'] ?? ''; // property, room, vehicle
 function get_province_image($name) {
     return strtolower(str_replace(' ', '_', $name)) . '.jpg';
 }
+
+// Image initialization logic for JS
+$initialImage = 'central.jpg'; 
+if ($s_province) {
+    foreach ($search_provinces as $p) {
+        if ($p['id'] == $s_province) {
+            $initialImage = get_province_image($p['name_en']);
+            break;
+        }
+    }
+}
 ?>
 
 <div class="search-container container my-5 position-relative" style="z-index: 10;">
     <div class="card border-0 shadow-lg search-card overflow-hidden">
         <div class="row g-0">
+            
             <!-- Left Side: Search Form -->
-            <div class="col-lg-8 p-4">
+            <div class="col-lg-8 p-5">
                 <form action="<?= app_url('index.php') ?>" method="GET" id="mainSearchForm">
-                    <div class="row g-3">
+                    <div class="row g-4">
                         <div class="col-12">
-                            <h4 class="mb-3 fw-bold text-dark"><i class="bi bi-search me-2 text-primary"></i>Find Your Perfect Place</h4>
+                            <h3 class="mb-4 fw-bold text-dark"><i class="bi bi-search me-2 text-primary"></i>Find Your Perfect Place</h3>
                         </div>
                         
                         <!-- Keyword -->
@@ -95,34 +107,45 @@ function get_province_image($name) {
                             </select>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Buttons Row -->
                         <div class="col-12 mt-4">
-                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm text-uppercase letter-spacing-1">
-                                <i class="bi bi-search me-2"></i>Search Now
-                            </button>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm text-uppercase letter-spacing-1">
+                                        <i class="bi bi-search me-2"></i>Search Now
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm text-uppercase letter-spacing-1" data-bs-toggle="modal" data-bs-target="#advancedSearchModal">
+                                        <i class="bi bi-sliders me-2"></i>Advanced Search
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
 
             <!-- Right Side: Province Image -->
-            <div class="col-lg-4 d-none d-lg-block position-relative">
-                <div class="h-100 w-100 position-absolute top-0 start-0">
-                    <div class="search-image-overlay"></div>
-                    <img id="province_image" 
+            <div class="col-lg-4 d-none d-lg-block position-relative p-0" style="background: #ffffff; min-height: 460px;">
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overflow-hidden">
+                     <img id="province_image" 
                          src="<?= app_url('public/search/search/provinces/central.jpg') ?>" 
                          alt="Province Image" 
-                         class="img-fluid h-100 w-100 object-fit-cover"
-                         style="transition: opacity 0.5s ease;">
-                    <div class="position-absolute bottom-0 start-0 p-4 text-white z-2">
-                        <h5 class="fw-bold mb-0 text-shadow" id="province_name_display">Discover Sri Lanka</h5>
-                        <small class="text-white-50 text-shadow">Select a province to explore</small>
+                         class="w-100 h-100"
+                         style="object-fit: contain; object-position: center; transition: opacity 0.5s ease; padding: 0;">
+                    
+                    <!-- Text Overlay -->
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white z-2" style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
+                        <h4 class="fw-bold mb-1 text-shadow" id="province_name_display" style="text-shadow: 0 2px 5px rgba(0,0,0,0.7);">Discover Sri Lanka</h4>
+                        <p class="small text-white-50 mb-0 text-shadow" style="text-shadow: 0 1px 3px rgba(0,0,0,0.7);">Select a province to explore listings</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div> <!-- End Row -->
+    </div> <!-- End Card -->
+</div> <!-- End Container -->
 
 <link rel="stylesheet" href="<?= app_url('public/search/search/search.css') ?>">
 <script>
@@ -131,20 +154,9 @@ function get_province_image($name) {
     const currentDistrict = "<?= $s_district ?>";
     const currentCity = "<?= $s_city ?>";
     const provinceImagesPath = "<?= app_url('public/search/search/provinces/') ?>";
-    
-    // Determine initial image
-    <?php
-    $initialImage = 'central.jpg'; // Default
-    if ($s_province) {
-        // Find the selected province name
-        foreach ($search_provinces as $p) {
-            if ($p['id'] == $s_province) {
-                $initialImage = get_province_image($p['name_en']);
-                break;
-            }
-        }
-    }
-    ?>
     const initialImage = "<?= $initialImage ?>";
 </script>
 <script src="<?= app_url('public/search/search/search.js') ?>"></script>
+
+<!-- Include Advanced Search Modal -->
+<?php require __DIR__ . '/../../search/advance_search/advance_search.php'; ?>

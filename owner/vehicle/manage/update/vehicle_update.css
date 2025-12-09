@@ -1,0 +1,51 @@
+/* Vehicle Update Page Styles */
+
+.img-card {
+    position: relative;
+    display: inline-block;
+    margin: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.img-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.img-card img {
+    width: 120px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+
+.del-chk {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background: white;
+    border: 2px solid #dc3545;
+    border-radius: 4px;
+}
+
+.del-chk:checked {
+    background-color: #dc3545;
+}
+
+.primary-radio-label {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

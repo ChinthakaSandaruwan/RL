@@ -9,6 +9,11 @@
     /* Ensure image doesn't bleed */
 }
 
+/* Ensure equal height columns */
+.search-card .row {
+    height: 100%;
+}
+
 .search-container {
     margin-top: -80px;
     /* Strong overlap with Hero */
@@ -34,8 +39,8 @@
 }
 
 /* Right Side Image Styling */
-.object-fit-cover {
-    object-fit: cover;
+#province_image {
+    transition: opacity 0.4s ease-in-out;
 }
 
 .search-image-overlay {

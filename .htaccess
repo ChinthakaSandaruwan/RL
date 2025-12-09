@@ -1,23 +1,48 @@
-# Disable directory browsing
-Options -Indexes
-
 # Enable Rewrite Engine
 RewriteEngine On
 
-# Protect sensitive files (dotfiles like .env, .git)
-<FilesMatch "^\.">
-    Order allow,deny
+# 1. Force HTTPS (Optional - uncomment if you have SSL installed)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Hide Directory Listings (Security)
+Options -Indexes
+
+# 3. URL Rewriting (Pretty URLs)
+# If a directory or file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Otherwise forward to index.php (Standard Front Controller pattern)
+# For RentAllanka specific page routing (e.g. removing .php extension)
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# 4. Custom Error Documents
+ErrorDocument 404 /RL/404.php
+ErrorDocument 500 /RL/500.php
+
+# 5. PHP Configuration
+# Disable error display in production
+# php_flag display_errors Off
+# Log errors to a file
+# php_value error_log "c:/xampp/htdocs/RL/php_error.log"
+
+# 6. Cache Control (Performance)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+# 7. Security: Block Access to Sensitive Files
+<FilesMatch "^\.(env|git|htaccess|htpasswd|ini|log|sh)$">
+    Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# Protect dependency definition files
-<FilesMatch "^(composer\.json|composer\.lock|package\.json|package-lock\.json)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# Prevent access to log files
-<Files "*.log">
-    Order allow,deny
-    Deny from all
-</Files>
+# 8. Set Default Character Set
+AddDefaultCharset UTF-8

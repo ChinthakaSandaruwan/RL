@@ -170,17 +170,17 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
             <hr class="my-4">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/property/manage_properties.php') ?>" class="btn btn-outline-secondary w-100 py-3">
+                    <a href="<?= app_url('owner/property/manage/manage.php') ?>" class="btn btn-outline-secondary w-100 py-3">
                         <i class="bi bi-list-check"></i> Manage Properties
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/room/manage_rooms.php') ?>" class="btn btn-outline-secondary w-100 py-3">
+                    <a href="<?= app_url('owner/room/manage/manage.php') ?>" class="btn btn-outline-secondary w-100 py-3">
                         <i class="bi bi-list-check"></i> Manage Rooms
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/vehicle/manage_vehicles.php') ?>" class="btn btn-outline-secondary w-100 py-3">
+                    <a href="<?= app_url('owner/vehicle/manage/manage.php') ?>" class="btn btn-outline-secondary w-100 py-3">
                         <i class="bi bi-list-check"></i> Manage Vehicles
                     </a>
                 </div>
