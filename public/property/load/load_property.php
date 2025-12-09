@@ -46,6 +46,14 @@ $query .= " ORDER BY p.created_at DESC LIMIT 6";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $properties = $stmt->fetchAll();
+
+// Get wishlist items for current user
+$wishlist_property_ids = [];
+if (isset($user) && $user) {
+    $stmt_wish = $pdo->prepare("SELECT property_id FROM property_wishlist WHERE customer_id = ?");
+    $stmt_wish->execute([$user['user_id']]);
+    $wishlist_property_ids = $stmt_wish->fetchAll(PDO::FETCH_COLUMN);
+}
 ?>
 
 <section class="listings-section py-5" style="background-color: #f8f9fa;">
@@ -62,8 +70,21 @@ $properties = $stmt->fetchAll();
                 <?php foreach ($properties as $property): ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 shadow-sm listing-card">
-                            <img src="<?= $property['primary_image'] ? app_url($property['primary_image']) : 'https://via.placeholder.com/400x250?text=Property' ?>" 
-                                 class="card-img-top" alt="<?= htmlspecialchars($property['title']) ?>" style="height: 200px; object-fit: cover;">
+                            <div class="position-relative">
+                                <img src="<?= $property['primary_image'] ? app_url($property['primary_image']) : 'https://via.placeholder.com/400x250?text=Property' ?>" 
+                                     class="card-img-top" alt="<?= htmlspecialchars($property['title']) ?>" style="height: 200px; object-fit: cover;">
+                                <?php if (isset($user) && $user): 
+                                    $inWishlist = in_array($property['property_id'], $wishlist_property_ids);
+                                    $iconClass = $inWishlist ? 'bi-heart-fill' : 'bi-heart';
+                                    $btnClass = $inWishlist ? 'active' : '';
+                                ?>
+                                <button class="btn btn-sm wishlist-btn position-absolute top-0 end-0 m-2 <?= $btnClass ?>" 
+                                        onclick="toggleWishlist('property', <?= $property['property_id'] ?>, this)"
+                                        title="<?= $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
+                                    <i class="bi <?= $iconClass ?>"></i>
+                                </button>
+                                <?php endif; ?>
+                            </div>
                             <div class="card-body">
                                 <span class="badge bg-success mb-2"><?= htmlspecialchars($property['type_name'] ?? 'Property') ?></span>
                                 <h5 class="card-title"><?= htmlspecialchars($property['title']) ?></h5>

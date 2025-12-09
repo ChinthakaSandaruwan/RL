@@ -44,6 +44,14 @@ $query .= " ORDER BY r.created_at DESC LIMIT 6";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $rooms = $stmt->fetchAll();
+
+// Get wishlist items for current user
+$wishlist_room_ids = [];
+if (isset($user) && $user) {
+    $stmt_wish = $pdo->prepare("SELECT room_id FROM room_wishlist WHERE customer_id = ?");
+    $stmt_wish->execute([$user['user_id']]);
+    $wishlist_room_ids = $stmt_wish->fetchAll(PDO::FETCH_COLUMN);
+}
 ?>
 
 <section class="listings-section py-5">
@@ -60,8 +68,21 @@ $rooms = $stmt->fetchAll();
                 <?php foreach ($rooms as $room): ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 shadow-sm listing-card">
-                            <img src="https://via.placeholder.com/400x250?text=Room" 
-                                 class="card-img-top" alt="Room" style="height: 200px; object-fit: cover;">
+                            <div class="position-relative">
+                                <img src="https://via.placeholder.com/400x250?text=Room" 
+                                     class="card-img-top" alt="Room" style="height: 200px; object-fit: cover;">
+                                <?php if (isset($user) && $user): 
+                                    $inWishlist = in_array($room['room_id'], $wishlist_room_ids);
+                                    $iconClass = $inWishlist ? 'bi-heart-fill' : 'bi-heart';
+                                    $btnClass = $inWishlist ? 'active' : '';
+                                ?>
+                                <button class="btn btn-sm wishlist-btn position-absolute top-0 end-0 m-2 <?= $btnClass ?>" 
+                                        onclick="toggleWishlist('room', <?= $room['room_id'] ?>, this)"
+                                        title="<?= $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
+                                    <i class="bi <?= $iconClass ?>"></i>
+                                </button>
+                                <?php endif; ?>
+                            </div>
                             <div class="card-body">
                                 <span class="badge bg-info mb-2">Room</span>
                                 <h5 class="card-title"><?= htmlspecialchars($room['title']) ?></h5>

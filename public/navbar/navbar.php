@@ -3,9 +3,8 @@
 
 <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
     <div class="container">
-        <!-- Brand -->
+        <!-- Brand on Left -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="<?= app_url('index.php') ?>">
-            <!-- Optional: Icon or Logo could go here -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-house-door-fill" viewBox="0 0 16 16">
                 <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.495v3.505a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5z"/>
             </svg>
@@ -19,6 +18,26 @@
 
         <!-- Navbar Links -->
         <div class="collapse navbar-collapse" id="rentalLankaNavbar">
+            <!-- Category Links (After Brand) -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= app_url('public/property/view_all.php') ?>">
+                        <i class="bi bi-house-door me-1"></i> All Properties
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= app_url('public/room/view_all.php') ?>">
+                        <i class="bi bi-door-closed me-1"></i> All Rooms
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?= app_url('public/vehicle/view_all.php') ?>">
+                        <i class="bi bi-car-front me-1"></i> All Vehicles
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Side - User Menu -->
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                 
                 <?php if (isset($user) && $user): ?>
@@ -135,6 +154,35 @@
                                 <a href="<?= app_url('public/notification/notification.php') ?>" class="small text-decoration-none fw-bold text-secondary">See all notifications</a>
                             </li>
                         </ul>
+                    </li>
+                    <?php
+                    // Fetch wishlist count for customers
+                    $wishlist_count = 0;
+                    if (isset($user['user_id'])) {
+                        $pdo_nav = get_pdo();
+                        $stmt_p = $pdo_nav->prepare("SELECT COUNT(*) FROM property_wishlist WHERE customer_id = ?");
+                        $stmt_p->execute([$user['user_id']]);
+                        $count_p = $stmt_p->fetchColumn();
+                        
+                        $stmt_r = $pdo_nav->prepare("SELECT COUNT(*) FROM room_wishlist WHERE customer_id = ?");
+                        $stmt_r->execute([$user['user_id']]);
+                        $count_r = $stmt_r->fetchColumn();
+                        
+                        $stmt_v = $pdo_nav->prepare("SELECT COUNT(*) FROM vehicle_wishlist WHERE customer_id = ?");
+                        $stmt_v->execute([$user['user_id']]);
+                        $count_v = $stmt_v->fetchColumn();
+                        
+                        $wishlist_count = $count_p + $count_r + $count_v;
+                    }
+                    ?>
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="<?= app_url('public/wishlist/wishlist.php') ?>">
+                            <i class="bi bi-heart-fill" style="font-size: 1.2rem;"></i>
+                            <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; <?= $wishlist_count > 0 ? '' : 'display:none;' ?>">
+                                <?= $wishlist_count > 99 ? '99+' : $wishlist_count ?>
+                                <span class="visually-hidden">wishlist items</span>
+                            </span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('public/my_rent/my_rent.php') ?>">

@@ -51,6 +51,14 @@ $query .= " ORDER BY v.created_at DESC LIMIT 6";
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $vehicles = $stmt->fetchAll();
+
+// Get wishlist items for current user
+$wishlist_vehicle_ids = [];
+if (isset($user) && $user) {
+    $stmt_wish = $pdo->prepare("SELECT vehicle_id FROM vehicle_wishlist WHERE customer_id = ?");
+    $stmt_wish->execute([$user['user_id']]);
+    $wishlist_vehicle_ids = $stmt_wish->fetchAll(PDO::FETCH_COLUMN);
+}
 ?>
 
 <section class="listings-section py-5" style="background-color: #f8f9fa;">
@@ -67,8 +75,21 @@ $vehicles = $stmt->fetchAll();
                 <?php foreach ($vehicles as $vehicle): ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 shadow-sm listing-card">
-                            <img src="<?= $vehicle['primary_image'] ? app_url($vehicle['primary_image']) : 'https://via.placeholder.com/400x250?text=Vehicle' ?>" 
-                                 class="card-img-top" alt="<?= htmlspecialchars($vehicle['title']) ?>" style="height: 200px; object-fit: cover;">
+                            <div class="position-relative">
+                                <img src="<?= $vehicle['primary_image'] ? app_url($vehicle['primary_image']) : 'https://via.placeholder.com/400x250?text=Vehicle' ?>" 
+                                     class="card-img-top" alt="<?= htmlspecialchars($vehicle['title']) ?>" style="height: 200px; object-fit: cover;">
+                                <?php if (isset($user) && $user): 
+                                    $inWishlist = in_array($vehicle['vehicle_id'], $wishlist_vehicle_ids);
+                                    $iconClass = $inWishlist ? 'bi-heart-fill' : 'bi-heart';
+                                    $btnClass = $inWishlist ? 'active' : '';
+                                ?>
+                                <button class="btn btn-sm wishlist-btn position-absolute top-0 end-0 m-2 <?= $btnClass ?>" 
+                                        onclick="toggleWishlist('vehicle', <?= $vehicle['vehicle_id'] ?>, this)"
+                                        title="<?= $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
+                                    <i class="bi <?= $iconClass ?>"></i>
+                                </button>
+                                <?php endif; ?>
+                            </div>
                             <div class="card-body">
                                 <span class="badge bg-warning text-dark mb-2"><?= htmlspecialchars($vehicle['type_name'] ?? 'Vehicle') ?></span>
                                 <h5 class="card-title"><?= htmlspecialchars($vehicle['title']) ?></h5>
