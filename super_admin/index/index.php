@@ -148,8 +148,13 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
             <div class="row g-3">
                
                 <div class="col-md-3">
-                    <a href="<?= app_url('super_admin/backup/database_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
+                    <a href="<?= app_url('super_admin/backup/database_backup/database_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
                         <i class="bi bi-database-down"></i> Database Backup
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/backup/upload_backup/upload_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
+                        <i class="bi bi-database-up"></i> Upload Backup
                     </a>
                 </div>
                 <div class="col-md-3">
