@@ -40,7 +40,17 @@
     background-color: #f8fcf8;
 }
 
+.feature-checkbox-card:has(.form-check-input:checked) {
+    border-color: var(--fern);
+    background-color: #e8f5e9;
+}
+
 .form-check-input:checked {
     background-color: var(--fern);
     border-color: var(--fern);
+}
+
+.form-check-input:checked~.form-check-label {
+    font-weight: 600;
+    color: var(--fern, #28a745);
 }

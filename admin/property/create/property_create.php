@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-check amenity-card">
                                     <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" id="am_<?= $a['amenity_id'] ?>"
                                     <?= in_array($a['amenity_id'], $old['amenities']) ? 'checked' : '' ?>>
-                                    <label class="form-check-label w-100 stretched-link" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
+                                    <label class="form-check-label w-100" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
                                 </div>
                             </div>
                             <?php endforeach; ?>

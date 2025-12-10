@@ -187,8 +187,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Admin - Add Room - Rental Lanka</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="room_create.css">
+    <link rel="stylesheet" href="room_create.css?v=2.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .feature-checkbox-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            height: 100%;
+            transition: all 0.2s;
+        }
+        .feature-checkbox-card:hover {
+            border-color: var(--fern);
+            background-color: #f8fcf8;
+        }
+        .form-check-input:checked {
+            background-color: var(--fern);
+            border-color: var(--fern);
+        }
+    </style>
 </head>
 <body>
 <?php require __DIR__ . '/../../../public/navbar/navbar.php'; ?>
@@ -286,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-check feature-checkbox-card">
                                     <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" id="am_<?= $a['amenity_id'] ?>"
                                     <?= in_array($a['amenity_id'], $old['amenities']) ? 'checked' : '' ?>>
-                                    <label class="form-check-label w-100 stretched-link" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
+                                    <label class="form-check-label w-100" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -404,6 +421,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="room_create.js"></script>
+<script src="room_create.js?v=2.0"></script>
 </body>
 </html>
