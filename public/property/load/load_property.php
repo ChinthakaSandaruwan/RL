@@ -56,7 +56,10 @@ if (isset($user) && $user) {
 }
 ?>
 
+
+<link rel="stylesheet" href="<?= app_url('public/property/load/load_property.css') ?>">
 <section class="listings-section py-5" style="background-color: #f8f9fa;">
+
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold" style="color: var(--hunter-green);">Latest Properties</h2>
@@ -86,12 +89,12 @@ if (isset($user) && $user) {
                                 <?php endif; ?>
                             </div>
                             <div class="card-body">
-                                <span class="badge bg-success mb-2"><?= htmlspecialchars($property['type_name'] ?? 'Property') ?></span>
+                                <span class="badge badge-theme mb-2"><?= htmlspecialchars($property['type_name'] ?? 'Property') ?></span>
                                 <h5 class="card-title"><?= htmlspecialchars($property['title']) ?></h5>
                                 <p class="card-text text-muted"><?= htmlspecialchars(substr($property['description'], 0, 80)) ?>...</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-success">LKR <?= number_format($property['price_per_month'], 2) ?>/mo</span>
-                                    <a href="<?= app_url('public/property/view/property_view.php?id=' . $property['property_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="price-tag">LKR <?= number_format($property['price_per_month'], 2) ?>/mo</span>
+                                    <a href="<?= app_url('public/property/view/property_view.php?id=' . $property['property_id']) ?>" class="btn-view-details">View <i class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -102,12 +105,4 @@ if (isset($user) && $user) {
     </div>
 </section>
 
-<style>
-.listing-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.listing-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
-}
-</style>
+

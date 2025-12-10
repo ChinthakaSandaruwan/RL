@@ -1,0 +1,116 @@
+:root {
+    --hunter-green: #3a5a40;
+    --fern-green: #588157;
+    --sage: #a3b18a;
+    --dust-grey: #e9ecef;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Text Colors */
+.text-theme {
+    color: var(--hunter-green) !important;
+}
+
+.text-primary-theme {
+    color: var(--fern-green) !important;
+}
+
+.text-success-theme {
+    color: var(--hunter-green) !important;
+}
+
+/* Buttons & Backgrounds */
+.bg-theme {
+    background-color: var(--hunter-green) !important;
+}
+
+.btn-theme {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+    color: white;
+    transition: all 0.3s;
+}
+
+.btn-theme:hover {
+    background-color: var(--fern-green);
+    border-color: var(--fern-green);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(58, 90, 64, 0.3);
+}
+
+/* Hero Section */
+.about-hero {
+    background: linear-gradient(rgba(58, 90, 64, 0.9), rgba(58, 90, 64, 0.7)), url('https://images.unsplash.com/photo-1546949392-4af9cb389276?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 400px;
+}
+
+/* Animations */
+.animate-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s forwards;
+}
+
+.delay-100 {
+    animation-delay: 0.1s;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cards */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .1) !important;
+}
+
+.icon-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-soft-primary {
+    background-color: rgba(88, 129, 87, 0.1);
+}
+
+.bg-soft-success {
+    background-color: rgba(58, 90, 64, 0.1);
+}
+
+/* Story Section */
+.story-img-bg {
+    width: 90%;
+    height: 90%;
+    top: 10%;
+    left: -10%;
+    z-index: 0;
+    opacity: 0.2;
+}
+
+.letter-spacing-1 {
+    letter-spacing: 1px;
+}
+
+/* Stats */
+.stat-item h2 {
+    font-weight: 800;
+}

@@ -5,6 +5,35 @@ require __DIR__ . '/config/db.php';
 
 ensure_session_started();
 
+// Maintenance Mode Check
+// Maintenance Mode Check
+$lockFile = __DIR__ . '/maintenance.lock';
+if (file_exists($lockFile)) {
+    $user = current_user();
+    $roleId = $user ? (int)$user['role_id'] : 0; // 0 for Guest
+
+    // Super Admin (1) always bypasses
+    if ($roleId !== 1) {
+        $content = file_get_contents($lockFile);
+        $blockedRoles = [];
+
+        // Check if file contains JSON config
+        $data = json_decode($content, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+            $blockedRoles = $data['blocked_roles'] ?? [];
+        } else {
+            // Legacy/Plain file: Block everyone except Super Admin
+            $blockedRoles = [2, 3, 4, 0]; 
+        }
+
+        // If current user's role is in the blocked list, show maintenance page
+        if (in_array($roleId, $blockedRoles)) {
+            require __DIR__ . '/maintain_index.php';
+            exit;
+        }
+    }
+}
+
 
 
 $user = current_user();
@@ -37,6 +66,8 @@ $user = current_user();
 <?php require __DIR__ . '/public/room/load/load_room.php'; ?>
 
 <?php require __DIR__ . '/public/vehicle/load/load_vehicle.php'; ?>
+<br><br><br>
+<?php require __DIR__ . '/public/review/review.php'; ?>
 
 <?php require __DIR__ . '/public/footer/footer.php'; ?>
 

@@ -1,0 +1,70 @@
+:root {
+    --hunter-green: #3a5a40;
+    --fern-green: #588157;
+    --sage: #a3b18a;
+    --light-bg: #f8f9fa;
+}
+
+.text-hunter-green {
+    color: var(--hunter-green);
+}
+
+.bg-soft-success {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.btn-theme {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-theme:hover {
+    background-color: var(--fern-green);
+    border-color: var(--fern-green);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background-color: var(--sage);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.modal-content {
+    border-radius: 1rem;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    background-color: white !important;
+    border: 1px solid var(--sage) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(163, 177, 138, 0.05);
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}

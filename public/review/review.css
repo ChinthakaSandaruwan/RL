@@ -1,0 +1,123 @@
+.text-hunter-green {
+    color: #3a5a40;
+}
+
+.text-primary-theme {
+    color: #588157;
+}
+
+.bg-soft-success {
+    background-color: rgba(58, 90, 64, 0.1);
+}
+
+.text-theme {
+    color: #3a5a40;
+}
+
+.divider {
+    width: 60px;
+    height: 4px;
+    background: #588157;
+    border-radius: 2px;
+}
+
+.btn-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+}
+
+.btn-circle:hover {
+    transform: scale(1.1);
+    background-color: #3a5a40;
+    color: white !important;
+}
+
+.review-carousel-container {
+    position: relative;
+    padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+    .review-prev {
+        position: absolute;
+        left: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .review-next {
+        position: absolute;
+        right: -25px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.review-track-wrapper {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+    padding: 10px;
+    /* Space for shadow */
+    margin: -10px;
+}
+
+.review-track-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.review-card {
+    width: 100%;
+    min-width: 100%;
+    /* Mobile: 1 card visible */
+    border-radius: 20px;
+    background: #ffffff;
+    transition: transform 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .review-card {
+        min-width: calc(50% - 1.5rem);
+        /* Tablet: 2 cards visible */
+    }
+}
+
+@media (min-width: 992px) {
+    .review-card {
+        min-width: calc(33.333% - 1.33rem);
+        /* Desktop: 3 cards visible */
+    }
+}
+
+.review-card:hover {
+    transform: translateY(-5px);
+}
+
+.avatar img,
+.avatar-placeholder {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.indicator-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #cbd5e1;
+    transition: all 0.3s;
+}
+
+.indicator-dot.active {
+    background-color: #3a5a40;
+    transform: scale(1.2);
+}

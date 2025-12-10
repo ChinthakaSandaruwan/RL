@@ -181,10 +181,10 @@ ON DUPLICATE KEY UPDATE
 
 -- Users
 INSERT INTO `user` (`user_id`, `email`, `name`, `mobile_number`, `role_id`, `status_id`, `created_at`) VALUES
-(1, 'super_admin@rentallanka.com', 'superadmin', '0713018395', 1, 1, '2025-11-04 12:00:00'),
-(2, 'admin@rentallanka.com', 'admin', '0710476945', 2, 1, '2025-11-04 12:00:00'),
-(3, 'owner@rentallanka.com', 'owner1', '0713018095', 3, 1, '2025-11-04 12:00:00'),
-(4, 'customer@rentallanka.com', 'customer1', '0713018096', 4, 1, '2025-11-04 12:00:00');
+(1, 'super_admin@rentallanka.com', 'superadmin', '0710476945', 1, 1, '2025-11-04 12:00:00'),
+(2, 'admin@rentallanka.com', 'admin', '0713018095', 2, 1, '2025-11-04 12:00:00'),
+(3, 'owner@rentallanka.com', 'owner1', '0718186333', 3, 1, '2025-11-04 12:00:00'),
+(4, 'customer@rentallanka.com', 'customer1', '0711111111', 4, 1, '2025-11-04 12:00:00');
 
 -- Sample Bought Package for Testing (Owner has purchased a package with quotas)
 -- This allows owner1 to test the system with available package quotas
@@ -255,10 +255,10 @@ INSERT INTO `property` (`property_id`, `property_code`, `owner_id`, `title`, `de
 ON DUPLICATE KEY UPDATE `title`=`title`;
 
 -- Property Location
-INSERT INTO `property_location` (`property_id`, `city_id`, `address`, `postal_code`) VALUES
-(1, NULL, '123 Lotus Road', '00700'), -- Colombo 7 (Approximation)
-(2, NULL, '45/B Lake View', '20000'), -- Kandy
-(3, NULL, '10 Beach Road', '80000')  -- Galle
+INSERT INTO `property_location` (`property_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`) VALUES
+(1, NULL, NULL, NULL, '123 Lotus Road', '00700'), -- Colombo 7 (Approximation)
+(2, NULL, NULL, NULL, '45/B Lake View', '20000'), -- Kandy
+(3, NULL, NULL, NULL, '10 Beach Road', '80000')  -- Galle
 ON DUPLICATE KEY UPDATE `address`=`address`;
 
 -- Property Amenities
@@ -282,9 +282,9 @@ INSERT INTO `room` (`room_id`, `room_code`, `owner_id`, `title`, `description`, 
 ON DUPLICATE KEY UPDATE `title`=`title`;
 
 -- Room Location
-INSERT INTO `room_location` (`room_id`, `city_id`, `address`, `postal_code`) VALUES
-(1, NULL, 'No 5, Unawatuna', '80600'),
-(2, NULL, 'No 12, Ella Town', '90090')
+INSERT INTO `room_location` (`room_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`) VALUES
+(1, NULL, NULL, NULL, 'No 5, Unawatuna', '80600'),
+(2, NULL, NULL, NULL, 'No 12, Ella Town', '90090')
 ON DUPLICATE KEY UPDATE `address`=`address`;
 
 -- Room Amenities

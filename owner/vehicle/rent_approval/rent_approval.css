@@ -1,0 +1,51 @@
+:root {
+    --hunter-green: #355E3B;
+    --fern: #4F7942;
+}
+
+.table> :not(caption)>*>* {
+    vertical-align: middle;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #e9ecef;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--hunter-green);
+    border-bottom: 2px solid var(--hunter-green);
+    background: transparent;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+}
+
+.card {
+    border-radius: 0.75rem;
+    border: none;
+}
+
+.btn-approve {
+    background-color: var(--fern);
+    color: white;
+    border: none;
+}
+
+.btn-approve:hover {
+    background-color: var(--hunter-green);
+    color: white;
+}

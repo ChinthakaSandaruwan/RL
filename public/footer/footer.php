@@ -89,9 +89,8 @@ $showContact = $footerData['show_contact'] ?? 1;
           <h6 class="text-uppercase fw-bold mb-4">
             Useful links
           </h6>
-          <p><a href="#!" class="text-reset">Pricing</a></p>
-          <p><a href="#!" class="text-reset">Settings</a></p>
-          <p><a href="#!" class="text-reset">Orders</a></p>
+          <p><a href="<?= app_url('public/about_us/about.php') ?>" class="text-reset">About Us</a></p>
+          <p><a href="<?= app_url('public/terms_of_service/terms_of_service.php') ?>" class="text-reset">Terms of Service</a></p>
           <p><a href="#!" class="text-reset">Help</a></p>
         </div>
         <?php endif; ?>

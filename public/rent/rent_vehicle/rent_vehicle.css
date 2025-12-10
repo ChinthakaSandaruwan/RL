@@ -1,0 +1,43 @@
+:root {
+    --hunter-green: #355E3B;
+    /* Primary Theme Color */
+    --fern: #4F7942;
+    /* Secondary Theme Color */
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-title {
+    color: var(--hunter-green);
+}
+
+.btn-primary {
+    background-color: var(--fern);
+    border-color: var(--fern);
+}
+
+.btn-primary:hover {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+}
+
+.form-control:focus {
+    border-color: var(--fern);
+    box-shadow: 0 0 0 0.25rem rgba(79, 121, 66, 0.25);
+}
+
+.flatpickr-day.selected {
+    background: var(--fern) !important;
+    border-color: var(--fern) !important;
+}
+
+/* Summary Box */
+#summary_total {
+    color: var(--hunter-green) !important;
+}

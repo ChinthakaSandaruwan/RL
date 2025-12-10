@@ -1,0 +1,39 @@
+:root {
+    --hunter-green: #355E3B;
+    --fern: #4F7942;
+}
+
+.img-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.status-badge {
+    min-width: 100px;
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.table> :not(caption)>*>* {
+    vertical-align: middle;
+}
+
+/* Enhancements */
+.card {
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: #6c757d;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}

@@ -1,43 +1,120 @@
-/* Vehicle View Custom Styles */
-
-.vehicle-main-img {
-    height: 500px;
-    object-fit: cover;
-    background-color: #f8f9fa;
+:root {
+    --primary-color: #198754;
+    --primary-gradient: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
 }
 
-.vehicle-thumb {
+/* Image Gallery */
+.main-img {
+    height: 500px;
+    object-fit: cover;
+    background-color: var(--light-bg);
+    border-radius: 8px;
+}
+
+.thumb-img {
     width: 100px;
     height: 80px;
     object-fit: cover;
     cursor: pointer;
     opacity: 0.6;
-    transition: opacity 0.2s, transform 0.2s;
+    transition: all 0.3s ease;
     border: 2px solid transparent;
+    border-radius: 6px;
 }
 
-.vehicle-thumb:hover {
+.thumb-img:hover {
     opacity: 1;
+    transform: translateY(-2px);
 }
 
-.vehicle-thumb.active-thumb {
+.thumb-img.active-thumb {
     opacity: 1;
-    border-color: var(--bs-warning);
+    border-color: var(--primary-color);
 }
 
+/* Typography & Badges */
+.text-theme {
+    color: var(--primary-color) !important;
+}
+
+.badge-theme {
+    background: var(--primary-gradient);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+/* Feature Boxes */
+.feature-box {
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    border-color: var(--primary-color);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Buttons */
+.btn-theme {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2);
+}
+
+.btn-theme:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(25, 135, 84, 0.3);
+    color: white;
+}
+
+.btn-outline-theme {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+    font-weight: 500;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-theme:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Breadcrumbs */
 .breadcrumb-item a {
+    color: var(--secondary-color);
     text-decoration: none;
-    color: var(--bs-secondary);
 }
 
-/* Use dark text for warning color legibility */
 .breadcrumb-item.active {
-    color: #cc9a06;
-    /* Darker yellow/gold */
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-    .vehicle-main-img {
+    .main-img {
         height: 300px;
     }
 }

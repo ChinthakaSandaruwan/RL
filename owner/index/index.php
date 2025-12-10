@@ -185,6 +185,42 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
                     </a>
                 </div>
             </div>
+            <hr class="my-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/property/status/status.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-activity"></i> Property Status
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/room/status/status.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-activity"></i> Room Status
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/vehicle/status/status.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-activity"></i> Vehicle Status
+                    </a>
+                </div>
+            </div>
+            <hr class="my-4">
+             <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/property/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
+                        <i class="bi bi-calendar-check"></i> Property Requests
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/room/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
+                        <i class="bi bi-calendar-check"></i> Room Requests
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="<?= app_url('owner/vehicle/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
+                        <i class="bi bi-calendar-check"></i> Vehicle Requests
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

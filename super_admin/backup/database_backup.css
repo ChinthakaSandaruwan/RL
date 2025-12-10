@@ -1,0 +1,18 @@
+.card-header {
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.display-1 {
+    font-size: 5rem;
+    opacity: 0.8;
+}
+
+.btn-primary {
+    background-color: var(--hunter-green, #198754);
+    border-color: var(--hunter-green, #198754);
+}
+
+.btn-primary:hover {
+    background-color: var(--fern, #157347);
+    border-color: var(--fern, #157347);
+}

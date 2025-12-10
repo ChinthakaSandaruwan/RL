@@ -12,7 +12,8 @@ if (!$user || !in_array($user['role_id'], [3])) {
 
 $pdo = get_pdo();
 $errors = [];
-$success = null;
+$successStr = '';
+$errorStr = '';
 $csrf_token = generate_csrf_token();
 
 // Check Quota
@@ -30,10 +31,22 @@ $districts = $pdo->query("SELECT * FROM `districts` ORDER BY `name_en` ASC")->fe
 $cities = $pdo->query("SELECT * FROM `cities` ORDER BY `name_en` ASC")->fetchAll();
 $amenities = $pdo->query("SELECT * FROM `amenity` WHERE `category` IN ('property', 'both') ORDER BY `amenity_name` ASC")->fetchAll();
 
+// Form Data Holders (for repopulation)
+$old = [
+    'title' => '', 'description' => '', 'price' => '', 'type_id' => '',
+    'sqft' => '', 'bedrooms' => '1', 'bathrooms' => '1',
+    'province_id' => '', 'district_id' => '', 'city_id' => '',
+    'address' => '', 'postal_code' => '', 'google_map_link' => '',
+    'amenities' => []
+];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        die('Invalid CSRF Token');
+        $errors[] = 'Invalid CSRF Token';
     }
+
+    // Capture POST data for repopulation
+    $old = array_merge($old, $_POST);
 
     // Input Sanitization
     $title = trim($_POST['title'] ?? '');
@@ -45,6 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $baths = intval($_POST['bathrooms'] ?? 0);
     
     // Location
+    $provinceId = intval($_POST['province_id'] ?? 0);
+    $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id'] ?? 0);
     $address = trim($_POST['address'] ?? '');
     $postal = trim($_POST['postal_code'] ?? '');
@@ -74,11 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($_FILES['property_images']['error'][$k] === UPLOAD_ERR_OK) {
                     $ext = strtolower(pathinfo($_FILES['property_images']['name'][$k], PATHINFO_EXTENSION));
                     if (!in_array($ext, $validTypes)) {
-                        $errors[] = "Invalid format. JPG, PNG, WEBP only.";
+                        $errors[] = "Invalid format. JPG, PNG, WEBP only. File: " . $_FILES['property_images']['name'][$k];
                         break; 
                     }
                     
-                    $newName = 'prop_' . uniqid() . '_' . time() . '.' . $ext;
+                    $newName = 'prop_' . uniqid() . '_' . time() . '_' . $k . '.' . $ext;
                     if (move_uploaded_file($tmp, $uploadDir . $newName)) {
                         $uploadedImages[] = 'public/uploads/properties/' . $newName;
                     }
@@ -101,17 +116,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$propCode, $user['user_id'], $typeId, $title, $description, $price, $sqft, $beds, $baths]);
             $propId = $pdo->lastInsertId();
 
-            // 2. Insert Location
-            $stmt = $pdo->prepare("INSERT INTO `property_location` (`property_id`, `city_id`, `address`, `postal_code`, `google_map_link`) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$propId, $cityId, $address, $postal, $gmap]);
+            // 2. Insert Location (Updated with Province/District)
+            $stmt = $pdo->prepare("INSERT INTO `property_location` (`property_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`, `google_map_link`) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$propId, $provinceId, $districtId, $cityId, $address, $postal, $gmap]);
 
             // 3. Insert Images
             $primaryIdx = intval($_POST['primary_image'] ?? 0);
             $stmt = $pdo->prepare("INSERT INTO `property_image` (`property_id`, `image_path`, `primary_image`) VALUES (?, ?, ?)");
             foreach ($uploadedImages as $idx => $path) {
+                // Ensure primary index is valid
                 $isMain = ($idx === $primaryIdx) ? 1 : 0;
                 $stmt->execute([$propId, $path, $isMain]);
             }
+            // If primary index was out of bounds (e.g., deleted file), set first as primary
+            // (Database logic might need a separate check, but simplistic approach here)
 
             // 4. Insert Amenities
             if ($selectedAmenities) {
@@ -125,15 +143,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             decrement_package_quota($packageCheck['package_id'], 'property');
 
             $pdo->commit();
-            $success = "Property submitted successfully and is pending approval.";
+            $successStr = "Property submitted successfully and is pending approval.";
             
-            // Optional: Redirect to manage
-            // header("Location: ../manage.php"); exit;
+            // Reset form
+            $old = [
+                'title' => '', 'description' => '', 'price' => '', 'type_id' => '',
+                'sqft' => '', 'bedrooms' => '1', 'bathrooms' => '1',
+                'province_id' => '', 'district_id' => '', 'city_id' => '',
+                'address' => '', 'postal_code' => '', 'google_map_link' => '',
+                'amenities' => []
+            ];
 
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "System Error: " . $e->getMessage();
         }
+    }
+
+    if (!empty($errors)) {
+        $errorStr = implode('<br>', $errors);
     }
 }
 ?>
@@ -145,21 +173,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>"> 
-    <!-- Inline minimal CSS for specific form elements -->
-    <style>
-        .amenity-card {
-            position: relative;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .amenity-card:hover { background: #f9f9f9; border-color: #ddd; }
-        .form-check-input:checked + label { color: var(--fern); font-weight: bold; }
-        .img-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-right: 10px; cursor: pointer; border: 2px solid transparent;}
-        .img-preview.selected-main { border-color: var(--fern); }
-    </style>
+    <link rel="stylesheet" href="property_create.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
 <?php require __DIR__ . '/../../../../public/navbar/navbar.php'; ?>
@@ -179,15 +194,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <?php if ($success): ?>
-                <div class="alert alert-success"><?= $success ?> <a href="../manage.php" class="fw-bold">Go to Dashboard</a></div>
-            <?php endif; ?>
-            
-            <?php if ($errors): ?>
-                <div class="alert alert-danger">
-                    <ul class="mb-0"><?php foreach ($errors as $e) echo "<li>$e</li>"; ?></ul>
-                </div>
-            <?php endif; ?>
+            <!-- SweetAlert Hidden Inputs -->
+            <input type="hidden" id="swal-success" value="<?= htmlspecialchars($successStr) ?>">
+            <input type="hidden" id="swal-error" value="<?= htmlspecialchars($errorStr) ?>">
+
+            <!-- Location Data for JS -->
+            <input type="hidden" id="districtsData" value="<?= htmlspecialchars(json_encode($districts), ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" id="citiesData" value="<?= htmlspecialchars(json_encode($cities), ENT_QUOTES, 'UTF-8') ?>">
 
             <form method="POST" enctype="multipart/form-data" id="propertyForm">
                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -199,24 +212,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Property Title <span class="text-danger">*</span></label>
-                                <input type="text" name="title" class="form-control" placeholder="Modern Apartment in City Center" required>
+                                <input type="text" name="title" class="form-control" placeholder="Modern Apartment in City Center" required value="<?= htmlspecialchars($old['title']) ?>">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Property Type <span class="text-danger">*</span></label>
                                 <select name="type_id" class="form-control" required>
                                     <option value="">Select Type</option>
                                     <?php foreach ($types as $t): ?>
-                                    <option value="<?= $t['type_id'] ?>"><?= $t['type_name'] ?></option>
+                                    <option value="<?= $t['type_id'] ?>" <?= $old['type_id'] == $t['type_id'] ? 'selected' : '' ?>><?= $t['type_name'] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Monthly Price (LKR) <span class="text-danger">*</span></label>
-                                <input type="number" name="price" class="form-control" required>
+                                <input type="number" name="price" class="form-control" required value="<?= htmlspecialchars($old['price']) ?>">
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea name="description" class="form-control" rows="4"></textarea>
+                                <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($old['description']) ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -229,15 +242,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="form-label">Bedrooms</label>
-                                <input type="number" name="bedrooms" class="form-control" value="1">
+                                <input type="number" name="bedrooms" class="form-control" value="<?= htmlspecialchars($old['bedrooms']) ?>">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Bathrooms</label>
-                                <input type="number" name="bathrooms" class="form-control" value="1">
+                                <input type="number" name="bathrooms" class="form-control" value="<?= htmlspecialchars($old['bathrooms']) ?>">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Area (Sqft)</label>
-                                <input type="number" name="sqft" class="form-control" placeholder="e.g. 1200">
+                                <input type="number" name="sqft" class="form-control" placeholder="e.g. 1200" value="<?= htmlspecialchars($old['sqft']) ?>">
                             </div>
                         </div>
                         <label class="form-label mb-2">Amenities</label>
@@ -245,7 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php foreach ($amenities as $a): ?>
                             <div class="col-6 col-md-3">
                                 <div class="form-check amenity-card">
-                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" id="am_<?= $a['amenity_id'] ?>">
+                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" id="am_<?= $a['amenity_id'] ?>"
+                                    <?= in_array($a['amenity_id'], $old['amenities']) ? 'checked' : '' ?>>
                                     <label class="form-check-label w-100 stretched-link" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
                                 </div>
                             </div>
@@ -261,34 +275,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Province</label>
-                                <select id="province" class="form-control">
+                                <select name="province_id" id="province" class="form-control" data-selected="<?= $old['province_id'] ?>">
                                     <option value="">Select</option>
                                     <?php foreach ($provinces as $p): ?>
-                                    <option value="<?= $p['id'] ?>"><?= $p['name_en'] ?></option>
+                                    <option value="<?= $p['id'] ?>" <?= $old['province_id'] == $p['id'] ? 'selected' : '' ?>><?= $p['name_en'] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">District</label>
-                                <select id="district" class="form-control" disabled><option>Select Province First</option></select>
+                                <select name="district_id" id="district" class="form-control" disabled data-selected="<?= $old['district_id'] ?>">
+                                    <option value="">Select Province First</option>
+                                </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">City <span class="text-danger">*</span></label>
-                                <select name="city_id" id="city" class="form-control" disabled required><option>Select District First</option></select>
+                                <select name="city_id" id="city" class="form-control" disabled required data-selected="<?= $old['city_id'] ?>">
+                                    <option value="">Select District First</option>
+                                </select>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Address</label>
-                            <input type="text" name="address" class="form-control" required placeholder="Full Address">
+                            <input type="text" name="address" class="form-control" required placeholder="Full Address" value="<?= htmlspecialchars($old['address']) ?>">
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Postal Code</label>
-                                <input type="text" name="postal_code" class="form-control">
+                                <input type="text" name="postal_code" class="form-control" value="<?= htmlspecialchars($old['postal_code']) ?>">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Google Maps Link</label>
-                                <input type="text" name="google_map_link" class="form-control" placeholder="Share Link from Google Maps">
+                                <input type="text" name="google_map_link" class="form-control" placeholder="Share Link from Google Maps" value="<?= htmlspecialchars($old['google_map_link']) ?>">
                             </div>
                         </div>
                     </div>
@@ -317,69 +335,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<script>
-    // Data passing
-    const districts = <?= json_encode($districts) ?>;
-    const cities = <?= json_encode($cities) ?>;
-
-    // Location Logic
-    const provSel = document.getElementById('province');
-    const distSel = document.getElementById('district');
-    const citySel = document.getElementById('city');
-
-    provSel.addEventListener('change', function() {
-        const pid = this.value;
-        distSel.innerHTML = '<option value="">Select District</option>';
-        citySel.innerHTML = '<option value="">Select District First</option>';
-        citySel.disabled = true;
-        
-        if (pid) {
-            const fil = districts.filter(d => d.province_id == pid);
-            fil.forEach(d => distSel.add(new Option(d.name_en, d.id)));
-            distSel.disabled = false;
-        } else {
-            distSel.disabled = true;
-        }
-    });
-
-    distSel.addEventListener('change', function() {
-        const did = this.value;
-        citySel.innerHTML = '<option value="">Select City</option>';
-        if (did) {
-            const fil = cities.filter(c => c.district_id == did);
-            fil.forEach(c => citySel.add(new Option(c.name_en, c.id)));
-            citySel.disabled = false;
-        } else {
-            citySel.disabled = true;
-        }
-    });
-
-    // Image Preview Logic
-    const imgInput = document.getElementById('imgInput');
-    const previewArea = document.getElementById('previewArea');
-    const primaryInput = document.getElementById('primaryIdx');
-
-    imgInput.addEventListener('change', function(e) {
-        previewArea.innerHTML = '';
-        if (this.files) {
-            Array.from(this.files).forEach((file, idx) => {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    img.className = 'img-preview' + (idx === 0 ? ' selected-main' : '');
-                    img.onclick = () => {
-                        document.querySelectorAll('.img-preview').forEach(el => el.classList.remove('selected-main'));
-                        img.classList.add('selected-main');
-                        primaryInput.value = idx;
-                    };
-                    previewArea.appendChild(img);
-                }
-                reader.readAsDataURL(file);
-            });
-        }
-    });
-</script>
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="property_create.js"></script>
 </body>
 </html>

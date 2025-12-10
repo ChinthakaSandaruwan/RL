@@ -61,7 +61,10 @@ if (isset($user) && $user) {
 }
 ?>
 
+
+<link rel="stylesheet" href="<?= app_url('public/vehicle/load/load_vehicle.css') ?>">
 <section class="listings-section py-5" style="background-color: #f8f9fa;">
+
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold" style="color: var(--hunter-green);">Latest Vehicles</h2>
@@ -91,12 +94,12 @@ if (isset($user) && $user) {
                                 <?php endif; ?>
                             </div>
                             <div class="card-body">
-                                <span class="badge bg-warning text-dark mb-2"><?= htmlspecialchars($vehicle['type_name'] ?? 'Vehicle') ?></span>
+                                <span class="badge badge-theme mb-2"><?= htmlspecialchars($vehicle['type_name'] ?? 'Vehicle') ?></span>
                                 <h5 class="card-title"><?= htmlspecialchars($vehicle['title']) ?></h5>
                                 <p class="card-text text-muted"><strong><?= htmlspecialchars(($vehicle['brand_name'] ?? '') . ' ' . ($vehicle['model_name'] ?? '')) ?></strong></p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-success">LKR <?= number_format($vehicle['price_per_day'], 2) ?>/day</span>
-                                    <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id=' . $vehicle['vehicle_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="price-tag">LKR <?= number_format($vehicle['price_per_day'], 2) ?>/day</span>
+                                    <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id=' . $vehicle['vehicle_id']) ?>" class="btn-view-details">View <i class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
                         </div>

@@ -56,3 +56,37 @@
 .image-preview-card:hover {
     border-color: #a3b18a;
 }
+
+/* Moved from inline styles */
+.amenity-card {
+    position: relative;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.amenity-card:hover {
+    background: #f9f9f9;
+    border-color: #ddd;
+}
+
+.form-check-input:checked+label {
+    color: var(--fern);
+    font-weight: bold;
+}
+
+.img-preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.img-preview.selected-main {
+    border-color: var(--fern);
+}

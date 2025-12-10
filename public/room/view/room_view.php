@@ -104,7 +104,7 @@ $user = current_user();
                     <div class="carousel-inner">
                         <?php foreach ($images as $index => $img): ?>
                         <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
-                            <img src="<?= app_url($img['image_path']) ?>" class="d-block w-100 room-main-img" alt="Room Image" onerror="this.src='https://via.placeholder.com/800x500?text=No+Image'">
+                            <img src="<?= app_url($img['image_path']) ?>" class="d-block w-100 main-img" alt="Room Image" onerror="this.src='https://via.placeholder.com/800x500?text=No+Image'">
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -123,7 +123,7 @@ $user = current_user();
                 <div class="d-flex gap-2 p-2 overflow-auto bg-white">
                     <?php foreach ($images as $index => $img): ?>
                         <img src="<?= app_url($img['image_path']) ?>" 
-                             class="img-thumbnail room-thumb <?= $index === 0 ? 'active-thumb' : '' ?>" 
+                             class="img-thumbnail thumb-img room-thumb <?= $index === 0 ? 'active-thumb' : '' ?>" 
                              onclick="showSlide(<?= $index ?>)"
                              alt="Thumbnail"
                              onerror="this.src='https://via.placeholder.com/100x80?text=No+Image'">
@@ -136,7 +136,7 @@ $user = current_user();
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
                         <div>
-                            <span class="badge bg-primary mb-2"><?= htmlspecialchars($room['type_name']) ?></span>
+                            <span class="badge badge-theme mb-2"><?= htmlspecialchars($room['type_name']) ?></span>
                             <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($room['title']) ?></h1>
                             <p class="text-muted mb-0">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
@@ -144,7 +144,7 @@ $user = current_user();
                             </p>
                         </div>
                         <div class="text-end">
-                            <h2 class="h3 fw-bold text-primary mb-0">LKR <?= number_format($room['price_per_day'], 2) ?></h2>
+                            <h2 class="h3 fw-bold text-theme mb-0">LKR <?= number_format($room['price_per_day'], 2) ?></h2>
                             <small class="text-muted">/ Day</small>
                         </div>
                     </div>
@@ -154,27 +154,26 @@ $user = current_user();
                     <!-- Features -->
                     <div class="row g-3 text-center mb-4">
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-droplet fs-3 text-primary d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-droplet feature-icon"></i>
                                 <div class="fw-bold"><?= $room['bathrooms'] ?></div>
                                 <small class="text-muted">Bathrooms</small>
                             </div>
                         </div>
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-door-closed fs-3 text-primary d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-door-closed feature-icon"></i>
                                 <div class="fw-bold"><?= $room['beds'] ?></div>
                                 <small class="text-muted">Beds</small>
                             </div>
                         </div>
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-people fs-3 text-primary d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-people feature-icon"></i>
                                 <div class="fw-bold"><?= $room['maximum_guests'] ?? '2' ?></div>
                                 <small class="text-muted">Max Guests</small>
                             </div>
                         </div>
-
                     </div>
 
                     <h5 class="fw-bold mb-3">Description</h5>
@@ -190,7 +189,7 @@ $user = current_user();
                             <?php foreach ($room_amenities as $amenity): ?>
                                 <div class="col-6 col-md-4">
                                     <div class="d-flex align-items-center text-dark">
-                                        <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                                        <i class="bi bi-check-circle-fill text-theme me-2"></i>
                                         <span><?= htmlspecialchars($amenity) ?></span>
                                     </div>
                                 </div>
@@ -218,7 +217,7 @@ $user = current_user();
                     <?php if (!empty($room['google_map_link'])): ?>
                         <h5 class="fw-bold mb-3">Location</h5>
                         <div class="bg-light p-4 rounded text-center">
-                            <a href="<?= htmlspecialchars($room['google_map_link']) ?>" target="_blank" class="btn btn-outline-primary">
+                            <a href="<?= htmlspecialchars($room['google_map_link']) ?>" target="_blank" class="btn btn-outline-theme">
                                 <i class="bi bi-geo-alt me-2"></i>View on Google Maps
                             </a>
                         </div>
@@ -243,13 +242,13 @@ $user = current_user();
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <a href="<?= app_url('public/rent/rent_room/rent_room.php?room_id=' . $room_id) ?>" class="btn btn-success btn-lg">
+                        <a href="<?= app_url('public/rent/rent_room/rent_room.php?room_id=' . $room_id) ?>" class="btn btn-theme btn-lg">
                             <i class="bi bi-house-check-fill me-2"></i> Rent Now
                         </a>
-                        <a href="tel:<?= htmlspecialchars($room['owner_phone']) ?>" class="btn btn-primary">
+                        <a href="tel:<?= htmlspecialchars($room['owner_phone']) ?>" class="btn btn-outline-theme">
                             <i class="bi bi-telephone-fill me-2"></i> Call Now
                         </a>
-                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $room['owner_phone']) ?>" target="_blank" class="btn btn-outline-primary">
+                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $room['owner_phone']) ?>" target="_blank" class="btn btn-outline-theme">
                             <i class="bi bi-whatsapp me-2"></i> WhatsApp
                         </a>
                     </div>

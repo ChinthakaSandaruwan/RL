@@ -123,6 +123,11 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/user/super_admin/super_admin.php') ?>" class="btn btn-outline-dark w-100 py-3">
+                        <i class="bi bi-person-workspace"></i> Manage Super Admins
+                    </a>
+                </div>
+                <div class="col-md-3">
                     <a href="<?= app_url('super_admin/user/admin/all_admins.php') ?>" class="btn btn-outline-danger w-100 py-3">
                         <i class="bi bi-shield-lock"></i> Manage Admins
                     </a>
@@ -171,6 +176,16 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/available_meals_&_prices/meal_type.php') ?>" class="btn btn-outline-info w-100 py-3">
                         <i class="bi bi-egg-fried"></i> Meal Types
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/backup/database_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
+                        <i class="bi bi-database-down"></i> Database Backup
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/maintain/control.php') ?>" class="btn btn-outline-warning text-dark w-100 py-3">
+                        <i class="bi bi-cone-striped"></i> Maintenance Mode
                     </a>
                 </div>
             </div>

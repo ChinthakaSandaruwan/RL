@@ -296,6 +296,8 @@ CREATE TABLE IF NOT EXISTS `property_image` (
 CREATE TABLE IF NOT EXISTS `property_location` (
   `location_id` INT NOT NULL AUTO_INCREMENT,
   `property_id` INT NOT NULL,
+  `province_id` INT NULL,
+  `district_id` INT NULL,
   `city_id` INT NULL,
   `address` VARCHAR(255) NULL,
   `google_map_link` VARCHAR(255) NULL,
@@ -304,7 +306,11 @@ CREATE TABLE IF NOT EXISTS `property_location` (
   PRIMARY KEY (`location_id`),
   KEY `idx_locations_property_id` (`property_id`),
   KEY `idx_locations_city_id` (`city_id`),
+  KEY `idx_locations_province_id` (`province_id`),
+  KEY `idx_locations_district_id` (`district_id`),
   CONSTRAINT `fk_property_locations_property` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_property_locations_province` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_property_locations_district` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_property_locations_city` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -361,6 +367,8 @@ CREATE TABLE IF NOT EXISTS `room_image` (
 CREATE TABLE IF NOT EXISTS `room_location` (
   `location_id` INT NOT NULL AUTO_INCREMENT,
   `room_id` INT NOT NULL,
+  `province_id` INT NULL,
+  `district_id` INT NULL,
   `city_id` INT NULL,
   `address` VARCHAR(255) NULL,
   `google_map_link` VARCHAR(255) NULL,
@@ -369,7 +377,11 @@ CREATE TABLE IF NOT EXISTS `room_location` (
   PRIMARY KEY (`location_id`),
   KEY `idx_locations_room_id` (`room_id`),
   KEY `idx_locations_city_id` (`city_id`),
+  KEY `idx_locations_province_id` (`province_id`),
+  KEY `idx_locations_district_id` (`district_id`),
   CONSTRAINT `fk_room_locations_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`room_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_room_locations_province` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_room_locations_district` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_room_locations_city` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -668,6 +680,8 @@ CREATE TABLE IF NOT EXISTS `vehicle_rent` (
   `pickup_date` DATETIME NOT NULL,
   `dropoff_date` DATETIME NOT NULL,
   `price_per_day` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `with_driver` TINYINT(1) NOT NULL DEFAULT 0,
+  `driver_fee` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `total_amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `status_id` INT NOT NULL DEFAULT 2, -- Default pending
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

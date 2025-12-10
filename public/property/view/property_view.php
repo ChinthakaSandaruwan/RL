@@ -98,7 +98,7 @@ $user = current_user();
                     <div class="carousel-inner">
                         <?php foreach ($images as $index => $img): ?>
                             <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
-                                <img src="<?= app_url($img['image_path']) ?>" class="d-block w-100 property-main-img" alt="Property Image" onerror="this.src='https://via.placeholder.com/800x500?text=No+Image'">
+                                <img src="<?= app_url($img['image_path']) ?>" class="d-block w-100 main-img" alt="Property Image" onerror="this.src='https://via.placeholder.com/800x500?text=No+Image'">
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -118,7 +118,7 @@ $user = current_user();
                 <div class="d-flex gap-2 p-2 overflow-auto bg-white">
                     <?php foreach ($images as $index => $img): ?>
                         <img src="<?= app_url($img['image_path']) ?>" 
-                             class="img-thumbnail property-thumb <?= $index === 0 ? 'active-thumb' : '' ?>" 
+                             class="img-thumbnail thumb-img property-thumb <?= $index === 0 ? 'active-thumb' : '' ?>" 
                              onclick="showSlide(<?= $index ?>)"
                              alt="Thumbnail"
                              onerror="this.src='https://via.placeholder.com/100x80?text=No+Image'">
@@ -131,7 +131,7 @@ $user = current_user();
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
                         <div>
-                            <span class="badge bg-success mb-2"><?= htmlspecialchars($property['type_name']) ?></span>
+                            <span class="badge badge-theme mb-2"><?= htmlspecialchars($property['type_name']) ?></span>
                             <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($property['title']) ?></h1>
                             <p class="text-muted mb-0">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
@@ -139,7 +139,7 @@ $user = current_user();
                             </p>
                         </div>
                         <div class="text-end">
-                            <h2 class="h3 fw-bold text-success mb-0">LKR <?= number_format($property['price_per_month'], 2) ?></h2>
+                            <h2 class="h3 fw-bold text-theme mb-0">LKR <?= number_format($property['price_per_month'], 2) ?></h2>
                             <small class="text-muted">/ Month</small>
                         </div>
                     </div>
@@ -149,29 +149,29 @@ $user = current_user();
                     <!-- Key Features -->
                     <div class="row g-3 text-center mb-4">
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-houses fs-3 text-success d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-houses feature-icon"></i>
                                 <div class="fw-bold"><?= $property['sqft'] ?></div>
                                 <small class="text-muted">Sqft</small>
                             </div>
                         </div>
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-door-open fs-3 text-success d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-door-open feature-icon"></i>
                                 <div class="fw-bold"><?= $property['bedrooms'] ?></div>
                                 <small class="text-muted">Bedrooms</small>
                             </div>
                         </div>
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-droplet fs-3 text-success d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-droplet feature-icon"></i>
                                 <div class="fw-bold"><?= $property['bathrooms'] ?></div>
                                 <small class="text-muted">Bathrooms</small>
                             </div>
                         </div>
                         <div class="col-6 col-sm-3">
-                            <div class="p-3 bg-light rounded-3">
-                                <i class="bi bi-tv fs-3 text-success d-block mb-1"></i>
+                            <div class="feature-box">
+                                <i class="bi bi-tv feature-icon"></i>
                                 <div class="fw-bold"><?= $property['living_rooms'] ?></div>
                                 <small class="text-muted">Living Rooms</small>
                             </div>
@@ -185,14 +185,14 @@ $user = current_user();
 
                     <h5 class="fw-bold mb-3">Amenities & Features</h5>
                     <div class="row g-3 mb-4">
-                    <div class="row g-3 mb-4">
+
                         <?php if (empty($property_amenities)): ?>
                             <div class="col-12"><p class="text-muted">No specific amenities listed.</p></div>
                         <?php else: ?>
                             <?php foreach ($property_amenities as $amenity): ?>
                                 <div class="col-6 col-md-4">
                                     <div class="d-flex align-items-center text-dark">
-                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <i class="bi bi-check-circle-fill text-theme me-2"></i>
                                         <span><?= htmlspecialchars($amenity) ?></span>
                                     </div>
                                 </div>
@@ -209,7 +209,7 @@ $user = current_user();
                                   or just a button. For safety, let's provide a button to open map. -->
                             <div class="bg-light d-flex align-items-center justify-content-center flex-column">
                                 <i class="bi bi-map fs-1 text-muted mb-2"></i>
-                                <a href="<?= htmlspecialchars($property['google_map_link']) ?>" target="_blank" class="btn btn-outline-success">
+                                <a href="<?= htmlspecialchars($property['google_map_link']) ?>" target="_blank" class="btn btn-outline-theme">
                                     <i class="bi bi-geo-alt me-2"></i>View on Google Maps
                                 </a>
                             </div>
@@ -237,32 +237,22 @@ $user = current_user();
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <a href="tel:<?= htmlspecialchars($property['owner_phone']) ?>" class="btn btn-success">
-                            <i class="bi bi-telephone-fill me-2"></i> Call Now
-                        </a>
-                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $property['owner_phone']) ?>" target="_blank" class="btn btn-outline-success">
-                            <i class="bi bi-whatsapp me-2"></i> WhatsApp
-                        </a>
                         <?php if (isset($user) && $user): ?>
-                        <a href="<?= app_url('public/rent/rent_property/rent_property.php?id=' . $property_id) ?>" class="btn btn-primary">
+                        <a href="<?= app_url('public/rent/rent_property/rent_property.php?id=' . $property_id) ?>" class="btn btn-theme btn-lg mb-2">
                             <i class="bi bi-house-check me-2"></i> Rent Now
                         </a>
                         <?php else: ?>
-                        <a href="<?= app_url('auth/login') ?>" class="btn btn-primary">
+                        <a href="<?= app_url('auth/login') ?>" class="btn btn-theme btn-lg mb-2">
                             <i class="bi bi-box-arrow-in-right me-2"></i> Login to Rent
                         </a>
                         <?php endif; ?>
-                    </div>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="small">
-                        <div class="mb-2">
-                            <i class="bi bi-envelope me-2 text-muted"></i>
-                            <a href="mailto:<?= htmlspecialchars($property['owner_email']) ?>" class="text-decoration-none text-secondary">
-                                <?= htmlspecialchars($property['owner_email']) ?>
-                            </a>
-                        </div>
+
+                        <a href="tel:<?= htmlspecialchars($property['owner_phone']) ?>" class="btn btn-outline-theme">
+                            <i class="bi bi-telephone-fill me-2"></i> Call Now
+                        </a>
+                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $property['owner_phone']) ?>" target="_blank" class="btn btn-outline-theme">
+                            <i class="bi bi-whatsapp me-2"></i> WhatsApp
+                        </a>
                     </div>
                 </div>
             </div>

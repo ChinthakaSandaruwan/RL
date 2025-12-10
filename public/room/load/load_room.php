@@ -12,7 +12,8 @@ if ($s_category && $s_category !== 'room') {
 }
 
 $pdo = get_pdo();
-$query = "SELECT r.* 
+$query = "SELECT r.*, 
+    (SELECT image_path FROM room_image WHERE room_id = r.room_id ORDER BY primary_image DESC LIMIT 1) as image_path
     FROM room r 
     LEFT JOIN room_location rl ON r.room_id = rl.room_id
     LEFT JOIN cities c ON rl.city_id = c.id
@@ -54,7 +55,10 @@ if (isset($user) && $user) {
 }
 ?>
 
+
+<link rel="stylesheet" href="<?= app_url('public/room/load/load_room.css') ?>">
 <section class="listings-section py-5">
+
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold" style="color: var(--hunter-green);">Latest Rooms</h2>
@@ -69,7 +73,7 @@ if (isset($user) && $user) {
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 shadow-sm listing-card">
                             <div class="position-relative">
-                                <img src="https://via.placeholder.com/400x250?text=Room" 
+                                <img src="<?= !empty($room['image_path']) ? app_url($room['image_path']) : 'https://via.placeholder.com/400x250?text=Room' ?>" 
                                      class="card-img-top" alt="Room" style="height: 200px; object-fit: cover;">
                                 <?php if (isset($user) && $user): 
                                     $inWishlist = in_array($room['room_id'], $wishlist_room_ids);
@@ -84,12 +88,12 @@ if (isset($user) && $user) {
                                 <?php endif; ?>
                             </div>
                             <div class="card-body">
-                                <span class="badge bg-info mb-2">Room</span>
+                                <span class="badge badge-theme mb-2">Room</span>
                                 <h5 class="card-title"><?= htmlspecialchars($room['title']) ?></h5>
                                 <p class="card-text text-muted"><?= htmlspecialchars(substr($room['description'], 0, 80)) ?>...</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-success">LKR <?= number_format($room['price_per_day'], 2) ?>/night</span>
-                                    <a href="<?= app_url('public/room/view/room_view.php?id=' . $room['room_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="price-tag">LKR <?= number_format($room['price_per_day'], 2) ?>/night</span>
+                                    <a href="<?= app_url('public/room/view/room_view.php?id=' . $room['room_id']) ?>" class="btn-view-details">View <i class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
                         </div>
