@@ -84,31 +84,131 @@ $user = current_user();
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-    <!-- JSON-LD Structured Data -->
+    <!-- Enhanced JSON-LD Structured Data for Rich Results -->
+    
+    <!-- 1. Website Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Rental Lanka",
+      "alternateName": "RentalLanka",
       "url": "<?= app_url() ?>",
+      "description": "Sri Lanka's premier platform for renting properties, rooms, and vehicles. Find verified listings with direct owner connections.",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "<?= app_url('search.php?q={search_term_string}') ?>",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "<?= app_url('search.php?q={search_term_string}') ?>"
+        },
         "query-input": "required name=search_term_string"
       }
     }
     </script>
+    
+    <!-- 2. Organization Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": "LocalBusiness",
+      "@id": "<?= app_url() ?>#organization",
       "name": "Rental Lanka",
+      "image": "<?= app_url('public/assets/images/logo.png') ?>",
+      "logo": "<?= app_url('public/assets/images/logo.png') ?>",
       "url": "<?= app_url() ?>",
-      "logo": "<?= app_url('public/assets/images/logo.png') ?>", 
+      "telephone": "+94-XX-XXXXXXX",
+      "priceRange": "LKR",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Sri Lanka",
+        "addressCountry": "LK"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 7.8731,
+        "longitude": 80.7718
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Sri Lanka"
+      },
+      "description": "Rental Lanka is Sri Lanka's leading rental marketplace connecting property owners with renters for homes, rooms, and vehicles across the island.",
       "sameAs": [
         "https://www.facebook.com/rentallanka",
         "https://twitter.com/rentallanka",
         "https://www.instagram.com/rentallanka"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Rental Services",
+        "itemListElement": [
+          {
+            "@type": "OfferCatalog",
+            "name": "Property Rentals",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "House Rentals",
+                  "description": "Find houses for rent across Sri Lanka"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Apartment Rentals",
+                  "description": "Modern apartments and condos for rent"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Room Rentals",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Room Rentals",
+                  "description": "Affordable rooms for students and professionals"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Vehicle Rentals",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Car Rentals",
+                  "description": "Rent cars, vans, and vehicles for travel"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+    </script>
+    
+    <!-- 3. BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "<?= app_url() ?>"
+        }
       ]
     }
     </script>
