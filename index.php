@@ -56,6 +56,9 @@ $user = current_user();
     <meta property="og:description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka. Connect with owners, find your dream home or ride.">
     <meta property="og:image" content="<?= app_url('public/assets/images/hero_house.png') ?>">
 
+    <!-- Preload LCP Image -->
+    <link rel="preload" as="image" href="<?= app_url('public/assets/images/hero_house.png') ?>">
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="<?= app_url() ?>">
@@ -70,6 +73,12 @@ $user = current_user();
     <link rel="icon" type="image/png" sizes="512x512" href="<?= app_url('public/favicon/android-chrome-512x512.png') ?>">
     <link rel="shortcut icon" href="<?= app_url('public/favicon/favicon.ico') ?>">
     <link rel="manifest" href="<?= app_url('public/favicon/site.webmanifest') ?>">
+
+    <!-- DNS Prefetch & Preconnect for External Resources -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -122,6 +131,6 @@ $user = current_user();
 
 <?php require __DIR__ . '/public/footer/footer.php'; ?>
 
-<script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
+<script defer src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
 </body>
 </html>

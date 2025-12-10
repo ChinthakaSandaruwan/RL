@@ -80,7 +80,7 @@ if (isset($user) && $user) {
                         <div class="card h-100 shadow-sm listing-card">
                             <div class="position-relative">
                                 <img src="<?= $vehicle['primary_image'] ? app_url($vehicle['primary_image']) : 'https://via.placeholder.com/400x250?text=Vehicle' ?>" 
-                                     class="card-img-top" alt="<?= htmlspecialchars($vehicle['title']) ?>" style="height: 200px; object-fit: cover;">
+                                     class="card-img-top" alt="<?= htmlspecialchars($vehicle['title']) ?>" loading="lazy" style="height: 200px; object-fit: cover;">
                                 <?php if (isset($user) && $user): 
                                     $inWishlist = in_array($vehicle['vehicle_id'], $wishlist_vehicle_ids);
                                     $iconClass = $inWishlist ? 'bi-heart-fill' : 'bi-heart';

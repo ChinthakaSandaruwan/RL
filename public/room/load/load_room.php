@@ -74,7 +74,7 @@ if (isset($user) && $user) {
                         <div class="card h-100 shadow-sm listing-card">
                             <div class="position-relative">
                                 <img src="<?= !empty($room['image_path']) ? app_url($room['image_path']) : 'https://via.placeholder.com/400x250?text=Room' ?>" 
-                                     class="card-img-top" alt="Room" style="height: 200px; object-fit: cover;">
+                                     class="card-img-top" alt="Room" loading="lazy" style="height: 200px; object-fit: cover;">
                                 <?php if (isset($user) && $user): 
                                     $inWishlist = in_array($room['room_id'], $wishlist_room_ids);
                                     $iconClass = $inWishlist ? 'bi-heart-fill' : 'bi-heart';

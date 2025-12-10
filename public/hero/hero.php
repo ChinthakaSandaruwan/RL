@@ -10,7 +10,7 @@
         <div class="carousel-inner">
             <!-- Slide 1: House -->
             <div class="carousel-item active hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_house.png') ?>" class="d-block w-100" alt="Luxury House">
+                <img src="<?= app_url('public/assets/images/hero_house.png') ?>" width="1920" height="600" class="d-block w-100" alt="Luxury House" fetchpriority="high" loading="eager">
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h1 class="hero-title">Find Your Dream Home</h1>
@@ -21,7 +21,7 @@
             </div>
             <!-- Slide 2: Apartment -->
             <div class="carousel-item hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_apartment.png') ?>" class="d-block w-100" alt="Modern Apartment">
+                <img src="<?= app_url('public/assets/images/hero_apartment.png') ?>" width="1920" height="600" class="d-block w-100" alt="Modern Apartment" loading="lazy">
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h1 class="hero-title">Cozy Modern Living</h1>
@@ -32,7 +32,7 @@
             </div>
             <!-- Slide 3: Vehicle -->
             <div class="carousel-item hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_vehicle.png') ?>" class="d-block w-100" alt="Luxury Fleet">
+                <img src="<?= app_url('public/assets/images/hero_vehicle.png') ?>" width="1920" height="600" class="d-block w-100" alt="Luxury Fleet" loading="lazy">
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h1 class="hero-title">Travel in Style</h1>
