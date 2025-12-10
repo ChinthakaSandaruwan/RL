@@ -140,6 +140,7 @@ try {
                         <i class="bi bi-house-add"></i> Create Property
                     </a>
                 </div>
+
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/room/create/room_create.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-door-open"></i> Create Room
@@ -148,6 +149,35 @@ try {
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/vehicle/create/vehicle_create.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-car-front"></i> Create Vehicle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Delete Management -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-list-task me-2"></i>Delete Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/property/delete/delete_property.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-house-add"></i> Delete Property
+                    </a>
+                </div>
+                
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/room/delete/delete_room.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-door-open"></i> Delete Room
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/vehicle/delete/delete_vehicle.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-car-front"></i> Delete Vehicle
                     </a>
                 </div>
             </div>
