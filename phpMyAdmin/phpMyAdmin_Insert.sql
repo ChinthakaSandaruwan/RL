@@ -8,43 +8,7 @@ SET sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 
 -- 1. Location Data (Provinces & Districts)
 
-INSERT IGNORE INTO `provinces` (`id`, `name_en`, `name_si`, `name_ta`) VALUES
-(1, 'Western', 'බස්නාහිර', 'மேல்'),
-(2, 'Central', 'මධ්‍යම', 'மத்திய'),
-(3, 'Southern', 'දකුණු', 'தென்'),
-(4, 'North Western', 'වයඹ', 'வட மேல்'),
-(5, 'Sabaragamuwa', 'සබරගමුව', 'சபரகமுவ'),
-(6, 'Eastern', 'නැගෙනහිර', 'கிழக்கு'),
-(7, 'Uva', 'ඌව', 'ஊவா'),
-(8, 'North Central', 'උතුරු මැද', 'வட மத்திய'),
-(9, 'Northern', 'උතුරු', 'வட');
 
-INSERT IGNORE INTO `districts` (`id`, `province_id`, `name_en`, `name_si`, `name_ta`) VALUES
-(1, 6, 'Ampara', 'අම්පාර', 'அம்பாறை'),
-(2, 8, 'Anuradhapura', 'අනුරාධපුරය', 'அனுராதபுரம்'),
-(3, 7, 'Badulla', 'බදුල්ල', 'பதுளை'),
-(4, 6, 'Batticaloa', 'මඩකලපුව', 'மட்டக்களப்பு'),
-(5, 1, 'Colombo', 'කොළඹ', 'கொழும்பு'),
-(6, 3, 'Galle', 'ගාල්ල', 'காலி'),
-(7, 1, 'Gampaha', 'ගම්පහ', 'கம்பஹா'),
-(8, 3, 'Hambantota', 'හම්බන්තොට', 'அம்பாந்தோட்டை'),
-(9, 9, 'Jaffna', 'යාපනය', 'யாழ்ப்பாணம்'),
-(10, 1, 'Kalutara', 'කළුතර', 'களுத்துறை'),
-(11, 2, 'Kandy', 'මහනුවර', 'கண்டி'),
-(12, 5, 'Kegalle', 'කෑගල්ල', 'கேகாலை'),
-(13, 9, 'Kilinochchi', 'කිලිනොච්චිය', 'கிளிநொச்சி'),
-(14, 4, 'Kurunegala', 'කුරුණෑගල', 'குருணாகல்'),
-(15, 9, 'Mannar', 'මන්නාරම', 'மன்னார்'),
-(16, 2, 'Matale', 'මාතලේ',  'மாத்தளை'),
-(17, 3, 'Matara', 'මාතර', 'மாத்தறை'),
-(18, 7, 'Monaragala', 'මොණරාගල', 'மொணராகலை'),
-(19, 9, 'Mullaitivu', 'මුලතිව්',  'முல்லைத்தீவு'),
-(20, 2, 'Nuwara Eliya', 'නුවර එළිය', 'நுவரேலியா'),
-(21, 8, 'Polonnaruwa', 'පොළොන්නරුව', 'பொலன்னறுவை'),
-(22, 4, 'Puttalam', 'පුත්තලම', 'புத்தளம்'),
-(23, 5, 'Ratnapura', 'රත්නපුර', 'இரத்தினபுரி'),
-(24, 6, 'Trincomalee', 'ත්‍රිකුණාමලය', 'திருகோணமலை'),
-(25, 9, 'Vavuniya', 'වව්නියාව', 'வவுனியா');
 
 -- 2. User & System Lookup Data
 
@@ -179,22 +143,6 @@ ON DUPLICATE KEY UPDATE
   `description`=VALUES(`description`),
   `status_id`=VALUES(`status_id`);
 
--- Users
-INSERT INTO `user` (`user_id`, `email`, `name`, `mobile_number`, `role_id`, `status_id`, `created_at`) VALUES
-(1, 'super_admin@rentallanka.com', 'superadmin', '0710476945', 1, 1, '2025-11-04 12:00:00'),
-(2, 'admin@rentallanka.com', 'admin', '0713018095', 2, 1, '2025-11-04 12:00:00'),
-(3, 'owner@rentallanka.com', 'owner1', '0718186333', 3, 1, '2025-11-04 12:00:00'),
-(4, 'customer@rentallanka.com', 'customer1', '0711111111', 4, 1, '2025-11-04 12:00:00');
-
--- Sample Bought Package for Testing (Owner has purchased a package with quotas)
--- This allows owner1 to test the system with available package quotas
-INSERT INTO `bought_package` (`bought_package_id`, `user_id`, `package_id`, `bought_date`, `expires_date`, `remaining_properties`, `remaining_rooms`, `remaining_vehicles`, `status_id`, `payment_status_id`) VALUES
-(1, 3, 1, '2025-12-01 10:00:00', '2026-01-01 10:00:00', 10, 10, 5, 1, 2)
-ON DUPLICATE KEY UPDATE 
-  `remaining_properties`=VALUES(`remaining_properties`),
-  `remaining_rooms`=VALUES(`remaining_rooms`),
-  `remaining_vehicles`=VALUES(`remaining_vehicles`);
-
 
 -- Vehicle Brands
 INSERT IGNORE INTO `vehicle_brand` (`brand_id`, `brand_name`) VALUES 
@@ -246,68 +194,4 @@ ON DUPLICATE KEY UPDATE `company_name`=`company_name`;
 INSERT INTO `admin_bank_account` (`account_id`, `bank_id`, `branch`, `account_number`, `account_holder_name`) VALUES
 (1, 3, 'Colombo Main', '1000123456', 'Rental Lanka PVT LTD')
 ON DUPLICATE KEY UPDATE `account_number`=`account_number`;
-
--- Properties
-INSERT INTO `property` (`property_id`, `property_code`, `owner_id`, `title`, `description`, `price_per_month`, `bedrooms`, `bathrooms`, `living_rooms`, `property_type_id`, `status_id`, `sqft`) VALUES
-(1, 'PROP001', 3, 'Luxury Villa in Colombo', 'Beautiful 3 bedroom villa with pool and garden in the heart of Colombo.', 150000.00, 3, 2, 1, 9, 1, 2500.00),
-(2, 'PROP002', 3, 'Cozy Apartment in Kandy', 'Modern 2 bedroom apartment with amazing view of the lake.', 85000.00, 2, 1, 1, 7, 1, 1200.00),
-(3, 'PROP003', 3, 'Beach Bungalow in Galle', 'Relaxing beachfront bungalow perfect for vacations.', 200000.00, 4, 3, 2, 13, 1, 3000.00)
-ON DUPLICATE KEY UPDATE `title`=`title`;
-
--- Property Location
-INSERT INTO `property_location` (`property_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`) VALUES
-(1, NULL, NULL, NULL, '123 Lotus Road', '00700'), -- Colombo 7 (Approximation)
-(2, NULL, NULL, NULL, '45/B Lake View', '20000'), -- Kandy
-(3, NULL, NULL, NULL, '10 Beach Road', '80000')  -- Galle
-ON DUPLICATE KEY UPDATE `address`=`address`;
-
--- Property Amenities
-INSERT INTO `property_amenity` (`property_id`, `amenity_id`) VALUES
-(1, 1), (1, 2), (1, 5), (1, 6), (1, 7), -- Villa: AC, WiFi, Pool, Gym, Parking
-(2, 1), (2, 2), (2, 7),             -- Apt: AC, WiFi, Parking
-(3, 1), (3, 2), (3, 4), (3, 5)      -- Bungalow: AC, WiFi, Kitchen, Pool
-ON DUPLICATE KEY UPDATE `property_id`=`property_id`;
-
--- Property Images
-INSERT INTO `property_image` (`property_id`, `primary_image`, `image_path`) VALUES
-(1, 1, 'public/assets/images/placeholder-property.jpg'),
-(2, 1, 'public/assets/images/placeholder-property.jpg'),
-(3, 1, 'public/assets/images/placeholder-property.jpg')
-ON DUPLICATE KEY UPDATE `image_path`=`image_path`;
-
--- Rooms
-INSERT INTO `room` (`room_id`, `room_code`, `owner_id`, `title`, `description`, `room_type_id`, `beds`, `bathrooms`, `maximum_guests`, `price_per_day`, `status_id`, `update_disable`) VALUES
-(1, 'ROOM001', 3, 'Ocean View Double Room', 'Spacious double room with sea view.', 6, 1, 1, 2, 5000.00, 1, 0),
-(2, 'ROOM002', 3, 'Budget Single Room', 'Clean and affordable single room for backpackers.', 5, 1, 1, 1, 2500.00, 1, 0)
-ON DUPLICATE KEY UPDATE `title`=`title`;
-
--- Room Location
-INSERT INTO `room_location` (`room_id`, `province_id`, `district_id`, `city_id`, `address`, `postal_code`) VALUES
-(1, NULL, NULL, NULL, 'No 5, Unawatuna', '80600'),
-(2, NULL, NULL, NULL, 'No 12, Ella Town', '90090')
-ON DUPLICATE KEY UPDATE `address`=`address`;
-
--- Room Amenities
-INSERT INTO `room_amenity` (`room_id`, `amenity_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 8), -- Double Room: AC, WiFi, TV, Hot Water
-(2, 2), (2, 8)                  -- Single Room: WiFi, Hot Water
-ON DUPLICATE KEY UPDATE `room_id`=`room_id`;
-
--- Room Meals
-INSERT INTO `room_meal` (`room_id`, `meal_type_id`, `price`) VALUES
-(1, 1, 500.00), (1, 2, 800.00), -- Room 1: Breakfast, Lunch
-(2, 1, 300.00)                -- Room 2: Breakfast
-ON DUPLICATE KEY UPDATE `price`=`price`;
-
--- Vehicles
-INSERT INTO `vehicle` (`vehicle_id`, `vehicle_code`, `owner_id`, `title`, `description`, `model_id`, `vehicle_type_id`, `fuel_type_id`, `transmission_type_id`, `pricing_type_id`, `price_per_day`, `price_per_km`, `status_id`, `color_id`, `license_plate`, `year`, `number_of_seats`) VALUES
-(1, 'VEH001', 3, 'Toyota Prius for Rent', 'Well maintained hybrid car for city run.', 2, 1, 4, 2, 1, 8000.00, 0.00, 1, 1, 'CAB-1234', 2020, 5),
-(2, 'VEH002', 3, 'Suzuki Alto Budget Car', 'Low fuel consumption, best for long trips.', 10, 1, 1, 1, 2, 0.00, 60.00, 1, 3, 'BCC-5678', 2019, 4)
-ON DUPLICATE KEY UPDATE `title`=`title`;
-
--- Vehicle Location
-INSERT INTO `vehicle_location` (`vehicle_id`, `city_id`, `address`, `postal_code`) VALUES
-(1, NULL, 'Nugegoda junction', '10250'),
-(2, NULL, 'Gampaha Town', '11000')
-ON DUPLICATE KEY UPDATE `address`=`address`;
 
