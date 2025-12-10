@@ -140,6 +140,16 @@ try {
                         <i class="bi bi-house-add"></i> Create Property
                     </a>
                 </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/room/create/room_create.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-door-open"></i> Create Room
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/vehicle/create/vehicle_create.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-car-front"></i> Create Vehicle
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -154,12 +164,12 @@ try {
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/owner/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                    <a href="<?= app_url('admin/users/owner/all/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-person-badge"></i> Manage Owners
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/customer/all_customers.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                    <a href="<?= app_url('admin/users/customer/all/all_customers.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-people"></i> Manage Customers
                     </a>
                 </div>
