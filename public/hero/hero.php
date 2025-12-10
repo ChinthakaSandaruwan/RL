@@ -24,7 +24,7 @@
                 <img src="<?= app_url('public/assets/images/hero_apartment.png') ?>" width="1920" height="600" class="d-block w-100" alt="Modern Apartment" loading="lazy">
                 <div class="hero-overlay">
                     <div class="hero-content">
-                        <h1 class="hero-title">Cozy Modern Living</h1>
+                        <h2 class="hero-title">Cozy Modern Living</h2>
                         <p class="hero-subtitle">Stylish apartments designed for comfort and convenience.</p>
                         <a href="#" class="btn hero-btn">View Apartments</a>
                     </div>
@@ -35,18 +35,18 @@
                 <img src="<?= app_url('public/assets/images/hero_vehicle.png') ?>" width="1920" height="600" class="d-block w-100" alt="Luxury Fleet" loading="lazy">
                 <div class="hero-overlay">
                     <div class="hero-content">
-                        <h1 class="hero-title">Travel in Style</h1>
+                        <h2 class="hero-title">Travel in Style</h2>
                         <p class="hero-subtitle">Premium vehicle rentals for your journey across the island.</p>
                         <a href="#" class="btn hero-btn">Rent a Car</a>
                     </div>
                 </div>
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Previous slide">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" aria-label="Next slide">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
         </button>

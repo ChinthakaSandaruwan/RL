@@ -90,7 +90,7 @@ if (isset($user) && $user) {
                             </div>
                             <div class="card-body">
                                 <span class="badge badge-theme mb-2"><?= htmlspecialchars($property['type_name'] ?? 'Property') ?></span>
-                                <h5 class="card-title"><?= htmlspecialchars($property['title']) ?></h5>
+                                <h3 class="card-title h5"><?= htmlspecialchars($property['title']) ?></h3>
                                 <p class="card-text text-muted"><?= htmlspecialchars(substr($property['description'], 0, 80)) ?>...</p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="price-tag">LKR <?= number_format($property['price_per_month'], 2) ?>/mo</span>

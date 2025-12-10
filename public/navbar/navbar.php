@@ -191,7 +191,7 @@
                     }
                     ?>
                     <li class="nav-item dropdown me-2">
-                        <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="View notifications">
                             <i class="bi bi-bell-fill" style="font-size: 1.2rem;"></i>
                             <?php if ($unread_count > 0): ?>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
@@ -258,7 +258,7 @@
                     }
                     ?>
                     <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="<?= app_url('public/wishlist/wishlist.php') ?>">
+                        <a class="nav-link position-relative" href="<?= app_url('public/wishlist/wishlist.php') ?>" aria-label="View wishlist">
                             <i class="bi bi-heart-fill" style="font-size: 1.2rem;"></i>
                             <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; <?= $wishlist_count > 0 ? '' : 'display:none;' ?>">
                                 <?= $wishlist_count > 99 ? '99+' : $wishlist_count ?>

@@ -71,10 +71,10 @@ if ($useStatic) {
 
         <div class="review-carousel-container position-relative">
             <!-- Navigation Buttons -->
-            <button class="btn btn-circle btn-white shadow-sm review-prev text-theme d-none d-md-flex">
+            <button class="btn btn-circle btn-white shadow-sm review-prev text-theme d-none d-md-flex" aria-label="Previous reviews">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <button class="btn btn-circle btn-white shadow-sm review-next text-theme d-none d-md-flex">
+            <button class="btn btn-circle btn-white shadow-sm review-next text-theme d-none d-md-flex" aria-label="Next reviews">
                 <i class="bi bi-chevron-right"></i>
             </button>
 

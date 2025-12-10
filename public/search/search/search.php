@@ -50,7 +50,7 @@ if ($s_province) {
                 <form action="<?= app_url('index.php') ?>" method="GET" id="mainSearchForm">
                     <div class="row g-4">
                         <div class="col-12">
-                            <h3 class="mb-4 fw-bold text-dark"><i class="bi bi-search me-2 text-primary"></i>Find Your Perfect Place</h3>
+                            <h2 class="mb-4 fw-bold text-dark h3"><i class="bi bi-search me-2 text-primary"></i>Find Your Perfect Place</h2>
                         </div>
                         
                         <!-- Keyword -->
@@ -64,10 +64,10 @@ if ($s_province) {
 
                         <!-- Category -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Searching For</label>
+                            <label for="search_category" class="form-label fw-bold text-muted small text-uppercase">Searching For</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-grid text-primary"></i></span>
-                                <select name="category" class="form-select fw-semibold border-start-0 ps-0">
+                                <select name="category" id="search_category" class="form-select fw-semibold border-start-0 ps-0" aria-label="Select category">
                                     <option value="">All Categories</option>
                                     <option value="property" <?= $s_category == 'property' ? 'selected' : '' ?>>Property</option>
                                     <option value="room" <?= $s_category == 'room' ? 'selected' : '' ?>>Room</option>
@@ -78,8 +78,8 @@ if ($s_province) {
 
                         <!-- Location Group -->
                         <div class="col-md-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Province</label>
-                            <select name="province" id="search_province" class="form-select">
+                            <label for="search_province" class="form-label fw-bold text-muted small text-uppercase">Province</label>
+                            <select name="province" id="search_province" class="form-select" aria-label="Select province">
                                 <option value="" data-image="default_map.jpg">All Provinces</option>
                                 <?php foreach ($search_provinces as $p): ?>
                                     <option value="<?= $p['id'] ?>" 
@@ -92,16 +92,16 @@ if ($s_province) {
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase">District</label>
-                            <select name="district" id="search_district" class="form-select" <?= empty($s_district) ? 'disabled' : '' ?>>
+                            <label for="search_district" class="form-label fw-bold text-muted small text-uppercase">District</label>
+                            <select name="district" id="search_district" class="form-select" aria-label="Select district" <?= empty($s_district) ? 'disabled' : '' ?>>
                                 <option value="">All Districts</option>
                                 <!-- Populated by JS -->
                             </select>
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase">City</label>
-                            <select name="city" id="search_city" class="form-select" <?= empty($s_city) ? 'disabled' : '' ?>>
+                            <label for="search_city" class="form-label fw-bold text-muted small text-uppercase">City</label>
+                            <select name="city" id="search_city" class="form-select" aria-label="Select city" <?= empty($s_city) ? 'disabled' : '' ?>>
                                 <option value="">All Cities</option>
                                 <!-- Populated by JS -->
                             </select>

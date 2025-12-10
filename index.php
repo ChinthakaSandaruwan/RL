@@ -116,6 +116,7 @@ $user = current_user();
 <body class="bg-light">
 <?php require __DIR__ . '/public/navbar/navbar.php'; ?>
 
+<main id="main-content">
 <?php require __DIR__ . '/public/hero/hero.php'; ?>
 
 <?php require __DIR__ . '/public/search/search/search.php'; ?>
@@ -128,6 +129,7 @@ $user = current_user();
 <?php require __DIR__ . '/public/vehicle/load/load_vehicle.php'; ?>
 <br><br><br>
 <?php require __DIR__ . '/public/review/review.php'; ?>
+</main>
 
 <?php require __DIR__ . '/public/footer/footer.php'; ?>
 

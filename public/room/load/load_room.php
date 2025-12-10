@@ -89,7 +89,7 @@ if (isset($user) && $user) {
                             </div>
                             <div class="card-body">
                                 <span class="badge badge-theme mb-2">Room</span>
-                                <h5 class="card-title"><?= htmlspecialchars($room['title']) ?></h5>
+                                <h3 class="card-title h5"><?= htmlspecialchars($room['title']) ?></h3>
                                 <p class="card-text text-muted"><?= htmlspecialchars(substr($room['description'], 0, 80)) ?>...</p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="price-tag">LKR <?= number_format($room['price_per_day'], 2) ?>/night</span>
