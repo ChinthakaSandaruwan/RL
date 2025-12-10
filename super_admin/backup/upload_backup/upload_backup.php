@@ -25,29 +25,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_backup'])) {
     if (!$sourceDir || !is_dir($sourceDir)) {
         $error = "Uploads directory not found.";
     } else {
-        $zip = new ZipArchive();
-        if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($sourceDir),
-                RecursiveIteratorIterator::LEAVES_ONLY
-            );
+        // Check if directory is empty
+        $isEmpty = (count(scandir($sourceDir)) == 2);
+        
+        if ($isEmpty) {
+             // Directory is empty (only . and ..)
+             // We can either return error or create a zip with a placeholder
+             // Let's create a placeholder file to prevent zip failure
+             $placeholder = $sourceDir . '/README.txt';
+             file_put_contents($placeholder, "Backup generated on " . date('Y-m-d H:i:s') . ".\nThe uploads directory was empty.");
+        }
 
-            foreach ($files as $name => $file) {
-                // Skip directories (they would be added automatically)
-                if (!$file->isDir()) {
-                    // Get real and relative path for current file
-                    $filePath = $file->getRealPath();
-                    $relativePath = substr($filePath, strlen($sourceDir) + 1);
+        if (class_exists('ZipArchive')) {
+            // Use PHP ZipArchive
+            $zip = new ZipArchive();
+            if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($sourceDir),
+                    RecursiveIteratorIterator::LEAVES_ONLY
+                );
 
-                    // Add current file to archive
-                    $zip->addFile($filePath, $relativePath);
+                foreach ($files as $name => $file) {
+                    if (!$file->isDir()) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($sourceDir) + 1);
+                        $zip->addFile($filePath, $relativePath);
+                    }
                 }
+
+                $zip->close();
+            } else {
+                $error = "Could not initialize ZipArchive.";
             }
+        } elseif (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // Fallback for Windows: Use PowerShell
+            // Use 2>&1 to capture error output
+            // We strip trailing slash from sourceDir for consistency
+            $sourceDirClean = rtrim($sourceDir, '\\/');
+            $command = "powershell -Command \"Compress-Archive -Path '$sourceDirClean\*' -DestinationPath '$zipFilePath' -Force\" 2>&1";
+            exec($command, $output, $returnCode);
+            
+            if ($returnCode !== 0) {
+                 $error = "Failed to create zip file using PowerShell. Output: " . implode("\n", $output);
+            }
+        } else {
+             // Fallback for Linux/Mac: Use zip command
+             $command = "cd '$sourceDir' && zip -r '$zipFilePath' . 2>&1";
+             exec($command, $output, $returnCode);
+             if ($returnCode !== 0) {
+                 $error = "Failed to create zip using system command. Output: " . implode("\n", $output);
+             }
+        }
+        
+        // Remove placeholder if we created it
+        if (isset($placeholder) && file_exists($placeholder)) {
+            unlink($placeholder);
+        }
 
-            $zip->close();
-
-            if (file_exists($zipFilePath)) {
+        // Check if file was created successfully
+        if (empty($error) && file_exists($zipFilePath)) {
+            if (filesize($zipFilePath) > 0) {
                 // Serve the file
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/zip');
@@ -64,10 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_backup'])) {
                 unlink($zipFilePath);
                 exit;
             } else {
-                $error = "Failed to create zip file.";
+                $error = "Zip file was created but is empty.";
+                unlink($zipFilePath);
             }
-        } else {
-            $error = "Could not initialize ZipArchive.";
+        } elseif (empty($error)) {
+            $error = "Zip file was not created. Please check permissions.";
         }
     }
 }
