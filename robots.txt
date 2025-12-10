@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /super_admin/
+Disallow: /owner/
+Disallow: /customer/
+Disallow: /includes/
+Disallow: /config/
+Disallow: /vendor/
+Disallow: *.sql
+Disallow: *.zip
+
+Sitemap: http://localhost/RL/sitemap.php

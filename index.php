@@ -42,8 +42,27 @@ $user = current_user();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rental Lanka</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Lanka - Rent Properties, Rooms & Vehicles in Sri Lanka</title>
+    <meta name="description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka. Connect with owners, find your dream home or ride, and experience seamless rentals.">
+    <meta name="keywords" content="rent sri lanka, house for rent, room for rent, vehicle rental sri lanka, car hire, property rental, colombo apartments, rental lanka">
+    <meta name="author" content="Rental Lanka">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="<?= app_url() ?>">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= app_url() ?>">
+    <meta property="og:title" content="Rental Lanka - Rent Properties, Rooms & Vehicles in Sri Lanka">
+    <meta property="og:description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka. Connect with owners, find your dream home or ride.">
+    <meta property="og:image" content="<?= app_url('public/assets/images/hero_house.png') ?>">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<?= app_url() ?>">
+    <meta property="twitter:title" content="Rental Lanka - Rent Properties, Rooms & Vehicles in Sri Lanka">
+    <meta property="twitter:description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka.">
+    <meta property="twitter:image" content="<?= app_url('public/assets/images/hero_house.png') ?>">
+
     <link rel="apple-touch-icon" sizes="180x180" href="<?= app_url('public/favicon/apple-touch-icon.png') ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="<?= app_url('public/favicon/favicon-32x32.png') ?>">
     <link rel="icon" type="image/png" sizes="16x16" href="<?= app_url('public/favicon/favicon-16x16.png') ?>">
@@ -51,6 +70,35 @@ $user = current_user();
     <link rel="icon" type="image/png" sizes="512x512" href="<?= app_url('public/favicon/android-chrome-512x512.png') ?>">
     <link rel="shortcut icon" href="<?= app_url('public/favicon/favicon.ico') ?>">
     <link rel="manifest" href="<?= app_url('public/favicon/site.webmanifest') ?>">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Rental Lanka",
+      "url": "<?= app_url() ?>",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "<?= app_url('search.php?q={search_term_string}') ?>",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Rental Lanka",
+      "url": "<?= app_url() ?>",
+      "logo": "<?= app_url('public/assets/images/logo.png') ?>", 
+      "sameAs": [
+        "https://www.facebook.com/rentallanka",
+        "https://twitter.com/rentallanka",
+        "https://www.instagram.com/rentallanka"
+      ]
+    }
+    </script>
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= app_url('public/footer/footer.css') ?>">
