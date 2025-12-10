@@ -152,17 +152,17 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/property/create/property_create.php') ?>" class="btn btn-outline-success w-100 py-3">
+                    <a href="<?= app_url('owner/property/manage/create/property_create.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-plus-circle"></i> Add Property
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/room/create/room_create.php') ?>" class="btn btn-outline-info w-100 py-3">
+                    <a href="<?= app_url('owner/room/manage/create/room_create.php') ?>" class="btn btn-outline-info w-100 py-3">
                         <i class="bi bi-plus-circle"></i> Add Room
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="<?= app_url('owner/vehicle/create/vehicle_create.php') ?>" class="btn btn-outline-warning w-100 py-3">
+                    <a href="<?= app_url('owner/vehicle/manage/create/vehicle_create.php') ?>" class="btn btn-outline-warning w-100 py-3">
                         <i class="bi bi-plus-circle"></i> Add Vehicle
                     </a>
                 </div>

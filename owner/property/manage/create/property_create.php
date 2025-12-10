@@ -148,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Inline minimal CSS for specific form elements -->
     <style>
         .amenity-card {
+            position: relative;
             border: 1px solid #eee;
             border-radius: 8px;
             padding: 10px;
@@ -240,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                         <label class="form-label mb-2">Amenities</label>
-                        <div class="row g-2">
+                        <div class="row g-3">
                             <?php foreach ($amenities as $a): ?>
                             <div class="col-6 col-md-3">
                                 <div class="form-check amenity-card">
