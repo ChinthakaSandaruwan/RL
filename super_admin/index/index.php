@@ -50,10 +50,10 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
     <!-- Statistics Cards -->
     <div class="row g-4 mb-5">
         <div class="col-md-3">
-            <div class="card stat-card shadow-sm h-100 border-danger">
+            <div class="card stat-card shadow-sm h-100 border-success">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">Total Admins</h6>
-                    <h2 class="fw-bold text-danger"><?= number_format($totalAdmins) ?></h2>
+                    <h2 class="fw-bold text-success"><?= number_format($totalAdmins) ?></h2>
                     <small class="text-muted">System Administrators</small>
                 </div>
             </div>
@@ -128,25 +128,13 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('super_admin/user/admin/all_admins.php') ?>" class="btn btn-outline-danger w-100 py-3">
+                    <a href="<?= app_url('super_admin/user/admin/all_admins.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-shield-lock"></i> Manage Admins
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/owner/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
-                        <i class="bi bi-person-badge"></i> View Owners
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/customer/all_customers.php') ?>" class="btn btn-outline-success w-100 py-3">
-                        <i class="bi bi-people"></i> View Customers
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/index/index.php') ?>" class="btn btn-outline-secondary w-100 py-3">
-                        <i class="bi bi-speedometer2"></i> Admin Dashboard
-                    </a>
-                </div>
+ 
+              
+              
             </div>
         </div>
     </div>
@@ -158,26 +146,7 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/amenity/amenity.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-tools"></i> Amenities
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/vehicle/vehicle_type/vehicle_type.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-car-front"></i> Vehicle Types
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/vehicle/vehicle_brand/vehicle_brand.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-copyright"></i> Vehicle Brands
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/available_meals_&_prices/meal_type.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-egg-fried"></i> Meal Types
-                    </a>
-                </div>
+               
                 <div class="col-md-3">
                     <a href="<?= app_url('super_admin/backup/database_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
                         <i class="bi bi-database-down"></i> Database Backup
