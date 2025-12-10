@@ -1,0 +1,20 @@
+/* Create Owner Styles */
+.form-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--hunter-green);
+}
+
+.profile-preview {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--fern);
+    margin-bottom: 1rem;
+}

@@ -164,23 +164,18 @@ try {
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/owner/all/all_owners.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                    <a href="<?= app_url('admin/users/admin/manage/manage.php') ?>" class="btn btn-outline-danger w-100 py-3">
+                        <i class="bi bi-shield-lock"></i> Manage Admins
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/users/owner/manage/manage.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-person-badge"></i> Manage Owners
                     </a>
                 </div>
                 <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/customer/all/all_customers.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                    <a href="<?= app_url('admin/users/customer/manage/manage.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-people"></i> Manage Customers
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/customer/customer_stauts/status_change.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-person-gear"></i> Customer Status
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="<?= app_url('admin/users/owner/owner_stauts/status_change.php') ?>" class="btn btn-outline-info w-100 py-3">
-                        <i class="bi bi-person-gear"></i> Owner Status
                     </a>
                 </div>
             </div>
