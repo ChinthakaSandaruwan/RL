@@ -1,43 +1,49 @@
 :root {
-    --hunter-green: #355E3B;
-    /* Primary Theme Color */
-    --fern: #4F7942;
-    /* Secondary Theme Color */
+    --hunter-green: #3a5a40;
+    --fern-green: #588157;
+    --sage: #a3b18a;
+    --light-bg: #f8f9fa;
 }
 
 body {
-    background-color: #f8f9fa;
+    background-color: var(--light-bg);
+}
+
+.text-hunter-green {
+    color: var(--hunter-green) !important;
 }
 
 .card {
-    border-radius: 0.75rem;
+    border-radius: 1rem;
 }
 
-.card-title {
-    color: var(--hunter-green);
-}
-
-.btn-primary {
-    background-color: var(--fern);
-    border-color: var(--fern);
-}
-
-.btn-primary:hover {
+.btn-theme {
     background-color: var(--hunter-green);
     border-color: var(--hunter-green);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-theme:hover {
+    background-color: var(--fern-green);
+    border-color: var(--fern-green);
+    color: white;
+    transform: translateY(-2px);
 }
 
 .form-control:focus {
-    border-color: var(--fern);
-    box-shadow: 0 0 0 0.25rem rgba(79, 121, 66, 0.25);
+    border-color: var(--sage);
+    box-shadow: 0 0 0 0.25rem rgba(163, 177, 138, 0.25);
 }
 
-.flatpickr-day.selected {
-    background: var(--fern) !important;
-    border-color: var(--fern) !important;
-}
-
-/* Summary Box */
-#summary_total {
-    color: var(--hunter-green) !important;
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+    background: var(--fern-green) !important;
+    border-color: var(--fern-green) !important;
 }

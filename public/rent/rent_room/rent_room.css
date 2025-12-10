@@ -1,347 +1,46 @@
-/* Room Rental Booking Page - Premium Modern Design */
-
 :root {
-    --primary-color: #0d6efd;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #0dcaf0;
-    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --hunter-green: #3a5a40;
+    --fern-green: #588157;
+    --sage: #a3b18a;
+    --light-bg: #f8f9fa;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+    background-color: var(--light-bg);
 }
 
-/* Cards */
+.text-hunter-green {
+    color: var(--hunter-green) !important;
+}
+
+.bg-soft-success {
+    background-color: rgba(88, 129, 87, 0.1);
+}
+
 .card {
-    border-radius: 16px;
-    overflow: hidden;
-    transition: var(--transition);
+    border-radius: 1rem;
 }
 
-.card:hover {
+.btn-theme {
+    background-color: var(--hunter-green);
+    border-color: var(--hunter-green);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-theme:hover {
+    background-color: var(--fern-green);
+    border-color: var(--fern-green);
+    color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
 }
 
-.card-img-top {
-    height: 250px;
-    object-fit: cover;
-    border-radius: 16px 16px 0 0;
+.form-control:focus {
+    border-color: var(--sage);
+    box-shadow: 0 0 0 0.25rem rgba(163, 177, 138, 0.25);
 }
 
-/* Form Controls */
-.form-control,
-.form-select {
-    border-radius: 12px;
-    border: 2px solid #e9ecef;
-    padding: 12px 16px;
-    transition: var(--transition);
-    font-size: 15px;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
-    transform: translateY(-1px);
-}
-
-.form-control-lg {
-    padding: 14px 18px;
-    font-size: 16px;
-}
-
-.form-label {
-    margin-bottom: 8px;
-    color: #2c3e50;
-    font-size: 14px;
-    letter-spacing: 0.3px;
-}
-
-/* Buttons */
-.btn {
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    transition: var(--transition);
-    border: none;
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-lg {
-    padding: 16px 32px;
-    font-size: 17px;
-    border-radius: 14px;
-}
-
-.btn-success {
-    background: var(--gradient-success);
-    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
-}
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
-}
-
-.btn-success:active {
-    transform: translateY(0);
-}
-
-/* Alerts */
-.alert {
-    border-radius: 12px;
-    border: none;
-    padding: 16px 20px;
-    box-shadow: var(--shadow-sm);
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.alert-success {
-    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-    color: #155724;
-}
-
-.alert-danger {
-    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-    color: #721c24;
-}
-
-.alert-info {
-    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-    color: #0c5460;
-}
-
-/* Badges */
-.badge {
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-    box-shadow: var(--shadow-sm);
-}
-
-/* Breadcrumb */
-.breadcrumb {
-    background: white;
-    border-radius: 12px;
-    padding: 12px 20px;
-    box-shadow: var(--shadow-sm);
-}
-
-.breadcrumb-item a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.breadcrumb-item a:hover {
-    color: #0a58ca;
-    text-decoration: underline;
-}
-
-/* Pricing Summary Card */
-.card.bg-light {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-    border-radius: 14px;
-    padding: 4px;
-}
-
-.card.bg-light .card-body {
-    background: white;
-    border-radius: 12px;
-}
-
-#grandTotal {
-    font-size: 1.5rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Sticky Sidebar */
-.sticky-top {
-    top: 20px !important;
-}
-
-/* Room Features Icons */
-.bi {
-    transition: var(--transition);
-}
-
-.card-body .row.g-2 .col-4:hover .bi {
-    transform: scale(1.2);
-    color: var(--primary-color) !important;
-}
-
-/* Input Icons */
-.form-label i {
-    font-size: 14px;
-}
-
-/* Special hover effects for inputs */
-.form-control:hover,
-.form-select:hover {
-    border-color: #cbd5e0;
-}
-
-/* Disabled state styling */
-form[style*="opacity"] {
-    cursor: not-allowed;
-}
-
-/* Responsive adjustments */
-@media (max-width: 991px) {
-    .sticky-top {
-        position: relative !important;
-        top: 0 !important;
-    }
-
-    .card-img-top {
-        height: 200px;
-    }
-}
-
-@media (max-width: 576px) {
-    .btn-lg {
-        padding: 14px 24px;
-        font-size: 16px;
-    }
-
-    .form-control-lg {
-        padding: 12px 16px;
-    }
-
-    .card-body {
-        padding: 1.25rem !important;
-    }
-}
-
-/* Loading animation for form submission */
-.btn-success:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* HR styling */
-hr {
-    border-top: 2px solid #e9ecef;
-    opacity: 1;
-    margin: 1.25rem 0;
-}
-
-/* Text animations */
-h2,
-h4,
-h5 {
-    animation: fadeInUp 0.5s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Tooltip-like price display */
-.text-primary {
-    position: relative;
-}
-
-/* Enhanced shadow on focus */
-.form-control:focus,
-.form-select:focus,
-.btn:focus {
-    outline: none;
-}
-
-/* Smooth transitions for all interactive elements */
-* {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* Meal row toggle */
-#mealRow {
-    transition: var(--transition);
-}
-
-/* Form validation states */
-.was-validated .form-control:valid,
-.form-control.is-valid {
-    border-color: var(--success-color);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-.was-validated .form-control:invalid,
-.form-control.is-invalid {
-    border-color: var(--danger-color);
-}
-
-/* Print styles */
-@media print {
-
-    .btn,
-    nav,
-    .breadcrumb {
-        display: none;
-    }
-
-    .card {
-        box-shadow: none;
-        border: 1px solid #dee2e6;
-    }
+.flatpickr-day.selected {
+    background: var(--fern-green) !important;
+    border-color: var(--fern-green) !important;
 }

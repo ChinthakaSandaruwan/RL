@@ -6,16 +6,8 @@ ensure_session_started();
 $user = current_user();
 if (!$user) {
     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . app_url('auth/login.php'));
+    header("Location: " . app_url('auth/login/index.php'));
     exit;
-}
-
-if ($user['role_id'] != 4) { // Assuming 4 is Customer
-    // Optionally allow owners to rent too? Schema says customer_id -> user_id. 
-    // Usually only customers rent. But let's check role.
-    // Use flash message?
-    // header("Location: " . app_url('index.php'));
-    // exit;
 }
 
 $vehicle_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -48,8 +40,6 @@ if (!$vehicle) {
 
 // 3. Handle Post
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // CSRF Check (if implemented, skipping for brevity but recommended)
-    
     $pickupStr = $_POST['pickup_date'] ?? '';
     $dropoffStr = $_POST['dropoff_date'] ?? '';
     $withDriver = isset($_POST['with_driver']) ? 1 : 0;
@@ -58,46 +48,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$pickupStr || !$dropoffStr) {
         $error = "Please select pickup and dropoff dates.";
     } else {
-        $pickup = new DateTime($pickupStr);
-        $dropoff = new DateTime($dropoffStr);
-        $now = new DateTime();
-        
-        if ($pickup < $now) {
-            // Allow today just in case of timezone drift, maybe create logic?
-            // strict: $error = "Pickup date cannot be in the past.";
-        }
-        
-        if ($dropoff < $pickup) {
-            $error = "Dropoff date must be after pickup date.";
-        }
-        
-        if (!$error) {
-            // Calculate Duration
-            // Logic: 1 day minimum. 
-            // If hours diff > 24, counts as multiple days.
-            // Simple: Ceil of days.
-            $interval = $pickup->diff($dropoff);
-            $days = $interval->days;
-            if ($interval->h > 0 || $interval->i > 0) $days++; // Any part of next day counts?
-            // Or just simplified Date logic
+        try {
+            $pickup = new DateTime($pickupStr);
+            $dropoff = new DateTime($dropoffStr);
+            $now = new DateTime();
             
-            // Re-calc logic:
-            $diffSeconds = $dropoff->getTimestamp() - $pickup->getTimestamp();
-            $rentDays = ceil($diffSeconds / (24 * 3600));
-            if ($rentDays < 1) $rentDays = 1;
-            
-            // Calculate Cost
-            $basePrice = $vehicle['price_per_day'] * $rentDays;
-            $driverFee = 0;
-            
-            if ($withDriver && $vehicle['is_driver_available']) {
-                $driverFee = $vehicle['driver_cost_per_day'] * $rentDays;
+            if ($pickup >= $dropoff) {
+                $error = "Dropoff date must be after pickup date.";
+            } elseif ($pickup < $now) {
+                // Optional: prevent past booking
+                // $error = "Pickup date cannot be in the past."; 
             }
             
-            $total = $basePrice + $driverFee;
+            if (!$error) {
+                // --- OVERLAP CHECK ---
+                // Status: 2 (Pending), 3 (Approved). Adjust if your DB uses different IDs.
+                // Overlap Logic: (StartA < EndB) AND (EndA > StartB)
+                $sqlOverlap = "SELECT COUNT(*) FROM vehicle_rent 
+                               WHERE vehicle_id = ? 
+                               AND status_id IN (2, 3) 
+                               AND (pickup_date < ? AND dropoff_date > ?)";
+                $stmtCheck = $pdo->prepare($sqlOverlap);
+                $stmtCheck->execute([
+                    $vehicle_id, 
+                    $dropoff->format('Y-m-d H:i:s'), 
+                    $pickup->format('Y-m-d H:i:s')
+                ]);
+                
+                if ($stmtCheck->fetchColumn() > 0) {
+                    $error = "This vehicle is already booked or pending approval for the selected dates. Please choose different dates.";
+                }
+            }
             
-            // Insert
-            try {
+            if (!$error) {
+                // Calculate Duration & Cost
+                $diffSeconds = $dropoff->getTimestamp() - $pickup->getTimestamp();
+                $rentDays = ceil($diffSeconds / (24 * 3600));
+                if ($rentDays < 1) $rentDays = 1;
+                
+                $basePrice = $vehicle['price_per_day'] * $rentDays;
+                $driverFee = ($withDriver && $vehicle['is_driver_available']) ? ($vehicle['driver_cost_per_day'] * $rentDays) : 0;
+                $total = $basePrice + $driverFee;
+                
+                // Insert
                 $pdo->beginTransaction();
                 
                 $sql = "INSERT INTO vehicle_rent 
@@ -118,15 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->commit();
                 
-                // Redirect ?
-                // $success = "Booking placed successfully!";
-                header("Location: " . app_url('public/profile/profile.php?tab=rents')); // Assuming this exists
+                // Redirect to my_rents tab
+                header("Location: " . app_url('public/my_rent/my_rent.php')); 
                 exit;
-                
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                $error = "Booking failed: " . $e->getMessage();
             }
+            
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $error = "Booking error: " . $e->getMessage();
         }
     }
 }
@@ -140,7 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="rent_vehicle.css">
-    <!-- Flatpickr for Date Time -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body class="bg-light">
@@ -150,17 +141,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <h2 class="mb-4 fw-bold text-dark">Rent Vehicle</h2>
+            <h2 class="mb-4 fw-bold text-hunter-green">Rent Vehicle</h2>
             
             <?php if ($error): ?>
-                <div class="alert alert-danger"><?= $error ?></div>
+                <div class="alert alert-danger shadow-sm border-0"><?= $error ?></div>
             <?php endif; ?>
 
             <div class="row g-4">
                 <!-- Vehicle Summary -->
                 <div class="col-md-5">
-                    <div class="card shadow-sm border-0 h-100">
-                        <!-- Fetch primary image -->
+                    <div class="card shadow-sm border-0 h-100 overflow-hidden">
                         <?php 
                         $stmtImg = $pdo->prepare("SELECT image_path FROM vehicle_image WHERE vehicle_id = ? ORDER BY primary_image DESC LIMIT 1");
                         $stmtImg->execute([$vehicle_id]);
@@ -169,16 +159,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ?>
                         <img src="<?= $imgUrl ?>" class="card-img-top" alt="Vehicle" style="height: 200px; object-fit: cover;">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold"><?= htmlspecialchars($vehicle['brand_name'] . ' ' . $vehicle['model_name']) ?></h5>
+                            <h5 class="card-title fw-bold text-hunter-green"><?= htmlspecialchars($vehicle['brand_name'] . ' ' . $vehicle['model_name']) ?></h5>
                             <p class="text-muted small mb-3"><?= htmlspecialchars($vehicle['title']) ?></p>
                             
                             <ul class="list-group list-group-flush small">
-                                <li class="list-group-item d-flex justify-content-between px-0">
+                                <li class="list-group-item d-flex justify-content-between px-0 bg-transparent">
                                     <span>Rate (Per Day)</span>
                                     <span class="fw-bold">LKR <?= number_format($vehicle['price_per_day'], 2) ?></span>
                                 </li>
                                 <?php if ($vehicle['is_driver_available']): ?>
-                                <li class="list-group-item d-flex justify-content-between px-0">
+                                <li class="list-group-item d-flex justify-content-between px-0 bg-transparent">
                                     <span>Driver Fee (Per Day)</span>
                                     <span class="fw-bold">LKR <?= number_format($vehicle['driver_cost_per_day'], 2) ?></span>
                                 </li>
@@ -196,19 +186,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <h5 class="fw-bold mb-3 text-secondary">Booking Details</h5>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Pickup Date & Time</label>
-                                    <input type="datetime-local" name="pickup_date" id="pickup_date" class="form-control" required>
+                                    <label class="form-label text-muted fw-bold small">Pickup Date & Time</label>
+                                    <input type="datetime-local" name="pickup_date" id="pickup_date" class="form-control" required value="<?= htmlspecialchars($_POST['pickup_date'] ?? '') ?>">
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Dropoff Date & Time</label>
-                                    <input type="datetime-local" name="dropoff_date" id="dropoff_date" class="form-control" required>
+                                    <label class="form-label text-muted fw-bold small">Dropoff Date & Time</label>
+                                    <input type="datetime-local" name="dropoff_date" id="dropoff_date" class="form-control" required value="<?= htmlspecialchars($_POST['dropoff_date'] ?? '') ?>">
                                 </div>
 
                                 <?php if ($vehicle['is_driver_available']): ?>
                                 <div class="mb-3">
                                     <div class="form-check p-3 border rounded bg-light">
-                                        <input class="form-check-input" type="checkbox" name="with_driver" id="with_driver" value="1">
+                                        <input class="form-check-input" type="checkbox" name="with_driver" id="with_driver" value="1" <?= isset($_POST['with_driver']) ? 'checked' : '' ?>>
                                         <label class="form-check-label fw-bold" for="with_driver">
                                             Request Driver
                                             <div class="small fw-normal text-muted">Additional LKR <?= number_format($vehicle['driver_cost_per_day']) ?> per day</div>
@@ -218,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?php endif; ?>
 
                                 <!-- Live Summary -->
-                                <div class="bg-light p-3 rounded mb-4">
+                                <div class="bg-light p-3 rounded mb-4 border border-light">
                                     <div class="d-flex justify-content-between mb-1">
                                         <span>Duration:</span>
                                         <span id="summary_days">0 Days</span>
@@ -233,14 +223,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <span id="summary_driver">LKR 0.00</span>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="border-top mt-2 pt-2 d-flex justify-content-between fw-bold fs-5">
+                                    <div class="border-top mt-2 pt-2 d-flex justify-content-between fw-bold fs-5 text-hunter-green">
                                         <span>Total:</span>
-                                        <span class="text-success" id="summary_total">LKR 0.00</span>
+                                        <span id="summary_total">LKR 0.00</span>
                                     </div>
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg shadow-sm" style="background-color: var(--fern); border-color: var(--fern);">
+                                    <button type="submit" class="btn btn-theme btn-lg shadow-sm">
                                         Confirm Booking
                                     </button>
                                 </div>
@@ -253,7 +243,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- JS Data -->
 <script>
     const PRICE_PER_DAY = <?= (float)$vehicle['price_per_day'] ?>;
     const DRIVER_COST = <?= (float)($vehicle['driver_cost_per_day'] ?? 0) ?>;

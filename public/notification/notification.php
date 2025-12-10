@@ -27,6 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all_read'])) {
     exit;
 }
 
+// Delete notification
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_notification'])) {
+    $notifId = intval($_POST['notification_id']);
+    $stmt = $pdo->prepare("DELETE FROM notification WHERE notification_id = ? AND user_id = ?");
+    $stmt->execute([$notifId, $user['user_id']]);
+    header('Location: ' . app_url('public/notification/notification.php'));
+    exit;
+}
+
 // Fetch notifications (paginated)
 $page = intval($_GET['page'] ?? 1);
 $perPage = 10;
@@ -113,14 +122,22 @@ $unreadCount = $unreadStmt->fetchColumn();
                                     </div>
                                     <p class="mb-2 ms-5"><?= nl2br(htmlspecialchars($notif['message'])) ?></p>
                                 </div>
-                                <?php if (!$notif['is_read']): ?>
-                                    <form method="POST" class="ms-3">
-                                        <input type="hidden" name="notification_id" value="<?= $notif['notification_id'] ?>">
-                                        <button type="submit" name="mark_read" class="btn btn-sm btn-outline-success" title="Mark as read">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
+                                    <div class="d-flex align-items-center">
+                                        <?php if (!$notif['is_read']): ?>
+                                            <form method="POST" class="ms-3">
+                                                <input type="hidden" name="notification_id" value="<?= $notif['notification_id'] ?>">
+                                                <button type="submit" name="mark_read" class="btn btn-sm btn-outline-success" title="Mark as read">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form method="POST" class="ms-2" onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                                            <input type="hidden" name="notification_id" value="<?= $notif['notification_id'] ?>">
+                                            <button type="submit" name="delete_notification" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                             </div>
                         </div>
                     <?php endforeach; ?>

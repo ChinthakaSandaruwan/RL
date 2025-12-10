@@ -242,7 +242,7 @@ $user = current_user();
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <a href="<?= app_url('public/rent/rent_room/rent_room.php?room_id=' . $room_id) ?>" class="btn btn-theme btn-lg">
+                        <a href="<?= app_url('public/rent/rent_room/rent_room.php?id=' . $room_id) ?>" class="btn btn-theme btn-lg">
                             <i class="bi bi-house-check-fill me-2"></i> Rent Now
                         </a>
                         <a href="tel:<?= htmlspecialchars($room['owner_phone']) ?>" class="btn btn-outline-theme">
