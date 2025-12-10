@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/../../config/db.php';
+require __DIR__ . '/../../services/email.php';
 
 ensure_session_started();
 $user = current_user();
@@ -29,8 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestId = intval($_POST['request_id'] ?? 0);
 
     if ($action === 'approve') {
-        // Get request details
-        $stmt = $pdo->prepare("SELECT * FROM user_type_change_request WHERE request_id = ? AND status_id = 1");
+        // Get request details with user info
+        $stmt = $pdo->prepare("
+            SELECT r.*, u.name, u.email, ur.role_name as requested_role_name 
+            FROM user_type_change_request r
+            JOIN user u ON r.user_id = u.user_id
+            LEFT JOIN user_role ur ON r.requested_role_id = ur.role_id
+            WHERE r.request_id = ? AND r.status_id = 1
+        ");
         $stmt->execute([$requestId]);
         $request = $stmt->fetch();
 
@@ -45,17 +52,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("UPDATE user_type_change_request SET status_id = 2, processed_at = NOW(), processed_by = ? WHERE request_id = ?");
                 $stmt->execute([$user['user_id'], $requestId]);
 
+                // Send approval email
+                send_user_type_approved_email(
+                    $request['email'], 
+                    $request['name'], 
+                    $request['requested_role_name']
+                );
+
                 $pdo->commit();
-                $success = 'Request approved successfully. User is now an Owner.';
+                $success = 'Request approved successfully and notification email sent.';
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $errors[] = 'Failed to approve request: ' . $e->getMessage();
             }
         }
     } elseif ($action === 'reject') {
-        $stmt = $pdo->prepare("UPDATE user_type_change_request SET status_id = 3, processed_at = NOW(), processed_by = ? WHERE request_id = ?");
-        $stmt->execute([$user['user_id'], $requestId]);
-        $success = 'Request rejected.';
+        // Get request details with user info for email
+        $stmt = $pdo->prepare("
+            SELECT r.*, u.name, u.email, ur.role_name as requested_role_name 
+            FROM user_type_change_request r
+            JOIN user u ON r.user_id = u.user_id
+            LEFT JOIN user_role ur ON r.requested_role_id = ur.role_id
+            WHERE r.request_id = ?
+        ");
+        $stmt->execute([$requestId]);
+        $request = $stmt->fetch();
+
+        if ($request) {
+            // Update request status to Rejected (3)
+            $stmt = $pdo->prepare("UPDATE user_type_change_request SET status_id = 3, processed_at = NOW(), processed_by = ? WHERE request_id = ?");
+            $stmt->execute([$user['user_id'], $requestId]);
+
+            // Send rejection email
+            send_user_type_rejected_email(
+                $request['email'], 
+                $request['name'], 
+                $request['requested_role_name']
+            );
+
+            $success = 'Request rejected and notification email sent.';
+        }
     }
 }
 

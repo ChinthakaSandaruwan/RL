@@ -1,10 +1,12 @@
 <?php
-require __DIR__ . '/../../config/db.php';
-require __DIR__ . '/../../services/email.php';
-require __DIR__ . '/../notification/owner/ads_package_approval_notification/package_approval_notification_auto.php';
+require __DIR__ . '/../../../config/db.php';
+require __DIR__ . '/../../../services/email.php';
+require __DIR__ . '/../../notification/owner/ads_package_approval_notification/package_approval_notification_auto.php';
+require __DIR__ . '/invoice/invoice.php';
 
 ensure_session_started();
 $currentUser = current_user();
+$user = $currentUser; // For navbar compatibility
 
 // Check if user is Admin (Role ID 2 or Super Admin 1)
 if (!$currentUser || !in_array($currentUser['role_id'], [1, 2])) {
@@ -30,10 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Fetch User Info for Email/Notification
                 $stmt = $pdo->prepare("
-                    SELECT u.user_id, u.email, u.name, p.package_name 
+                    SELECT u.user_id, u.email, u.name, p.package_name, p.price,
+                           t.transaction_id, t.created_at, t.amount, pm.method_name 
                     FROM bought_package bp
                     JOIN user u ON bp.user_id = u.user_id
                     JOIN package p ON bp.package_id = p.package_id
+                    LEFT JOIN transaction t ON t.related_type = 'package' AND t.related_id = bp.bought_package_id AND t.status = 'pending'
+                    LEFT JOIN payment_method pm ON t.payment_method_id = pm.method_id
                     WHERE bp.bought_package_id = ?
                 ");
                 $stmt->execute([$boughtPackageId]);
@@ -49,14 +54,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$boughtPackageId]);
 
                     if ($userInfo) {
-                        // Send Email
-                        send_package_status_email($userInfo['email'], $userInfo['name'], $userInfo['package_name'], 'approved');
+                        // Generate Invoice Data
+                        $invoiceData = [
+                            'invoice_no' => 'INV-' . str_pad($userInfo['transaction_id'] ?? rand(1000,9999), 6, '0', STR_PAD_LEFT),
+                            'date' => date('Y-m-d'),
+                            'owner_name' => $userInfo['name'],
+                            'owner_email' => $userInfo['email'],
+                            'package_name' => $userInfo['package_name'],
+                            'amount' => $userInfo['amount'] ?? $userInfo['price'],
+                            'payment_method' => $userInfo['method_name'] ?? 'Bank Transfer'
+                        ];
+
+                        // Generate Invoice HTML for email body
+                        $invoiceHtml = get_invoice_html($invoiceData);
+
+                        // Generate Invoice PDF
+                        $pdfPath = generate_invoice_pdf($invoiceData);
+                        
+                        // Determine filename for attachment
+                        $pdfFilename = $invoiceData['invoice_no'] . '.pdf';
+                        if (strpos($pdfPath, '.html') !== false) {
+                            $pdfFilename = $invoiceData['invoice_no'] . '.html';
+                        }
+
+                        // Send Invoice Email with PDF attachment
+                        send_email_with_attachment(
+                            $userInfo['email'], 
+                            "Payment Invoice - Rental Lanka", 
+                            $invoiceHtml, 
+                            $userInfo['name'],
+                            [$pdfPath => $pdfFilename]
+                        );
+
+                        // Clean up old invoice files
+                        cleanup_old_invoices();
+
+                        // Delete the current invoice file after sending (optional - comment out if you want to keep it)
+                        if (file_exists($pdfPath)) {
+                            // Keep file for 24 hours, cleanup_old_invoices() will handle it
+                        }
 
                         // Create Notification
                         notify_owner_package_status($userInfo['user_id'], $userInfo['package_name'], 'approved');
                     }
 
-                    $success = "Package request approved successfully.";
+                    $success = "Package request approved successfully and invoice sent with PDF attachment.";
                 } elseif ($action === 'reject') {
                     // Update Bought Package
                     $stmt = $pdo->prepare("UPDATE bought_package SET payment_status_id = 3, status_id = 2 WHERE bought_package_id = ?"); // 3=failed, 2=inactive
@@ -156,7 +198,7 @@ $csrf_token = generate_csrf_token();
 </head>
 <body>
 
-<?php require __DIR__ . '/../../public/navbar/navbar.php'; ?>
+<?php require __DIR__ . '/../../../public/navbar/navbar.php'; ?>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">

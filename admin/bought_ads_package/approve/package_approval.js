@@ -34,12 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', function () {
             Swal.fire({
                 title: 'Approve Request?',
-                text: "This will activate the user's package immediately.",
+                html: "This will:<br>• Activate the user's package immediately<br>• Generate and send an invoice via email",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#198754',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Approve',
+                confirmButtonText: 'Yes, Approve & Send Invoice',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {

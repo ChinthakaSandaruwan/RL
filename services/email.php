@@ -56,6 +56,62 @@ function send_email($to, $subject, $body, $recipientName = null) {
 }
 
 /**
+ * Send an email with attachment using PHPMailer
+ * 
+ * @param string $to Recipient email address
+ * @param string $subject Email subject
+ * @param string $body HTML email body
+ * @param string|null $recipientName Recipient name (optional)
+ * @param array $attachments Array of attachment paths ['path' => 'filename']
+ * @return bool True on success, false on failure
+ */
+function send_email_with_attachment($to, $subject, $body, $recipientName = null, $attachments = []) {
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = env('MAIL_HOST', 'smtp.gmail.com');
+        $mail->SMTPAuth   = true;
+        $mail->Username   = env('MAIL_USERNAME');
+        $mail->Password   = env('MAIL_PASSWORD');
+        $mail->SMTPSecure = env('MAIL_ENCRYPTION', 'tls');
+        $mail->Port       = (int)env('MAIL_PORT', 587);
+        
+        // Error reporting
+        $mail->SMTPDebug  = 0; // Disable verbose debug output
+        
+        // Recipients
+        $fromAddress = env('MAIL_FROM_ADDRESS', 'noreply@rentallanka.com');
+        $fromName = env('MAIL_FROM_NAME', 'RentalLanka');
+        
+        $mail->setFrom($fromAddress, $fromName);
+        $mail->addAddress($to, $recipientName ?? '');
+        
+        // Attachments
+        if (!empty($attachments)) {
+            foreach ($attachments as $path => $filename) {
+                if (file_exists($path)) {
+                    $mail->addAttachment($path, $filename);
+                }
+            }
+        }
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+        $mail->AltBody = strip_tags($body); // Plain text version
+        
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Email send failed: {$mail->ErrorInfo}");
+        return false;
+    }
+}
+
+/**
  * Send a welcome email to a newly registered user
  * 
  * @param string $email User's email address
@@ -201,5 +257,154 @@ function send_package_status_email($email, $name, $packageName, $status) {
     </html>
     ";
 
+    return send_email($email, $subject, $body, $name);
+}
+
+/**
+ * Send email when user type change request is approved
+ * 
+ * @param string $email User's email address
+ * @param string $name User's name
+ * @param string $newRole New role name (e.g., "Owner")
+ * @return bool
+ */
+function send_user_type_approved_email($email, $name, $newRole) {
+    $subject = "User Type Change Approved - Rental Lanka";
+    
+    $body = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #444; background-color: #f4f4f4; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+            .header { background: linear-gradient(135deg, #2D5016 0%, #4A7C2C 100%); color: white; padding: 40px 20px; text-align: center; }
+            .content { padding: 40px 30px; }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #888; font-size: 13px; border-top: 1px solid #eee; }
+            .btn { display: inline-block; padding: 12px 30px; background-color: #2D5016; color: white !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+            h1 { margin: 0; font-size: 24px; font-weight: 700; }
+            .highlight-box { background: #f0f7e6; padding: 20px; border-left: 4px solid #2D5016; margin: 20px 0; border-radius: 4px; }
+            .icon { font-size: 40px; margin-bottom: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <div class='icon'>🎉</div>
+                <h1>Request Approved!</h1>
+            </div>
+            <div class='content'>
+                <h3 style='color: #333;'>Hello " . htmlspecialchars($name) . ",</h3>
+                
+                <p>Great news! Your user type change request has been <strong style='color: #2D5016;'>APPROVED</strong>.</p>
+                
+                <div class='highlight-box'>
+                    <p style='margin: 0;'><strong>Your New Role:</strong> " . htmlspecialchars($newRole) . "</p>
+                </div>
+                
+                <p>You now have access to all features and capabilities associated with your new account type.</p>
+                
+                <p><strong>What's Next?</strong></p>
+                <ul>
+                    <li>Log in to your account to access new features</li>
+                    <li>Explore your enhanced dashboard</li>
+                    <li>Start using your new privileges immediately</li>
+                </ul>
+                
+                <div style='text-align: center;'>
+                    <a href='" . app_url('auth/login') . "' class='btn'>Go to Dashboard</a>
+                </div>
+                
+                <p style='margin-top: 30px;'>If you have any questions, feel free to contact our support team.</p>
+                
+                <p>Best regards,<br><strong>The Rental Lanka Team</strong></p>
+            </div>
+            <div class='footer'>
+                <p>&copy; " . date('Y') . " Rental Lanka. All rights reserved.</p>
+                <p>Need help? Contact us at support@rentallanka.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+    
+    return send_email($email, $subject, $body, $name);
+}
+
+/**
+ * Send email when user type change request is rejected
+ * 
+ * @param string $email User's email address
+ * @param string $name User's name
+ * @param string $requestedRole Role that was requested
+ * @return bool
+ */
+function send_user_type_rejected_email($email, $name, $requestedRole) {
+    $subject = "User Type Change Request Update - Rental Lanka";
+    
+    $body = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #444; background-color: #f4f4f4; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+            .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 40px 20px; text-align: center; }
+            .content { padding: 40px 30px; }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #888; font-size: 13px; border-top: 1px solid #eee; }
+            .btn { display: inline-block; padding: 12px 30px; background-color: #2D5016; color: white !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+            h1 { margin: 0; font-size: 24px; font-weight: 700; }
+            .info-box { background: #fdeaea; padding: 20px; border-left: 4px solid #dc3545; margin: 20px 0; border-radius: 4px; }
+            .icon { font-size: 40px; margin-bottom: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <div class='icon'>📋</div>
+                <h1>Request Update</h1>
+            </div>
+            <div class='content'>
+                <h3 style='color: #333;'>Hello " . htmlspecialchars($name) . ",</h3>
+                
+                <p>Thank you for your interest in upgrading your account to <strong>" . htmlspecialchars($requestedRole) . "</strong>.</p>
+                
+                <div class='info-box'>
+                    <p style='margin: 0;'><strong>Status:</strong> Your request could not be approved at this time.</p>
+                </div>
+                
+                <p>This decision may be due to:</p>
+                <ul>
+                    <li>Incomplete information provided</li>
+                    <li>Additional verification requirements</li>
+                    <li>Policy restrictions</li>
+                </ul>
+                
+                <p><strong>What to do next?</strong></p>
+                <ul>
+                    <li>Contact our support team for more information</li>
+                    <li>Review the requirements for this account type</li>
+                    <li>You may submit a new request once the requirements are met</li>
+                </ul>
+                
+                <div style='text-align: center;'>
+                    <a href='" . app_url() . "' class='btn'>Visit Rental Lanka</a>
+                </div>
+                
+                <p style='margin-top: 30px;'>We appreciate your understanding and look forward to serving you better.</p>
+                
+                <p>Best regards,<br><strong>The Rental Lanka Team</strong></p>
+            </div>
+            <div class='footer'>
+                <p>&copy; " . date('Y') . " Rental Lanka. All rights reserved.</p>
+                <p>Need help? Contact us at support@rentallanka.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+    
     return send_email($email, $subject, $body, $name);
 }
