@@ -126,6 +126,24 @@ try {
         </div>
     </div>
 
+    <!-- Listing Management -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">
+                <i class="bi bi-list-task me-2"></i>Listing Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/property/create/property_create.php') ?>" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-house-add"></i> Create Property
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- User Management -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
