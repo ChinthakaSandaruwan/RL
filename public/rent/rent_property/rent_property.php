@@ -22,7 +22,7 @@ $success = '';
 
 // 2. Fetch Property
 $stmt = $pdo->prepare("
-    SELECT p.*, u.name as owner_name, pt.type_name
+    SELECT p.*, u.name as owner_name, u.mobile_number as owner_mobile, pt.type_name
     FROM property p
     JOIN user u ON p.owner_id = u.user_id
     LEFT JOIN property_type pt ON p.property_type_id = pt.type_id
@@ -62,6 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             
             $pdo->commit();
+
+            // Send SMS to Owner
+            if (!empty($property['owner_mobile'])) {
+                require_once __DIR__ . '/../../../services/sms.php';
+                $msg = "New rent request for property '{$property['title']}' by {$user['name']}. Please check your dashboard.";
+                smslenz_send_sms($property['owner_mobile'], $msg);
+            }
             
             header("Location: " . app_url('public/my_rent/my_rent.php')); 
             exit;

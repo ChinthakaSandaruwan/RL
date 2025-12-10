@@ -110,6 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 
                 $pdo->commit();
+
+                // Send SMS to Owner
+                if (!empty($vehicle['mobile_number'])) {
+                    require_once __DIR__ . '/../../../services/sms.php';
+                    $msg = "New booking for vehicle '{$vehicle['title']}' by {$user['name']} from {$pickup->format('Y-m-d H:i')} to {$dropoff->format('Y-m-d H:i')}.";
+                    smslenz_send_sms($vehicle['mobile_number'], $msg);
+                }
                 
                 // Redirect to my_rents tab
                 header("Location: " . app_url('public/my_rent/my_rent.php')); 

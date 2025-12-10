@@ -22,7 +22,7 @@ $success = '';
 
 // 2. Fetch Room
 $stmt = $pdo->prepare("
-    SELECT r.*, u.name as owner_name, rt.type_name
+    SELECT r.*, u.name as owner_name, u.mobile_number as owner_mobile, rt.type_name
     FROM room r
     JOIN user u ON r.owner_id = u.user_id
     LEFT JOIN room_type rt ON r.room_type_id = rt.type_id
@@ -105,6 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 
                 $pdo->commit();
+
+                // Send SMS to Owner
+                if (!empty($room['owner_mobile'])) {
+                    require_once __DIR__ . '/../../../services/sms.php';
+                    $msg = "New booking for room '{$room['title']}' by {$user['name']} from {$checkin->format('Y-m-d')} to {$checkout->format('Y-m-d')}.";
+                    smslenz_send_sms($room['owner_mobile'], $msg);
+                }
                 
                 header("Location: " . app_url('public/my_rent/my_rent.php')); 
                 exit;
