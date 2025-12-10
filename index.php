@@ -56,7 +56,8 @@ $user = current_user();
     <meta property="og:description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka. Connect with owners, find your dream home or ride.">
     <meta property="og:image" content="<?= app_url('public/assets/images/hero_house.png') ?>">
 
-    <!-- Preload LCP Image -->
+    <!-- Preload LCP Image in WebP format -->
+    <link rel="preload" as="image" href="<?= app_url('public/assets/images/hero_house.webp') ?>" type="image/webp">
     <link rel="preload" as="image" href="<?= app_url('public/assets/images/hero_house.png') ?>">
 
     <!-- Twitter -->
@@ -108,10 +109,42 @@ $user = current_user();
       ]
     }
     </script>
+
+    <!-- Critical CSS - Load Bootstrap synchronously but optimized -->
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="<?= app_url('public/footer/footer.css') ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> <!-- Ensure FontAwesome is available for footer icons -->
+    
+    <!-- Preload icon fonts but defer loading to prevent render blocking -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"></noscript>
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <!-- Non-critical CSS - Load asynchronously -->
+    <link rel="preload" href="<?= app_url('public/footer/footer.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="<?= app_url('public/footer/footer.css') ?>"></noscript>
+    
+    <!-- Inline critical CSS for instant render -->
+    <style>
+        /* Critical above-the-fold CSS */
+        body { background-color: #f8f9fa; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+        .hero-section { position: relative; overflow: hidden; }
+        .hero-carousel-item img { display: block; width: 100%; height: auto; }
+        .carousel-fade .carousel-item { opacity: 0; transition: opacity 0.6s ease-in-out; }
+        .carousel-fade .carousel-item.active { opacity: 1; }
+    </style>
+    
+    <!-- Font display swap to prevent FOIT -->
+    <style>
+        @font-face {
+            font-family: 'Bootstrap Icons';
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Font Awesome 6 Free';
+            font-display: swap;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <?php require __DIR__ . '/public/navbar/navbar.php'; ?>

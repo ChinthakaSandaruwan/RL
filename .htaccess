@@ -50,8 +50,26 @@ ErrorDocument 500 /RL/500.php
 
 # Enable Gzip Compression
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
+    # Compress HTML, CSS, JavaScript, Text, XML and fonts
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json application/xml
+    AddOutputFilterByType DEFLATE application/rss+xml application/atom+xml
     AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+    AddOutputFilterByType DEFLATE application/x-font-ttf application/x-font-opentype application/x-font-truetype
+    
+    # Remove browser bugs (only needed for really old browsers)
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+    Header append Vary User-Agent
+</IfModule>
+
+# Enable Brotli Compression if available (better than Gzip)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json application/xml
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
 </IfModule>
 
 # Browser Caching with Cache-Control Headers

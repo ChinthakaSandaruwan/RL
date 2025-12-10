@@ -10,34 +10,56 @@
         <div class="carousel-inner">
             <!-- Slide 1: House -->
             <div class="carousel-item active hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_house.png') ?>" width="1920" height="600" class="d-block w-100" alt="Luxury House" fetchpriority="high" loading="eager">
+                <picture>
+                    <source srcset="<?= app_url('public/assets/images/hero_house.webp') ?>" type="image/webp">
+                    <img src="<?= app_url('public/assets/images/hero_house.png') ?>" 
+                         width="1920" height="600" 
+                         class="d-block w-100" 
+                         alt="Luxury House for Rent in Sri Lanka" 
+                         fetchpriority="high" 
+                         loading="eager">
+                </picture>
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h1 class="hero-title">Find Your Dream Home</h1>
                         <p class="hero-subtitle">Discover luxury properties in the heart of Sri Lanka.</p>
-                        <a href="#" class="btn hero-btn">Explore Properties</a>
+                        <a href="<?= app_url('public/property/view_all/view_all.php') ?>" class="btn hero-btn">Explore Properties</a>
                     </div>
                 </div>
             </div>
             <!-- Slide 2: Apartment -->
             <div class="carousel-item hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_apartment.png') ?>" width="1920" height="600" class="d-block w-100" alt="Modern Apartment" loading="lazy">
+                <picture>
+                    <source srcset="<?= app_url('public/assets/images/hero_apartment.webp') ?>" type="image/webp">
+                    <img src="<?= app_url('public/assets/images/hero_apartment.png') ?>" 
+                         width="1920" height="600" 
+                         class="d-block w-100" 
+                         alt="Modern Apartment for Rent in Colombo" 
+                         loading="lazy">
+                </picture>
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h2 class="hero-title">Cozy Modern Living</h2>
                         <p class="hero-subtitle">Stylish apartments designed for comfort and convenience.</p>
-                        <a href="#" class="btn hero-btn">View Apartments</a>
+                        <a href="<?= app_url('public/room/view_all/view_all.php') ?>" class="btn hero-btn">View Apartments</a>
                     </div>
                 </div>
             </div>
             <!-- Slide 3: Vehicle -->
             <div class="carousel-item hero-carousel-item">
-                <img src="<?= app_url('public/assets/images/hero_vehicle.png') ?>" width="1920" height="600" class="d-block w-100" alt="Luxury Fleet" loading="lazy">
+                <picture>
+                    <source srcset="<?= app_url('public/assets/images/hero_vehicle.webp') ?>" type="image/webp">
+                    <img src="<?= app_url('public/assets/images/hero_vehicle.png') ?>" 
+                         width="1920" height="600" 
+                         class="d-block w-100" 
+                         alt="Premium Vehicle Rentals in Sri Lanka" 
+                         loading="lazy">
+                </picture>
                 <div class="hero-overlay">
                     <div class="hero-content">
                         <h2 class="hero-title">Travel in Style</h2>
                         <p class="hero-subtitle">Premium vehicle rentals for your journey across the island.</p>
-                        <a href="#" class="btn hero-btn">Rent a Car</a>
+                        <a href="<?= app_url('public/vehicle/view_all/view_all.php') ?>" class="btn hero-btn">Rent a Car</a>
                     </div>
                 </div>
             </div>
