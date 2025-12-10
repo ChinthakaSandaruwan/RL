@@ -1,5 +1,5 @@
 // Wishlist Toggle Function
-function toggleWishlist(type, itemId, button) {
+function toggleWishlist(type, itemId, button, appUrl = '/RL') {
     const icon = button.querySelector('i');
     const isFilled = icon.classList.contains('bi-heart-fill');
     const action = isFilled ? 'remove' : 'add';
@@ -16,7 +16,7 @@ function toggleWishlist(type, itemId, button) {
     }
 
     // AJAX call
-    fetch('/RL/public/wishlist/toggle_wishlist.php', {
+    fetch(`${appUrl}/public/wishlist/toggle_wishlist.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `type=${type}&item_id=${itemId}&action=${action}`

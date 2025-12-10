@@ -82,7 +82,7 @@ if (isset($user) && $user) {
                                     $btnClass = $inWishlist ? 'active' : '';
                                 ?>
                                 <button class="btn btn-sm wishlist-btn position-absolute top-0 end-0 m-2 <?= $btnClass ?>" 
-                                        onclick="toggleWishlist('property', <?= $property['property_id'] ?>, this)"
+                                        onclick="toggleWishlist('property', <?= $property['property_id'] ?>, this, '<?= rtrim(app_url(), '/') ?>')"
                                         title="<?= $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
                                     <i class="bi <?= $iconClass ?>"></i>
                                 </button>
