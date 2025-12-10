@@ -63,7 +63,7 @@ if (isset($user) && $user) {
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold" style="color: var(--hunter-green);">Latest Properties</h2>
-            <a href="<?= app_url('public/property/view_all.php') ?>" class="btn btn-outline-success">View All</a>
+            <a href="<?= app_url('public/property/view_all/view_all.php') ?>" class="btn btn-outline-success">View All</a>
         </div>
         
         <?php if (empty($properties)): ?>
