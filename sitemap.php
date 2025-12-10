@@ -8,20 +8,25 @@ echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
 $baseUrl = app_url();
 
-// Static Pages
+// Static Pages with Priority
 $staticPages = [
-    '',
-    'auth/login/login.php',
-    'auth/register/register.php',
-    'public/about/about.php', 
-    'public/contact/contact.php'
+    ['url' => '', 'priority' => '1.0', 'changefreq' => 'daily'], // Homepage - highest priority
+    ['url' => 'public/about_us/about.php', 'priority' => '0.8', 'changefreq' => 'monthly'], // Fixed path
+    ['url' => 'public/contact/contact.php', 'priority' => '0.7', 'changefreq' => 'monthly'],
+    ['url' => 'auth/login/login.php', 'priority' => '0.6', 'changefreq' => 'monthly'],
+    ['url' => 'auth/register/register.php', 'priority' => '0.6', 'changefreq' => 'monthly'],
+    ['url' => 'public/property/view_all/view_all.php', 'priority' => '0.9', 'changefreq' => 'daily'],
+    ['url' => 'public/room/view_all/view_all.php', 'priority' => '0.9', 'changefreq' => 'daily'],
+    ['url' => 'public/vehicle/view_all/view_all.php', 'priority' => '0.9', 'changefreq' => 'daily'],
+    ['url' => 'public/privacy_policy/privacy_policy.php', 'priority' => '0.5', 'changefreq' => 'yearly'],
+    ['url' => 'public/terms_of_service/terms_of_service.php', 'priority' => '0.5', 'changefreq' => 'yearly'],
 ];
 
 foreach ($staticPages as $page) {
     echo '<url>';
-    echo '<loc>' . $baseUrl . '/' . $page . '</loc>';
-    echo '<changefreq>monthly</changefreq>';
-    echo '<priority>0.8</priority>';
+    echo '<loc>' . $baseUrl . '/' . $page['url'] . '</loc>';
+    echo '<changefreq>' . $page['changefreq'] . '</changefreq>';
+    echo '<priority>' . $page['priority'] . '</priority>';
     echo '</url>';
 }
 

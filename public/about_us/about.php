@@ -7,7 +7,53 @@ ensure_session_started();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Rental Lanka</title>
+    <title>About Us - Rental Lanka | Property, Room & Vehicle Rentals in Sri Lanka</title>
+    
+    <!-- Canonical URL - Prevents duplicate content issues -->
+    <link rel="canonical" href="<?= app_url('public/about_us/about.php') ?>">
+    
+    <!-- Meta Description for SEO -->
+    <meta name="description" content="Learn about Rental Lanka - Sri Lanka's leading rental marketplace for properties, rooms, and vehicles. Trusted by thousands, offering verified listings and direct owner connections.">
+    <meta name="keywords" content="rental lanka about, property rental sri lanka, vehicle rental company, room rental platform, sri lanka rentals, rental marketplace">
+    <meta name="author" content="Rental Lanka">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= app_url('public/about_us/about.php') ?>">
+    <meta property="og:title" content="About Rental Lanka - Your Trusted Rental Partner in Sri Lanka">
+    <meta property="og:description" content="Discover how Rental Lanka is transforming the rental experience in Sri Lanka with verified listings, direct owner connections, and 24/7 support.">
+    <meta property="og:image" content="<?= app_url('public/assets/images/logo.png') ?>">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?= app_url('public/about_us/about.php') ?>">
+    <meta name="twitter:title" content="About Rental Lanka - Your Trusted Rental Partner">
+    <meta name="twitter:description" content="Learn about our mission to simplify rentals in Sri Lanka through verified listings and direct connections.">
+    <meta name="twitter:image" content="<?= app_url('public/assets/images/logo.png') ?>">
+    
+    <!-- JSON-LD Structured Data for Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Rental Lanka",
+      "url": "<?= app_url() ?>",
+      "logo": "<?= app_url('public/assets/images/logo.png') ?>",
+      "description": "Sri Lanka's premier platform for property, room, and vehicle rentals",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "LK",
+        "addressLocality": "Sri Lanka"
+      },
+      "sameAs": [
+        "https://www.facebook.com/rentallanka",
+        "https://twitter.com/rentallanka",
+        "https://www.instagram.com/rentallanka"
+      ]
+    }
+    </script>
+    
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="about.css">
