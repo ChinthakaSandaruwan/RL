@@ -202,6 +202,16 @@ try {
                     </a>
                 </div>
                 <div class="col-md-3">
+                    <a href="<?= app_url('admin/property/property_type/property_type.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-house-gear"></i> Property Types
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/room/room_type/room_type.php') ?>" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-door-open"></i> Room Types
+                    </a>
+                </div>
+                <div class="col-md-3">
                     <a href="<?= app_url('admin/vehicle/vehicle_type/vehicle_type.php') ?>" class="btn btn-outline-info w-100 py-3">
                         <i class="bi bi-car-front"></i> Vehicle Types
                     </a>

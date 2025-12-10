@@ -15,6 +15,15 @@
     transition: all 0.3s ease;
 }
 
+/* Hover Dropdown Behavior (Desktop Only) */
+@media (min-width: 992px) {
+    .custom-navbar .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+        animation: slideDown 0.3s ease;
+    }
+}
+
 .custom-navbar .navbar-brand {
     font-weight: 700;
     font-size: 1.25rem;
@@ -69,30 +78,122 @@
     /* Dry Sage glow */
 }
 
-/* Dropdown Menu Customization (if used) */
+/* Dropdown Menu Customization */
 .custom-navbar .dropdown-menu {
     border: none;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
-    background-color: var(--dust-grey);
+    background-color: #ffffff;
     overflow: hidden;
+    margin-top: 0.5rem;
+    animation: slideDown 0.3s ease;
+    padding: 0.5rem 0;
+}
+
+/* Multi-column layout for dropdowns */
+#propertiesDropdown+.dropdown-menu {
+    min-width: 600px;
+    column-count: 3;
+    column-gap: 0;
+}
+
+#roomsDropdown+.dropdown-menu {
+    min-width: 500px;
+    column-count: 2;
+    column-gap: 0;
+}
+
+#vehiclesDropdown+.dropdown-menu {
+    min-width: 400px;
+    column-count: 2;
+    column-gap: 0;
+}
+
+/* Prevent column breaks inside items */
+.custom-navbar .dropdown-menu li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* Responsive: single column on mobile */
+@media (max-width: 768px) {
+
+    #propertiesDropdown+.dropdown-menu,
+    #roomsDropdown+.dropdown-menu,
+    #vehiclesDropdown+.dropdown-menu {
+        column-count: 1 !important;
+        min-width: 250px !important;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .custom-navbar .dropdown-item {
     color: var(--pine-teal);
-    padding: 0.75rem 1.5rem;
+    padding: 0.65rem 1.25rem;
     font-weight: 500;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.custom-navbar .dropdown-item i {
+    width: 20px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
 .custom-navbar .dropdown-item:hover {
     background-color: var(--dry-sage);
     color: var(--hunter-green);
+    padding-left: 1.5rem;
+}
+
+.custom-navbar .dropdown-item:hover i {
+    opacity: 1;
 }
 
 .custom-navbar .dropdown-item.active,
 .custom-navbar .dropdown-item:active {
     background-color: var(--fern);
     color: #ffffff;
+}
+
+.custom-navbar .dropdown-header {
+    color: var(--hunter-green);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 1.25rem 0.25rem;
+    background-color: rgba(163, 177, 138, 0.1);
+}
+
+.custom-navbar .dropdown-divider {
+    margin: 0.25rem 0;
+    border-color: rgba(52, 78, 65, 0.1);
+}
+
+/* Dropdown Toggle Arrow */
+.custom-navbar .dropdown-toggle::after {
+    margin-left: 0.4rem;
+    vertical-align: 0.15em;
+    transition: transform 0.3s ease;
+}
+
+.custom-navbar .dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
 }
 
 /* Wishlist Button Styles */

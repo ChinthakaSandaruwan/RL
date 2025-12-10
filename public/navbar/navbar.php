@@ -19,21 +19,103 @@
         <!-- Navbar Links -->
         <div class="collapse navbar-collapse" id="rentalLankaNavbar">
             <!-- Category Links (After Brand) -->
+            <?php
+            // Fetch types for navbar dropdowns
+            $pdo_nav = get_pdo();
+            $navPropertyTypes = $pdo_nav->query("SELECT * FROM property_type ORDER BY type_name ASC")->fetchAll();
+            $navRoomTypes = $pdo_nav->query("SELECT * FROM room_type ORDER BY type_name ASC")->fetchAll();
+            $navVehicleTypes = $pdo_nav->query("SELECT * FROM vehicle_type ORDER BY type_name ASC")->fetchAll();
+            
+            // Helper function to get icon for property type
+            function getPropertyIcon($typeName) {
+                $lower = strtolower($typeName);
+                if (str_contains($lower, 'house')) return 'bi-house';
+                if (str_contains($lower, 'apartment')) return 'bi-building';
+                if (str_contains($lower, 'villa')) return 'bi-house-fill';
+                if (str_contains($lower, 'condo')) return 'bi-buildings';
+                if (str_contains($lower, 'office')) return 'bi-briefcase';
+                if (str_contains($lower, 'shop')) return 'bi-shop';
+                if (str_contains($lower, 'warehouse') || str_contains($lower, 'ware house')) return 'bi-box-seam';
+                if (str_contains($lower, 'hotel')) return 'bi-building';
+                if (str_contains($lower, 'land')) return 'bi-geo';
+                return 'bi-house-door';
+            }
+            
+            // Helper function to get icon for room type
+            function getRoomIcon($typeName) {
+                $lower = strtolower($typeName);
+                if (str_contains($lower, 'single')) return 'bi-door-closed';
+                if (str_contains($lower, 'double') || str_contains($lower, 'twin')) return 'bi-door-open';
+                if (str_contains($lower, 'suite') || str_contains($lower, 'deluxe')) return 'bi-door-open-fill';
+                if (str_contains($lower, 'shared') || str_contains($lower, 'dorm')) return 'bi-people';
+                if (str_contains($lower, 'studio')) return 'bi-house-door';
+                if (str_contains($lower, 'family')) return 'bi-people-fill';
+                return 'bi-door-closed';
+            }
+            
+            // Helper function to get icon for vehicle type
+            function getVehicleIcon($typeName) {
+                $lower = strtolower($typeName);
+                if (str_contains($lower, 'car') || str_contains($lower, 'sedan') || str_contains($lower, 'hatchback')) return 'bi-car-front-fill';
+                if (str_contains($lower, 'van')) return 'bi-truck';
+                if (str_contains($lower, 'suv') || str_contains($lower, 'pickup')) return 'bi-truck-front-fill';
+                if (str_contains($lower, 'motorcycle') || str_contains($lower, 'bike')) return 'bi-bicycle';
+                return 'bi-car-front';
+            }
+            ?>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/property/view_all/view_all.php') ?>">
-                        <i class="bi bi-house-door me-1"></i> All Properties
+                <!-- All Properties Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="<?= app_url('public/property/view_all/view_all.php') ?>" id="propertiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-house-door me-1"></i> Properties
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="propertiesDropdown">
+                        <li><a class="dropdown-item" href="<?= app_url('public/property/view_all/view_all.php') ?>">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>All Properties
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <?php foreach ($navPropertyTypes as $type): ?>
+                        <li><a class="dropdown-item" href="<?= app_url('public/property/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                            <i class="<?= getPropertyIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars(ucfirst($type['type_name'])) ?>
+                        </a></li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/room/view_all/view_all.php') ?>">
-                        <i class="bi bi-door-closed me-1"></i> All Rooms
+
+                <!-- All Rooms Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="<?= app_url('public/room/view_all/view_all.php') ?>" id="roomsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-door-closed me-1"></i> Rooms
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="roomsDropdown">
+                        <li><a class="dropdown-item" href="<?= app_url('public/room/view_all/view_all.php') ?>">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>All Rooms
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <?php foreach ($navRoomTypes as $type): ?>
+                        <li><a class="dropdown-item" href="<?= app_url('public/room/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                            <i class="<?= getRoomIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars($type['type_name']) ?>
+                        </a></li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= app_url('public/vehicle/view_all/view_all.php') ?>">
-                        <i class="bi bi-car-front me-1"></i> All Vehicles
+
+                <!-- All Vehicles Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="<?= app_url('public/vehicle/view_all/view_all.php') ?>" id="vehiclesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-car-front me-1"></i> Vehicles
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="vehiclesDropdown">
+                        <li><a class="dropdown-item" href="<?= app_url('public/vehicle/view_all/view_all.php') ?>">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>All Vehicles
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <?php foreach ($navVehicleTypes as $type): ?>
+                        <li><a class="dropdown-item" href="<?= app_url('public/vehicle/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                            <i class="<?= getVehicleIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars(ucfirst($type['type_name'])) ?>
+                        </a></li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
             </ul>
 

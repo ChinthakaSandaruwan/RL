@@ -17,6 +17,23 @@ $sortBy = $_GET['sort'] ?? 'newest';
 // Fetch property types for filter
 $propertyTypes = $pdo->query("SELECT * FROM property_type ORDER BY type_name ASC")->fetchAll();
 
+// Convert property type name to ID if needed (for navbar links)
+$propertyTypeId = null;
+if ($propertyType) {
+    if (is_numeric($propertyType)) {
+        // Already an ID
+        $propertyTypeId = intval($propertyType);
+    } else {
+        // It's a type name, find the ID
+        foreach ($propertyTypes as $type) {
+            if (strcasecmp($type['type_name'], $propertyType) === 0) {
+                $propertyTypeId = $type['type_id'];
+                break;
+            }
+        }
+    }
+}
+
 // Build query
 $sql = "
     SELECT p.*, pt.type_name, 
@@ -46,9 +63,9 @@ if ($searchQuery) {
     $params[] = $searchParam;
 }
 
-if ($propertyType) {
+if ($propertyTypeId) {
     $sql .= " AND p.property_type_id = ?";
-    $params[] = $propertyType;
+    $params[] = $propertyTypeId;
 }
 
 if ($minBedrooms > 0) {
@@ -131,7 +148,7 @@ $totalProperties = count($properties);
                         <select name="type" class="form-select">
                             <option value="">All Property Types</option>
                             <?php foreach ($propertyTypes as $type): ?>
-                            <option value="<?= $type['type_id'] ?>" <?= $propertyType == $type['type_id'] ? 'selected' : '' ?>>
+                            <option value="<?= $type['type_id'] ?>" <?= $propertyTypeId == $type['type_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($type['type_name']) ?>
                             </option>
                             <?php endforeach; ?>

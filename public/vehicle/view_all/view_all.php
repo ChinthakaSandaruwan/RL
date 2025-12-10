@@ -19,6 +19,23 @@ $vehicleTypes = $pdo->query("SELECT * FROM vehicle_type ORDER BY type_name ASC")
 $fuelTypes = $pdo->query("SELECT * FROM fuel_type ORDER BY type_name ASC")->fetchAll();
 $transmissionTypes = $pdo->query("SELECT * FROM transmission_type ORDER BY type_name ASC")->fetchAll();
 
+// Convert vehicle type name to ID if needed (for navbar links)
+$vehicleTypeId = null;
+if ($vehicleType) {
+    if (is_numeric($vehicleType)) {
+        // Already an ID
+        $vehicleTypeId = intval($vehicleType);
+    } else {
+        // It's a type name, find the ID
+        foreach ($vehicleTypes as $type) {
+            if (strcasecmp($type['type_name'], $vehicleType) === 0) {
+                $vehicleTypeId = $type['type_id'];
+                break;
+            }
+        }
+    }
+}
+
 // Build query
 $sql = "
     SELECT v.*, vt.type_name, 
@@ -57,9 +74,9 @@ if ($searchQuery) {
     $params[] = $searchParam;
 }
 
-if ($vehicleType) {
+if ($vehicleTypeId) {
     $sql .= " AND v.vehicle_type_id = ?";
-    $params[] = $vehicleType;
+    $params[] = $vehicleTypeId;
 }
 
 if ($fuelType) {
@@ -140,7 +157,7 @@ $totalVehicles = count($vehicles);
                         <select name="type" class="form-select">
                             <option value="">All Vehicle Types</option>
                             <?php foreach ($vehicleTypes as $type): ?>
-                            <option value="<?= $type['type_id'] ?>" <?= $vehicleType == $type['type_id'] ? 'selected' : '' ?>>
+                            <option value="<?= $type['type_id'] ?>" <?= $vehicleTypeId == $type['type_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($type['type_name']) ?>
                             </option>
                             <?php endforeach; ?>

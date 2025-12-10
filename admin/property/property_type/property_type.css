@@ -1,0 +1,64 @@
+:root {
+    --dust-grey: #dad7cdff;
+    --dry-sage: #a3b18aff;
+    --fern: #588157ff;
+    --hunter-green: #3a5a40ff;
+    --pine-teal: #344e41ff;
+
+    --primary-color: #588157;
+    /* Fern */
+    --primary-hover: #3a5a40;
+    /* Hunter Green */
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.table thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    font-weight: 600;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.badge.bg-info {
+    background-color: #e2e3e5 !important;
+    color: #383d41 !important;
+    font-weight: 500;
+}
+
+.modal-content {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #fff;
+}

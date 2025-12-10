@@ -15,6 +15,23 @@ $sortBy = $_GET['sort'] ?? 'newest';
 // Fetch room types for filter
 $roomTypes = $pdo->query("SELECT * FROM room_type ORDER BY type_name ASC")->fetchAll();
 
+// Convert room type name to ID if needed (for navbar links)
+$roomTypeId = null;
+if ($roomType) {
+    if (is_numeric($roomType)) {
+        // Already an ID
+        $roomTypeId = intval($roomType);
+    } else {
+        // It's a type name, find the ID
+        foreach ($roomTypes as $type) {
+            if (strcasecmp($type['type_name'], $roomType) === 0) {
+                $roomTypeId = $type['type_id'];
+                break;
+            }
+        }
+    }
+}
+
 // Build query
 $sql = "
     SELECT r.*, rt.type_name, 
@@ -44,9 +61,9 @@ if ($searchQuery) {
     $params[] = $searchParam;
 }
 
-if ($roomType) {
+if ($roomTypeId) {
     $sql .= " AND r.room_type_id = ?";
-    $params[] = $roomType;
+    $params[] = $roomTypeId;
 }
 
 if ($minPrice > 0) {
@@ -118,7 +135,7 @@ $totalRooms = count($rooms);
                     <select name="type" class="form-select">
                         <option value="">All Types</option>
                         <?php foreach ($roomTypes as $type): ?>
-                        <option value="<?= $type['type_id'] ?>" <?= $roomType == $type['type_id'] ? 'selected' : '' ?>>
+                        <option value="<?= $type['type_id'] ?>" <?= $roomTypeId == $type['type_id'] ? 'selected' : '' ?>>
                             <?= htmlspecialchars($type['type_name']) ?>
                         </option>
                         <?php endforeach; ?>
