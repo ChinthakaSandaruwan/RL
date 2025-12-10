@@ -97,6 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
+
+                    <?php if (isset($_GET['mobile']) && !isset($_POST['mobile'])): ?>
+                        <div class="alert alert-info small py-2 mb-3">
+                            <i class="fa fa-info-circle me-1"></i> No account found. Please register below.
+                        </div>
+                    <?php endif; ?>
+
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                         <div class="form-floating mb-3">
@@ -112,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
-                                    <input type="text" name="mobile" class="form-control" id="mobileInput" placeholder="Mobile Number" required value="<?= htmlspecialchars($_POST['mobile'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="text" name="mobile" class="form-control" id="mobileInput" placeholder="Mobile Number" required value="<?= htmlspecialchars($_POST['mobile'] ?? $_GET['mobile'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     <label for="mobileInput">Mobile Number</label>
                                 </div>
                             </div>

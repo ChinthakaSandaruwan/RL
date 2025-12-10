@@ -40,7 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$mobile]);
             $user = $stmt->fetch();
             if (!$user) {
-                $errors[] = 'No user found with that mobile number.';
+                // Redirect to register page with pre-filled mobile
+                header('Location: ' . app_url('auth/register/index.php?mobile=' . urlencode($mobile)));
+                exit;
             } else {
                 $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                 $expiresAt = (new DateTime('+5 minutes'))->format('Y-m-d H:i:s');
