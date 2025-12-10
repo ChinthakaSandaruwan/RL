@@ -22,13 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $mobile = trim($_POST['mobile'] ?? '');
     $nic = trim($_POST['nic'] ?? '');
-    $password = $_POST['password'] ?? '';
     $status_id = intval($_POST['status_id'] ?? 1);
 
-    if (!$name || !$email || !$mobile || !$password) {
+    if (!$name || !$email || !$mobile) {
         $errors[] = 'All required fields must be filled.';
-    } elseif (strlen($password) < 6) {
-        $errors[] = 'Password must be at least 6 characters.';
     }
 
     if (!$errors) {
@@ -71,9 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, password_hash, profile_image, role_id, status_id) VALUES (?, ?, ?, ?, ?, ?, 3, ?)");
-            $stmt->execute([$name, $email, $mobile, $nic, $passwordHash, $profileImagePath, $status_id]);
+            $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, profile_image, role_id, status_id) VALUES (?, ?, ?, ?, ?, 3, ?)");
+            $stmt->execute([$name, $email, $mobile, $nic, $profileImagePath, $status_id]);
             $success = "Owner account created successfully!";
             $name = $email = $mobile = $nic = '';
         } catch (Exception $e) {
@@ -117,8 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="col-md-6"><label class="form-label">NIC Number</label><input type="text" name="nic" class="form-control" value="<?= htmlspecialchars($nic ?? '') ?>"></div>
                                 <div class="col-md-6"><label class="form-label">Email Address <span class="text-danger">*</span></label><input type="email" name="email" class="form-control" required value="<?= htmlspecialchars($email ?? '') ?>"></div>
                                 <div class="col-md-6"><label class="form-label">Mobile Number <span class="text-danger">*</span></label><input type="text" name="mobile" class="form-control" required placeholder="07XXXXXXXX" value="<?= htmlspecialchars($mobile ?? '') ?>"></div>
-                                <div class="col-md-6"><label class="form-label">Password <span class="text-danger">*</span></label><input type="password" name="password" id="password" class="form-control" required minlength="6"></div>
-                                <div class="col-md-6"><label class="form-label">Confirm Password <span class="text-danger">*</span></label><input type="password" name="confirm_password" id="confirm_password" class="form-control" required></div>
                                 <div class="col-md-6"><label class="form-label">Status</label><select name="status_id" class="form-select"><option value="1">Active</option><option value="2">Inactive</option></select></div>
                             </div>
                             <div class="mt-4 d-grid"><button type="submit" class="btn btn-primary btn-lg">Create Owner Account</button></div>

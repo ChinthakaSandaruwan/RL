@@ -35,8 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $mobile = trim($_POST['mobile'] ?? '');
     $nic = trim($_POST['nic'] ?? '');
-    $password = $_POST['password'] ?? ''; // Optional on update
-
+    
     if (!$name || !$email || !$mobile) $errors[] = 'Name, Email and Mobile are required.';
 
     // Check unique constraints (excluding self)
@@ -77,14 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            if ($password) {
-                 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-                 $stmt = $pdo->prepare("UPDATE user SET name = ?, email = ?, mobile_number = ?, nic = ?, password_hash = ?, profile_image = ? WHERE user_id = ?");
-                 $stmt->execute([$name, $email, $mobile, $nic, $passwordHash, $profileImagePath, $targetUser['user_id']]);
-            } else {
-                 $stmt = $pdo->prepare("UPDATE user SET name = ?, email = ?, mobile_number = ?, nic = ?, profile_image = ? WHERE user_id = ?");
-                 $stmt->execute([$name, $email, $mobile, $nic, $profileImagePath, $targetUser['user_id']]);
-            }
+            $stmt = $pdo->prepare("UPDATE user SET name = ?, email = ?, mobile_number = ?, nic = ?, profile_image = ? WHERE user_id = ?");
+            $stmt->execute([$name, $email, $mobile, $nic, $profileImagePath, $targetUser['user_id']]);
             $success = "Owner updated successfully!";
             // Refresh Data
             $stmt = $pdo->prepare("SELECT * FROM user WHERE user_id = ?");
@@ -131,8 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="col-md-6"><label class="form-label">NIC Number</label><input type="text" name="nic" class="form-control" value="<?= htmlspecialchars($targetUser['nic']) ?>"></div>
                                 <div class="col-md-6"><label class="form-label">Email Address</label><input type="email" name="email" class="form-control" required value="<?= htmlspecialchars($targetUser['email']) ?>"></div>
                                 <div class="col-md-6"><label class="form-label">Mobile Number</label><input type="text" name="mobile" class="form-control" required value="<?= htmlspecialchars($targetUser['mobile_number']) ?>"></div>
-                                <div class="col-12"><hr class="my-2 text-muted"></div>
-                                <div class="col-md-6"><label class="form-label">New Password <span class="text-muted fw-light">(Leave blank to keep current)</span></label><input type="password" name="password" class="form-control" minlength="6"></div>
                             </div>
                             <div class="mt-4 d-grid"><button type="submit" class="btn btn-primary btn-lg">Save Changes</button></div>
                         </form>
