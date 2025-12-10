@@ -220,11 +220,16 @@ $pendingMobile = $_SESSION['pending_login_mobile'] ?? '';
                         </button>
                     </form>
 
-                    <form method="post" class="mt-3 text-center">
-                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                        <input type="hidden" name="action" value="resend_otp">
-                        <button type="submit" class="btn-link-custom">Resend OTP</button>
-                    </form>
+                    <div class="mt-4 text-center">
+                        <form method="post" id="resendForm" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="action" value="resend_otp">
+                            <button type="submit" id="resendBtn" class="btn-link-custom border-0 bg-transparent p-0" disabled>
+                                Resend OTP
+                            </button>
+                        </form>
+                        <span id="countdownTimer" class="ms-2 text-muted fw-bold small">(60s)</span>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
