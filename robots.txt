@@ -10,4 +10,4 @@ Disallow: /vendor/
 Disallow: *.sql
 Disallow: *.zip
 
-Sitemap: http://localhost/RL/sitemap.php
+Sitemap: https://rentallanka.com/sitemap.php

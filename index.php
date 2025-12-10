@@ -42,6 +42,7 @@ $user = current_user();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rental Lanka - Rent Properties, Rooms & Vehicles in Sri Lanka</title>
     <meta name="description" content="Discover Rental Lanka, the premier platform for renting properties, rooms, and vehicles in Sri Lanka. Connect with owners, find your dream home or ride, and experience seamless rentals.">
     <meta name="keywords" content="rent sri lanka, house for rent, room for rent, vehicle rental sri lanka, car hire, property rental, colombo apartments, rental lanka">
