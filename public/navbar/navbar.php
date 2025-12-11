@@ -25,7 +25,14 @@
             $navPropertyTypes = $pdo_nav->query("SELECT * FROM property_type ORDER BY type_name ASC")->fetchAll();
             $navRoomTypes = $pdo_nav->query("SELECT * FROM room_type ORDER BY type_name ASC")->fetchAll();
             $navVehicleTypes = $pdo_nav->query("SELECT * FROM vehicle_type ORDER BY type_name ASC")->fetchAll();
-            
+
+            if (!function_exists('str_contains')) {
+                function str_contains($haystack, $needle)
+                {
+                    return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+                }
+            }
+
             // Helper function to get icon for property type
             function getPropertyIcon($typeName) {
                 $lower = strtolower($typeName);
@@ -75,7 +82,7 @@
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <?php foreach ($navPropertyTypes as $type): ?>
-                        <li><a class="dropdown-item" href="<?= app_url('public/property/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                        <li><a class="dropdown-item" href="<?= app_url('public/property/view_all/view_all.php?type=' . $type['type_id']) ?>">
                             <i class="<?= getPropertyIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars(ucfirst($type['type_name'])) ?>
                         </a></li>
                         <?php endforeach; ?>
@@ -93,7 +100,7 @@
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <?php foreach ($navRoomTypes as $type): ?>
-                        <li><a class="dropdown-item" href="<?= app_url('public/room/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                        <li><a class="dropdown-item" href="<?= app_url('public/room/view_all/view_all.php?type=' . $type['type_id']) ?>">
                             <i class="<?= getRoomIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars($type['type_name']) ?>
                         </a></li>
                         <?php endforeach; ?>
@@ -111,7 +118,7 @@
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <?php foreach ($navVehicleTypes as $type): ?>
-                        <li><a class="dropdown-item" href="<?= app_url('public/vehicle/view_all/view_all.php?type=' . urlencode($type['type_name'])) ?>">
+                        <li><a class="dropdown-item" href="<?= app_url('public/vehicle/view_all/view_all.php?type=' . $type['type_id']) ?>">
                             <i class="<?= getVehicleIcon($type['type_name']) ?> me-2"></i><?= htmlspecialchars(ucfirst($type['type_name'])) ?>
                         </a></li>
                         <?php endforeach; ?>

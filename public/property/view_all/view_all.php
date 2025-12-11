@@ -34,14 +34,20 @@ if ($propertyType) {
     }
 }
 
-// Build query
+// Build query (compatible with ONLY_FULL_GROUP_BY)
 $sql = "
-    SELECT p.*, pt.type_name, 
-           pi.image_path,
-           c.name_en as city_name,
-           d.name_en as district_name,
-           u.name as owner_name,
-           COUNT(DISTINCT pa.amenity_id) as amenity_count
+    SELECT 
+        p.*, 
+        pt.type_name, 
+        pi.image_path,
+        c.name_en AS city_name,
+        d.name_en AS district_name,
+        u.name AS owner_name,
+        (
+            SELECT COUNT(DISTINCT pa.amenity_id)
+            FROM property_amenity pa
+            WHERE pa.property_id = p.property_id
+        ) AS amenity_count
     FROM property p
     JOIN property_type pt ON p.property_type_id = pt.type_id
     LEFT JOIN property_image pi ON p.property_id = pi.property_id AND pi.primary_image = 1
@@ -49,7 +55,6 @@ $sql = "
     LEFT JOIN cities c ON pl.city_id = c.id
     LEFT JOIN districts d ON c.district_id = d.id
     LEFT JOIN user u ON p.owner_id = u.user_id
-    LEFT JOIN property_amenity pa ON p.property_id = pa.property_id
     WHERE p.status_id = 1
 ";
 
@@ -87,8 +92,6 @@ if ($maxPrice > 0) {
     $sql .= " AND p.rent_per_month <= ?";
     $params[] = $maxPrice;
 }
-
-$sql .= " GROUP BY p.property_id";
 
 // Sorting
 switch ($sortBy) {

@@ -3,8 +3,8 @@ require __DIR__ . '/../../config/db.php';
 ensure_session_started();
 $user = current_user();
 
-// Require customer role (2)
-if (!$user || $user['role_id'] != 2) {
+// Require any logged-in user (any role)
+if (!$user) {
     header('Location: ' . app_url('auth/login'));
     exit;
 }
