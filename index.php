@@ -48,6 +48,7 @@ $user = current_user();
     <meta name="keywords" content="rent sri lanka, house for rent, room for rent, vehicle rental sri lanka, car hire, property rental, colombo apartments, rental lanka">
     <meta name="author" content="Rental Lanka">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#4A90E2">
     
     <!-- Canonical URL - Prevents duplicate content issues -->
     <link rel="canonical" href="<?= app_url() ?>">
