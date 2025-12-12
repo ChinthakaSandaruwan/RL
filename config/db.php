@@ -256,6 +256,55 @@ function create_notification($userId, $title, $message, $typeId = 1, $propertyId
     }
 }
 
+/**
+ * Get cached type data (property_type, room_type, vehicle_type) to reduce database queries
+ * Types are cached in session since they rarely change
+ * @param PDO $pdo - Database connection
+ * @param string $type_table - Table name ('property_type', 'room_type', or 'vehicle_type')
+ * @param int $cache_duration - Cache duration in seconds (default 1 hour)
+ * @return array - Array of type records
+ */
+function get_cached_types($pdo, $type_table, $cache_duration = 3600) {
+    ensure_session_started();
+    $cache_key = "types_{$type_table}";
+    
+    // Check if cached in session and still valid
+    if (isset($_SESSION[$cache_key]) && 
+        isset($_SESSION[$cache_key . '_time']) && 
+        (time() - $_SESSION[$cache_key . '_time']) < $cache_duration) {
+        return $_SESSION[$cache_key];
+    }
+    
+    // Fetch from database if not cached or expired
+    $stmt = $pdo->query("SELECT * FROM {$type_table} ORDER BY type_name ASC");
+    $data = $stmt->fetchAll();
+    
+    // Cache in session
+    $_SESSION[$cache_key] = $data;
+    $_SESSION[$cache_key . '_time'] = time();
+    
+    return $data;
+}
+
+/**
+ * Clear type cache - call this when types are added/updated/deleted
+ * @param string|null $type_table - Specific table to clear, or null to clear all
+ */
+function clear_type_cache($type_table = null) {
+    ensure_session_started();
+    if ($type_table) {
+        unset($_SESSION["types_{$type_table}"]);
+        unset($_SESSION["types_{$type_table}_time"]);
+    } else {
+        // Clear all type caches
+        $tables = ['property_type', 'room_type', 'vehicle_type'];
+        foreach ($tables as $table) {
+            unset($_SESSION["types_{$table}"]);
+            unset($_SESSION["types_{$table}_time"]);
+        }
+    }
+}
+
 function get_chat_flag_path() {
     return __DIR__ . '/../chat_config.json';
 }

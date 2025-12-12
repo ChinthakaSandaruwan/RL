@@ -67,7 +67,25 @@ elseif ($action === 'fetch') {
     }
 
     $lastId = (int)($_GET['last_id'] ?? 0);
+    
+    // PERFORMANCE OPTIMIZATION: Quick check if there are new messages
+    // This prevents unnecessary full message fetches when conversation is idle
+    $stmt = $pdo->prepare("SELECT MAX(message_id) as max_id FROM chat_messages WHERE conversation_id = ?");
+    $stmt->execute([$conversation['conversation_id']]);
+    $maxId = (int)$stmt->fetchColumn();
+    
+    // If no new messages, return early without fetching full message list
+    if ($maxId <= $lastId) {
+        echo json_encode([
+            'success' => true,
+            'messages' => [],
+            'conversation_id' => $conversation['conversation_id'],
+            'status' => $conversation['status']
+        ]);
+        exit;
+    }
 
+    // Fetch new messages only if there are actually new ones
     $stmt = $pdo->prepare("
         SELECT message_id, sender_type, message, created_at 
         FROM chat_messages 

@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="rentalLankaNavbar">
             <!-- Category Links (After Brand) -->
             <?php
-            // Fetch types for navbar dropdowns
+            // Fetch types for navbar dropdowns (CACHED for performance)
             $pdo_nav = get_pdo();
             
             // Ensure session/user context if not already set by parent
@@ -29,9 +29,10 @@
                 $user = current_user();
             }
 
-            $navPropertyTypes = $pdo_nav->query("SELECT * FROM property_type ORDER BY type_name ASC")->fetchAll();
-            $navRoomTypes = $pdo_nav->query("SELECT * FROM room_type ORDER BY type_name ASC")->fetchAll();
-            $navVehicleTypes = $pdo_nav->query("SELECT * FROM vehicle_type ORDER BY type_name ASC")->fetchAll();
+            // Use cached versions to prevent 3 DB queries on every page load
+            $navPropertyTypes = get_cached_types($pdo_nav, 'property_type');
+            $navRoomTypes = get_cached_types($pdo_nav, 'room_type');
+            $navVehicleTypes = get_cached_types($pdo_nav, 'vehicle_type');
 
             if (!function_exists('str_contains')) {
                 function str_contains($haystack, $needle)

@@ -279,8 +279,9 @@ function initChatWidget() {
     }
 
     function startPolling() {
-        // Poll messages every 3 seconds
-        pollInterval = setInterval(fetchMessages, 3000);
+        // Poll messages every 8 seconds (reduced from 3s for better performance)
+        // This reduces API requests from 20/min to 7.5/min per user
+        pollInterval = setInterval(fetchMessages, 8000);
     }
 
     function stopPolling() {
