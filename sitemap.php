@@ -30,57 +30,61 @@ foreach ($staticPages as $page) {
     echo '</url>';
 }
 
-try {
-    $pdo = get_pdo();
+
+    // Helper function for safe XML date
+    function get_safe_date($updated, $created) {
+        if (!empty($updated) && strtotime($updated) !== false) {
+            return date('Y-m-d', strtotime($updated));
+        }
+        if (!empty($created) && strtotime($created) !== false) {
+            return date('Y-m-d', strtotime($created));
+        }
+        return date('Y-m-d'); // Fallback to today
+    }
+
+    try {
+        $pdo = get_pdo();
 
     // Properties
     try {
-        $stmt = $pdo->query("SELECT property_id, updated_at FROM property ORDER BY updated_at DESC");
+        $stmt = $pdo->query("SELECT property_id, created_at, updated_at FROM property WHERE status_id = 1 ORDER BY updated_at DESC");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo '<url>';
-            echo '<loc>' . $baseUrl . '/public/property/view/property_view.php?id=' . $row['property_id'] . '</loc>';
-            echo '<lastmod>' . date('Y-m-d', strtotime($row['updated_at'])) . '</lastmod>';
+            echo '<loc>' . htmlspecialchars($baseUrl . '/public/property/view/property_view.php?id=' . $row['property_id']) . '</loc>';
+            echo '<lastmod>' . get_safe_date($row['updated_at'], $row['created_at']) . '</lastmod>';
             echo '<changefreq>weekly</changefreq>';
             echo '<priority>0.9</priority>';
             echo '</url>';
         }
-    } catch (Exception $e) {
-        // Log error or ignore
-    }
+    } catch (Exception $e) { }
 
     // Rooms
     try {
-        $stmt = $pdo->query("SELECT room_id, updated_at FROM room ORDER BY updated_at DESC");
+        $stmt = $pdo->query("SELECT room_id, created_at, updated_at FROM room WHERE status_id = 1 ORDER BY updated_at DESC");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo '<url>';
-            echo '<loc>' . $baseUrl . '/public/room/view/room_view.php?id=' . $row['room_id'] . '</loc>';
-            echo '<lastmod>' . date('Y-m-d', strtotime($row['updated_at'])) . '</lastmod>';
+            echo '<loc>' . htmlspecialchars($baseUrl . '/public/room/view/room_view.php?id=' . $row['room_id']) . '</loc>';
+            echo '<lastmod>' . get_safe_date($row['updated_at'], $row['created_at']) . '</lastmod>';
             echo '<changefreq>weekly</changefreq>';
             echo '<priority>0.9</priority>';
             echo '</url>';
         }
-    } catch (Exception $e) {
-        // Log error or ignore
-    }
+    } catch (Exception $e) { }
 
     // Vehicles
     try {
-        $stmt = $pdo->query("SELECT vehicle_id, updated_at FROM vehicle ORDER BY updated_at DESC");
+        $stmt = $pdo->query("SELECT vehicle_id, created_at, updated_at FROM vehicle WHERE status_id = 1 ORDER BY updated_at DESC");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo '<url>';
-            echo '<loc>' . $baseUrl . '/public/vehicle/view/vehicle_view.php?id=' . $row['vehicle_id'] . '</loc>';
-            echo '<lastmod>' . date('Y-m-d', strtotime($row['updated_at'])) . '</lastmod>';
+            echo '<loc>' . htmlspecialchars($baseUrl . '/public/vehicle/view/vehicle_view.php?id=' . $row['vehicle_id']) . '</loc>';
+            echo '<lastmod>' . get_safe_date($row['updated_at'], $row['created_at']) . '</lastmod>';
             echo '<changefreq>weekly</changefreq>';
             echo '<priority>0.9</priority>';
             echo '</url>';
         }
-    } catch (Exception $e) {
-        // Log error or ignore
-    }
+    } catch (Exception $e) { }
 } catch (Exception $e) {
-    // DB Connection failed - Sitemap will contain only static pages
-    // We could log this error to a file if needed
-    // error_log($e->getMessage());
+    // DB Connection failed
 }
 
 echo '</urlset>';

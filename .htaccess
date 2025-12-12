@@ -13,6 +13,9 @@ Options -Indexes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 # Otherwise forward to index.php (Standard Front Controller pattern)
+# Sitemap XML Rewrite
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
 # For RentAllanka specific page routing (e.g. removing .php extension)
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
