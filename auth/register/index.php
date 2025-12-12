@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="mt-4 text-center">
                         <p class="mb-0 text-muted">Already have an account?</p>
-                        <a href="<?= app_url('auth/login') ?>" class="fw-bold">Login here</a>
+                        <a href="<?= app_url('auth/login/index.php') ?>" class="fw-bold">Login here</a>
                         <div class="mt-2">
                              <a href="<?= app_url('index.php') ?>" class="small text-muted">Back to home</a>
                         </div>

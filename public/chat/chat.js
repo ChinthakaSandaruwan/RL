@@ -51,6 +51,16 @@ function initChatWidget() {
         });
     });
 
+    // Event delegation for dynamically created buttons (like "Start New Conversation")
+    chatBody.addEventListener('click', function (e) {
+        if (e.target && e.target.id === 'startNewConversation') {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Start New Conversation clicked via delegation');
+            startNewConversation();
+        }
+    });
+
     // Send Message
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
@@ -206,7 +216,18 @@ function initChatWidget() {
             chatBody.scrollTop = chatBody.scrollHeight;
 
             // Add event listener for new conversation button
-            document.getElementById('startNewConversation')?.addEventListener('click', startNewConversation);
+            const startNewBtn = document.getElementById('startNewConversation');
+            if (startNewBtn) {
+                console.log('Start New Conversation button found, attaching listener');
+                startNewBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Start New Conversation clicked');
+                    startNewConversation();
+                });
+            } else {
+                console.error('Start New Conversation button not found in DOM');
+            }
         }
 
         // Disable input
@@ -217,16 +238,20 @@ function initChatWidget() {
     }
 
     function startNewConversation() {
+        console.log('Starting new conversation...');
+
         // Remove ended message
         document.querySelector('.conversation-ended')?.remove();
 
-        // Clear chat
+        // Clear all messages except the first greeting
         const messages = chatBody.querySelectorAll('.message-row:not(:first-child)');
         messages.forEach(msg => msg.remove());
 
         // Reset
         lastMessageId = 0;
         conversationId = null;
+
+        // Re-enable input and buttons
         chatInput.disabled = false;
         chatInput.removeAttribute('disabled');
         sendBtn.disabled = false;
@@ -236,10 +261,21 @@ function initChatWidget() {
             endBtn.disabled = false;
             endBtn.removeAttribute('disabled');
         }
-        chatInput.focus();
 
-        // Add welcome back message
-        addBotMessage('Hello again! How can I help you today?');
+        // Show the first greeting again
+        const greeting = chatBody.querySelector('.message-row:first-child');
+        if (greeting) {
+            greeting.style.display = '';
+        }
+
+        // Show chat options if they exist
+        const options = document.querySelector('.chat-options');
+        if (options) {
+            options.style.display = '';
+        }
+
+        chatInput.focus();
+        console.log('New conversation started successfully');
     }
 
     function startPolling() {

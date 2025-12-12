@@ -245,7 +245,7 @@ $user = current_user();
                             <i class="bi bi-house-check me-2"></i> Rent Now
                         </a>
                         <?php else: ?>
-                        <a href="<?= app_url('auth/login') ?>" class="btn btn-theme btn-lg mb-2">
+                        <a href="<?= app_url('auth/login/index.php') ?>" class="btn btn-theme btn-lg mb-2">
                             <i class="bi bi-box-arrow-in-right me-2"></i> Login to Rent
                         </a>
                         <?php endif; ?>

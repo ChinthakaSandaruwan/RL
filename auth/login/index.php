@@ -245,7 +245,7 @@ $pendingMobile = $_SESSION['pending_login_mobile'] ?? '';
         </div>
 
         <div class="login-footer">
-            <p>New to Rental Lanka? <a href="<?= app_url('auth/register') ?>">Create Account</a></p>
+            <p>New to Rental Lanka? <a href="<?= app_url('auth/register/index.php') ?>">Create Account</a></p>
             <a href="<?= app_url('index.php') ?>" class="home-link"><i class="fa-solid fa-house me-1"></i> Back to Home</a>
         </div>
     </div>
