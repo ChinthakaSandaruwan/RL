@@ -255,3 +255,38 @@ function create_notification($userId, $title, $message, $typeId = 1, $propertyId
         return false;
     }
 }
+
+function get_chat_flag_path() {
+    return __DIR__ . '/../chat_config.json';
+}
+
+function is_chat_enabled(): bool {
+    $path = get_chat_flag_path();
+    if (!is_readable($path)) {
+        return true;
+    }
+
+    $content = file_get_contents($path);
+    $data = json_decode($content, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+        return true;
+    }
+
+    if (!array_key_exists('enabled', $data)) {
+        return true;
+    }
+
+    return (bool)$data['enabled'];
+}
+
+function set_chat_enabled(bool $enabled): void {
+    $path = get_chat_flag_path();
+    $data = [
+        'enabled' => $enabled,
+        'updated_at' => date('c')
+    ];
+    file_put_contents($path, json_encode($data));
+}
+
+?>

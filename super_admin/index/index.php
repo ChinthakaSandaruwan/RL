@@ -175,6 +175,11 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
                         <i class="bi bi-cone-striped"></i> Maintenance Mode
                     </a>
                 </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/chat/control.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-chat-dots"></i> Chat Control
+                    </a>
+                </div>
                 <!-- special holidays -->
                 <div class="col-md-3">
                     <a href="<?= app_url('super_admin/special_holidays/holidays_manage.php') ?>" class="btn btn-outline-dark w-100 py-3">

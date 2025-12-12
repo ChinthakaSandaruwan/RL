@@ -12,6 +12,8 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 
 $pdo = get_pdo();
 
+$chatEnabled = function_exists('is_chat_enabled') ? is_chat_enabled() : true;
+
 // Fetch all conversations with user info
 $stmt = $pdo->query("
     SELECT 
@@ -72,23 +74,33 @@ if ($selectedConversation) {
 <div class="container-fluid mt-4">
     <div class="row">
         <!-- Conversations List -->
-        <div class="col-md-4 col-lg-3">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Conversations</h5>
-                </div>
-                <div class="list-group list-group-flush" id="conversationsList" style="max-height: 600px; overflow-y: auto;">
-                    <!-- Conversations will be loaded here via AJAX -->
-                    <div class="list-group-item text-center text-muted py-4">
-                        <i class="bi bi-hourglass"></i> Loading...
+        <?php if ($chatEnabled): ?>
+            <div class="col-md-4 col-lg-3">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Conversations</h5>
+                    </div>
+                    <div class="list-group list-group-flush" id="conversationsList" style="max-height: 600px; overflow-y: auto;">
+                        <!-- Conversations will be loaded here via AJAX -->
+                        <div class="list-group-item text-center text-muted py-4">
+                            <i class="bi bi-hourglass"></i> Loading...
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
+        <?php endif; ?>
+        
         <!-- Chat Window -->
         <div class="col-md-8 col-lg-9">
-            <?php if ($selectedConversation): ?>
+            <?php if (!$chatEnabled): ?>
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-chat-dots display-1 text-muted"></i>
+                        <h4 class="mt-3">Live chat is currently disabled</h4>
+                        <p class="text-muted">Super Admin has turned off the chat system. You can still view existing data from the database, but new chat actions are blocked.</p>
+                    </div>
+                </div>
+            <?php elseif ($selectedConversation): ?>
                 <div class="card">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Chat</h5>

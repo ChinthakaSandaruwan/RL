@@ -14,6 +14,11 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
     exit;
 }
 
+if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
+    echo json_encode(['success' => false, 'message' => 'Chat is currently disabled.']);
+    exit;
+}
+
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 // 1. Send Admin Reply

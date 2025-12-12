@@ -14,12 +14,12 @@ SET sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 
 -- User Roles
 INSERT INTO `user_role` (`role_id`, `role_name`) VALUES 
-(1, 'super_admin'), (2, 'admin'), (3, 'owner'), (4, 'customer')
+(1, 'Super Admin'), (2, 'Admin'), (3, 'Owner'), (4, 'Customer')
 ON DUPLICATE KEY UPDATE `role_name`=`role_name`;
 
 -- User Statuses
 INSERT INTO `user_status` (`status_id`, `status_name`) VALUES
-(1, 'active'), (2, 'inactive'), (3, 'banned')
+(1, 'Active'), (2, 'Inactive'), (3, 'Banned')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Package Types (Duration + Category Combinations)
@@ -42,37 +42,37 @@ ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Package Statuses
 INSERT INTO `package_status` (`status_id`, `status_name`) VALUES
-(1, 'active'), (2, 'inactive')
+(1, 'Active'), (2, 'Inactive')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Subscription Statuses
 INSERT INTO `subscription_status` (`status_id`, `status_name`) VALUES
-(1, 'active'), (2, 'expired')
+(1, 'Active'), (2, 'Expired')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Payment Statuses
 INSERT INTO `payment_status` (`status_id`, `status_name`) VALUES
-(1, 'pending'), (2, 'paid'), (3, 'failed'), (4, 'success')
+(1, 'Pending'), (2, 'Paid'), (3, 'Failed'), (4, 'Success')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Payment Methods
 INSERT INTO `payment_method` (`method_id`, `method_name`) VALUES
-(1, 'card'), (2, 'bank'), (3, 'mobile'), (4, 'cash')
+(1, 'Card'), (2, 'Bank'), (3, 'Mobile'), (4, 'Cash')
 ON DUPLICATE KEY UPDATE `method_name`=`method_name`;
 
 -- Property Types
 INSERT INTO `property_type` (`type_id`, `type_name`) VALUES
 (1, 'Office Space(Per Sqrft)'), (2, 'Parking Property'), (3, 'Selling Property'), (4, 'Rental Property'), 
-(5, 'Ware House'), (6, 'Anex(Space Office)'), (7, 'apartment'), (8, 'house'), (9, 'villa'), 
-(10, 'duplex'), (11, 'studio'), (12, 'penthouse'), (13, 'bungalow'), (14, 'townhouse'), 
-(15, 'farmhouse'), (16, 'office'), (17, 'shop'), (18, 'warehouse'), (19, 'land'), 
-(20, 'commercial_building'), (21, 'industrial'), (22, 'hotel'), (23, 'guesthouse'), 
-(24, 'resort'), (25, 'other')
+(5, 'Ware House'), (6, 'Anex(Space Office)'), (7, 'Apartment'), (8, 'House'), (9, 'Villa'), 
+(10, 'Duplex'), (11, 'Studio'), (12, 'Penthouse'), (13, 'Bungalow'), (14, 'Townhouse'), 
+(15, 'Farmhouse'), (16, 'Office'), (17, 'Shop'), (18, 'Warehouse'), (19, 'Land'), 
+(20, 'Commercial Building'), (21, 'Industrial'), (22, 'Hotel'), (23, 'Guesthouse'), 
+(24, 'Resort'), (25, 'Other')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Listing Statuses
 INSERT INTO `listing_status` (`status_id`, `status_name`) VALUES
-(1, 'available'), (2, 'rented'), (3, 'unavailable'), (4, 'pending'), (5, 'maintenance')
+(1, 'Available'), (2, 'Rented'), (3, 'Unavailable'), (4, 'Pending'), (5, 'Maintenance')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Room Types
@@ -85,38 +85,38 @@ ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Vehicle Types
 INSERT INTO `vehicle_type` (`type_id`, `type_name`) VALUES
-(1, 'car'), (2, 'motorcycle'), (3, 'van'), (4, 'suv'), (5, 'pickup'), 
-(6, 'coupe'), (7, 'sedan'), (8, 'hatchback'), (9, 'wagon'), (10, 'other')
+(1, 'Car'), (2, 'Motorcycle'), (3, 'Van'), (4, 'SUV'), (5, 'Pickup'), 
+(6, 'Coupe'), (7, 'Sedan'), (8, 'Hatchback'), (9, 'Wagon'), (10, 'Other')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Fuel Types
 INSERT INTO `fuel_type` (`type_id`, `type_name`) VALUES
-(1, 'petrol'), (2, 'diesel'), (3, 'electric'), (4, 'hybrid'), (5, 'other')
+(1, 'Petrol'), (2, 'Diesel'), (3, 'Electric'), (4, 'Hybrid'), (5, 'Other')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Transmission Types
 INSERT INTO `transmission_type` (`type_id`, `type_name`) VALUES
-(1, 'manual'), (2, 'automatic'), (3, 'cvt'), (4, 'semi-automatic'), (5, 'other')
+(1, 'Manual'), (2, 'Automatic'), (3, 'CVT'), (4, 'Semi-Automatic'), (5, 'Other')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Pricing Types
 INSERT INTO `pricing_type` (`type_id`, `type_name`) VALUES
-(1, 'per_day'), (2, 'per_km')
+(1, 'Per Day'), (2, 'Per Km')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Rent Statuses
 INSERT INTO `rent_status` (`status_id`, `status_name`) VALUES
-(1, 'booked'), (2, 'pending'), (3, 'cancelled')
+(1, 'Booked'), (2, 'Pending'), (3, 'Cancelled')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 -- Notification Types
 INSERT INTO `notification_type` (`type_id`, `type_name`) VALUES
-(1, 'system'), (2, 'other')
+(1, 'System'), (2, 'Other')
 ON DUPLICATE KEY UPDATE `type_name`=`type_name`;
 
 -- Request Statuses
 INSERT INTO `request_status` (`status_id`, `status_name`) VALUES
-(1, 'pending'), (2, 'approved'), (3, 'rejected')
+(1, 'Pending'), (2, 'Approved'), (3, 'Rejected')
 ON DUPLICATE KEY UPDATE `status_name`=`status_name`;
 
 
@@ -150,11 +150,7 @@ INSERT IGNORE INTO `vehicle_brand` (`brand_id`, `brand_name`) VALUES
 (6, 'Kia'), (7, 'Hyundai'), (8, 'BMW'), (9, 'Mercedes-Benz'), (10, 'Audi')
 ON DUPLICATE KEY UPDATE `brand_name`=`brand_name`;
 
--- Vehicle Colors
-INSERT IGNORE INTO `vehicle_color` (`color_id`, `color_name`, `hex_code`) VALUES 
-(1, 'White', '#FFFFFF'), (2, 'Black', '#000000'), (3, 'Silver', '#C0C0C0'), (4, 'Gray', '#808080'), 
-(5, 'Red', '#FF0000'), (6, 'Blue', '#0000FF'), (7, 'Brown', '#A52A2A'), (8, 'Green', '#008000')
-ON DUPLICATE KEY UPDATE `color_name`=`color_name`;
+
 
 -- Vehicle Models (Sample)
 INSERT IGNORE INTO `vehicle_model` (`model_id`, `brand_id`, `model_name`) VALUES

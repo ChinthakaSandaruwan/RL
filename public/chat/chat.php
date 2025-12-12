@@ -3,6 +3,10 @@
 $agentName = "Support Agent"; // Default
 $agentRole = "Customer Support";
 $agentAvatar = app_url('public/favicon/apple-touch-icon.png'); // Fallback to favicon since logo.png is missing
+
+if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
+    return;
+}
 ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="<?= app_url('public/chat/chat.css') ?>">

@@ -9,6 +9,11 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $user = current_user();
 $pdo = get_pdo();
 
+if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
+    echo json_encode(['success' => false, 'message' => 'Chat is currently disabled.']);
+    exit;
+}
+
 // Restrict to logged-in users
 if (!$user) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
