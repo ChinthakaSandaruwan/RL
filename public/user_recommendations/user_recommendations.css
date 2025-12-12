@@ -1,0 +1,98 @@
+.recommendation-section {
+    padding: 60px 0;
+    background-color: #f8f9fa;
+}
+
+.recommendation-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-img-wrapper {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.recommendation-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.recommendation-card:hover .recommendation-img {
+    transform: scale(1.1);
+}
+
+.recommendation-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.badge-property {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-room {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-vehicle {
+    background-color: #ffc107;
+    color: black;
+}
+
+.recommendation-body {
+    padding: 20px;
+    background: white;
+}
+
+.recommendation-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.recommendation-price {
+    color: #e74c3c;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.recommendation-features {
+    display: flex;
+    gap: 15px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.recommendation-feature {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}

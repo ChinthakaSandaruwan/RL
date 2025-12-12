@@ -132,161 +132,82 @@
                 <?php if (isset($user) && $user): ?>
                     <!-- Logged In State -->
                     <li class="nav-item me-2">
-                        <span class="navbar-text">
-                            Hello, <span class="fw-bold text-white"><?= htmlspecialchars($user['name'] ?? $user['email'] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
-                            <span class="badge bg-secondary ms-2" style="font-size: 0.75rem; vertical-align: middle;"><?= htmlspecialchars($user['role_name'] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
-                        </span>
-                    </li>
-                    <?php if ($user['role_id'] == 1): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('super_admin/index/index.php') ?>">
-                            <i class="bi bi-shield-lock me-1"></i> Super Admin Dashboard
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    <?php if ($user['role_id'] == 2): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('admin/index/index.php') ?>">
-                            Admin Dashboard
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    <?php if ($user['role_id'] == 4): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('public/user_type_change/send_user_type_change_request.php') ?>">
-                            Become Owner
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    <?php if ($user['role_id'] == 3): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('owner/index/index.php') ?>">
-                            Owner Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="ownerCreateDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Create
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="ownerCreateDropdown">
-                            <li><a class="dropdown-item" href="<?= app_url('owner/property/manage/create/property_create.php') ?>">Add Property</a></li>
-                            <li><a class="dropdown-item" href="<?= app_url('owner/room/manage/create/room_create.php') ?>">Add Room</a></li>
-                            <li><a class="dropdown-item" href="<?= app_url('owner/vehicle/manage/create/vehicle_create.php') ?>">Add Vehicle</a></li>
-                        </ul>
-                    </li>
-                    <?php endif; ?>
-                    <?php
-                    // Fetch unread notification count & latest notifications
-                    $unread_count = 0;
-                    $navbar_notifications = [];
-                    if (isset($user['user_id'])) {
-                        $pdo_nav = get_pdo();
-                        // Count
-                        $stmt = $pdo_nav->prepare("SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0");
-                        $stmt->execute([$user['user_id']]);
-                        $unread_count = $stmt->fetchColumn();
-                        
-                        // Latest 5
-                        $stmt_list = $pdo_nav->prepare("
-                            SELECT * FROM notification 
-                            WHERE user_id = ? 
-                            ORDER BY created_at DESC 
-                            LIMIT 5
-                        ");
-                        $stmt_list->execute([$user['user_id']]);
-                        $navbar_notifications = $stmt_list->fetchAll();
-                    }
-                    ?>
-                    <li class="nav-item dropdown me-2">
-                        <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="View notifications">
-                            <i class="bi bi-bell-fill" style="font-size: 1.2rem;"></i>
-                            <?php if ($unread_count > 0): ?>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                    <?= $unread_count > 99 ? '99+' : $unread_count ?>
-                                    <span class="visually-hidden">unread messages</span>
-                                </span>
-                            <?php endif; ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end p-0 shadow overflow-hidden" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                            <li class="p-2 border-bottom d-flex justify-content-between align-items-center bg-white">
-                                <span class="fw-bold small ms-1">Notifications</span>
-                                <a href="<?= app_url('public/notification/notification.php') ?>" class="text-decoration-none small text-success">View All</a>
-                            </li>
-                            <?php if (empty($navbar_notifications)): ?>
-                                <li class="p-3 text-center text-muted small">
-                                    No notifications
-                                </li>
-                            <?php else: ?>
-                                <?php foreach ($navbar_notifications as $notif): ?>
-                                    <li>
-                                        <a class="dropdown-item p-2 text-wrap" href="<?= app_url('public/property/view/property_view.php?id=' . $notif['property_id']) ?>">
-                                            <div class="d-flex align-items-start gap-2">
-                                                <div class="mt-1">
-                                                    <?php if (!$notif['is_read']): ?>
-                                                        <i class="bi bi-circle-fill text-success" style="font-size: 0.5rem;"></i>
-                                                    <?php else: ?>
-                                                        <i class="bi bi-circle text-muted" style="font-size: 0.5rem;"></i>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold small text-truncate" style="max-width: 230px;"><?= htmlspecialchars($notif['title']) ?></div>
-                                                    <div class="small text-muted text-truncate" style="max-width: 230px;"><?= htmlspecialchars($notif['message']) ?></div>
-                                                    <div class="text-muted" style="font-size: 0.7rem;"><?= date('M d, H:i', strtotime($notif['created_at'])) ?></div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider my-0"></li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                            <li class="text-center p-2 bg-light">
-                                <a href="<?= app_url('public/notification/notification.php') ?>" class="small text-decoration-none fw-bold text-secondary">See all notifications</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <?php
-                    // Fetch wishlist count for customers
-                    $wishlist_count = 0;
-                    if (isset($user['user_id'])) {
-                        $pdo_nav = get_pdo();
-                        $stmt_p = $pdo_nav->prepare("SELECT COUNT(*) FROM property_wishlist WHERE customer_id = ?");
-                        $stmt_p->execute([$user['user_id']]);
-                        $count_p = $stmt_p->fetchColumn();
-                        
-                        $stmt_r = $pdo_nav->prepare("SELECT COUNT(*) FROM room_wishlist WHERE customer_id = ?");
-                        $stmt_r->execute([$user['user_id']]);
-                        $count_r = $stmt_r->fetchColumn();
-                        
-                        $stmt_v = $pdo_nav->prepare("SELECT COUNT(*) FROM vehicle_wishlist WHERE customer_id = ?");
-                        $stmt_v->execute([$user['user_id']]);
-                        $count_v = $stmt_v->fetchColumn();
-                        
-                        $wishlist_count = $count_p + $count_r + $count_v;
-                    }
-                    ?>
-                    <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="<?= app_url('public/wishlist/wishlist.php') ?>" aria-label="View wishlist">
-                            <i class="bi bi-heart-fill" style="font-size: 1.2rem;"></i>
-                            <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; <?= $wishlist_count > 0 ? '' : 'display:none;' ?>">
-                                <?= $wishlist_count > 99 ? '99+' : $wishlist_count ?>
-                                <span class="visually-hidden">wishlist items</span>
-                            </span>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('public/my_rent/my_rent.php') ?>">
                             <i class="bi bi-calendar-check me-1"></i> My Rent
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('public/profile/profile.php') ?>">
-                            Profile
+                    <!-- User Menu Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="fw-bold text-white"><?= htmlspecialchars($user['name'] ?? $user['email'] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php if (!empty($user['profile_image'])): ?>
+                                <img src="<?= app_url($user['profile_image']) ?>" alt="Profile" class="rounded-circle" width="30" height="30" style="object-fit: cover; border: 2px solid white;">
+                            <?php else: ?>
+                                <div class="rounded-circle bg-light text-secondary d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            <?php endif; ?>
                         </a>
-                    </li>
-                    <li class="nav-item ms-lg-2">
-                        <a class="nav-link btn btn-sm" style="border: 1px solid rgba(255,255,255,0.3); padding: 0.4rem 1rem !important;" href="<?= app_url('auth/logout') ?>">
-                            Logout
-                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                             <li class="px-3 py-2 border-bottom">
+                                <small class="text-muted d-block">Signed in as</small>
+                                <span class="fw-bold d-block text-truncate" style="max-width: 15rem;"><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></span>
+                                <span class="badge bg-secondary mt-1"><?= htmlspecialchars($user['role_name'] ?? 'User', ENT_QUOTES, 'UTF-8') ?></span>
+                            </li>
+                            
+                            <?php if ($user['role_id'] == 1): ?>
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('super_admin/index/index.php') ?>">
+                                    <i class="bi bi-shield-lock me-2"></i>Super Admin Dashboard
+                                </a>
+                            </li>
+                            <?php endif; ?>
+
+                            <?php if ($user['role_id'] == 2): ?>
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('admin/index/index.php') ?>">
+                                    <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+                                </a>
+                            </li>
+                            <?php endif; ?>
+
+                            <?php if ($user['role_id'] == 3): ?>
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('owner/index/index.php') ?>">
+                                    <i class="bi bi-speedometer2 me-2"></i>Owner Dashboard
+                                </a>
+                            </li>
+                            <?php endif; ?>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('public/profile/profile.php') ?>">
+                                    <i class="bi bi-person-circle me-2"></i>Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('public/transactions/my_transactions.php') ?>">
+                                    <i class="bi bi-receipt me-2"></i>My Transactions
+                                </a>
+                            </li>
+                            
+                            <?php if ($user['role_id'] == 4): ?>
+                            <li>
+                                <a class="dropdown-item" href="<?= app_url('public/user_type_change/send_user_type_change_request.php') ?>">
+                                    <i class="bi bi-shop-window me-2"></i>Become Owner
+                                </a>
+                            </li>
+                            <?php endif; ?>
+
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="<?= app_url('auth/logout') ?>">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 <?php else: ?>
                     <!-- Guest State -->

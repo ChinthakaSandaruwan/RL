@@ -1,0 +1,155 @@
+.transaction-dashboard {
+    padding: 40px 0;
+    font-family: 'Outfit', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 80vh;
+}
+
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.dashboard-subtitle {
+    color: #7f8c8d;
+}
+
+/* Card Styling */
+.transaction-card {
+    border: none;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.transaction-card-header {
+    background: white;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.table-responsive {
+    margin: 0;
+}
+
+.table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.table th {
+    font-weight: 600;
+    color: #95a5a6;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #eee;
+    padding: 15px 25px;
+    background: #fdfdfd;
+}
+
+.table td {
+    padding: 15px 25px;
+    color: #2c3e50;
+    font-weight: 500;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Badges */
+.badge-rounded {
+    border-radius: 30px;
+    padding: 6px 14px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.status-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-failed {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.status-refunded {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* Amount Styling */
+.amount-text {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.currency-text {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-right: 4px;
+}
+
+/* ID Styling */
+.trans-id {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #34495e;
+    font-size: 0.9rem;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: #eef2f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon {
+    font-size: 2rem;
+    color: #bdc3c7;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .dashboard-header {
+        text-align: center;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 15px;
+    }
+
+    /* Optional: Card view for mobile if needed, but horizontal scroll works for now */
+}

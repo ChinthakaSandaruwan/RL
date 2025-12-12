@@ -258,6 +258,8 @@ $user = current_user();
 
 <?php require __DIR__ . '/public/search/search/search.php'; ?>
 
+<?php require __DIR__ . '/public/user_recommendations/user_recommendations.php'; ?>
+
 
 <?php require __DIR__ . '/public/property/load/load_property.php'; ?>
 
