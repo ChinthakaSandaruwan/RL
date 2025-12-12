@@ -193,7 +193,7 @@ $pendingMobile = $_SESSION['pending_login_mobile'] ?? '';
                         <label for="mobileInput" class="form-label">Mobile Number</label>
                         <div class="input-field-wrapper">
                             <i class="fa-solid fa-mobile-screen-button icon"></i>
-                            <input type="text" name="mobile" id="mobileInput" placeholder="07XXXXXXXX" required autofocus autocomplete="tel">
+                            <input type="text" name="mobile" id="mobileInput" placeholder="07XXXXXXXX" required autofocus autocomplete="tel" value="<?= htmlspecialchars($_POST['mobile'] ?? $_GET['mobile'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                         <div class="form-text">We'll send you a verification code.</div>
                     </div>

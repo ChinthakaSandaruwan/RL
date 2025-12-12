@@ -154,7 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
     window.serverMessages = {
         success: <?= json_encode($success) ?>,
-        errors: <?= json_encode($errors) ?>
+        errors: <?= json_encode($errors) ?>,
+        mobile: <?= json_encode($mobile ?? null) ?>
     };
 </script>
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>

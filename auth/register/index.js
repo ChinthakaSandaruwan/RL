@@ -7,7 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: window.serverMessages.success,
                 confirmButtonColor: '#3a5a40',
                 background: '#fff',
-                color: '#344e41'
+                color: '#344e41',
+                confirmButtonText: 'Login Now'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '../login/index.php';
+                    if (window.serverMessages.mobile) {
+                        url += '?mobile=' + encodeURIComponent(window.serverMessages.mobile);
+                    }
+                    window.location.href = url;
+                }
             });
         }
 
