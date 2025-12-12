@@ -12,13 +12,13 @@ if ($s_category && $s_category !== 'property') {
 }
 
 $pdo = get_pdo();
-$query = "SELECT p.*, pt.type_name, 
-    (SELECT image_path FROM property_image WHERE property_id = p.property_id AND primary_image = 1 LIMIT 1) as primary_image
+$query = "SELECT p.*, pt.type_name, pi.image_path as primary_image
     FROM property p 
     LEFT JOIN property_type pt ON p.property_type_id = pt.type_id
     LEFT JOIN property_location pl ON p.property_id = pl.property_id
     LEFT JOIN cities c ON pl.city_id = c.id
     LEFT JOIN districts d ON c.district_id = d.id
+    LEFT JOIN property_image pi ON p.property_id = pi.property_id AND pi.primary_image = 1
     WHERE p.status_id = 1";
 
 $params = [];

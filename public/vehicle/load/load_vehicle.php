@@ -12,8 +12,7 @@ if ($s_category && $s_category !== 'vehicle') {
 }
 
 $pdo = get_pdo();
-$query = "SELECT v.*, vt.type_name, vm.model_name, vb.brand_name,
-    (SELECT image_path FROM vehicle_image WHERE vehicle_id = v.vehicle_id AND primary_image = 1 LIMIT 1) as primary_image
+$query = "SELECT v.*, vt.type_name, vm.model_name, vb.brand_name, vi.image_path as primary_image
     FROM vehicle v 
     LEFT JOIN vehicle_type vt ON v.vehicle_type_id = vt.type_id
     LEFT JOIN vehicle_model vm ON v.model_id = vm.model_id
@@ -21,6 +20,7 @@ $query = "SELECT v.*, vt.type_name, vm.model_name, vb.brand_name,
     LEFT JOIN vehicle_location vl ON v.vehicle_id = vl.vehicle_id
     LEFT JOIN cities c ON vl.city_id = c.id
     LEFT JOIN districts d ON c.district_id = d.id
+    LEFT JOIN vehicle_image vi ON v.vehicle_id = vi.vehicle_id AND vi.primary_image = 1
     WHERE v.status_id = 1";
 
 $params = [];

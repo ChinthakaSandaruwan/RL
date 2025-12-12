@@ -261,8 +261,16 @@ function get_chat_flag_path() {
 }
 
 function is_chat_enabled(): bool {
+    // Cache the result in a static variable to avoid repeated file reads
+    static $cached_result = null;
+    
+    if ($cached_result !== null) {
+        return $cached_result;
+    }
+    
     $path = get_chat_flag_path();
     if (!is_readable($path)) {
+        $cached_result = true;
         return true;
     }
 
@@ -270,14 +278,17 @@ function is_chat_enabled(): bool {
     $data = json_decode($content, true);
 
     if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+        $cached_result = true;
         return true;
     }
 
     if (!array_key_exists('enabled', $data)) {
+        $cached_result = true;
         return true;
     }
 
-    return (bool)$data['enabled'];
+    $cached_result = (bool)$data['enabled'];
+    return $cached_result;
 }
 
 function set_chat_enabled(bool $enabled): void {

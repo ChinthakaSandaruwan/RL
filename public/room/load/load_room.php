@@ -12,12 +12,12 @@ if ($s_category && $s_category !== 'room') {
 }
 
 $pdo = get_pdo();
-$query = "SELECT r.*, 
-    (SELECT image_path FROM room_image WHERE room_id = r.room_id ORDER BY primary_image DESC LIMIT 1) as image_path
+$query = "SELECT r.*, ri.image_path
     FROM room r 
     LEFT JOIN room_location rl ON r.room_id = rl.room_id
     LEFT JOIN cities c ON rl.city_id = c.id
     LEFT JOIN districts d ON c.district_id = d.id
+    LEFT JOIN room_image ri ON r.room_id = ri.room_id AND ri.primary_image = 1
     WHERE r.status_id = 1";
 
 $params = [];

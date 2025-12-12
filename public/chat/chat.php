@@ -4,6 +4,14 @@ $agentName = "Support Agent"; // Default
 $agentRole = "Customer Support";
 $agentAvatar = app_url('public/favicon/apple-touch-icon.png'); // Fallback to favicon since logo.png is missing
 
+// Only show chat for logged-in users
+if (function_exists('current_user')) {
+    $chatUser = current_user();
+    if (!$chatUser) {
+        return;
+    }
+}
+
 if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
     return;
 }
@@ -88,4 +96,38 @@ if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?= app_url('public/chat/chat.js') ?>"></script>
+<script>
+function setupLazyChatLoader() {
+    const launcher = document.querySelector('.chat-launcher');
+    if (!launcher) return;
+
+    let chatLoaded = false;
+
+    function loadChatScriptAndTriggerClick(event) {
+        if (chatLoaded) return;
+        chatLoaded = true;
+
+        if (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+
+        const script = document.createElement('script');
+        script.src = "<?= app_url('public/chat/chat.js') ?>";
+        script.onload = function () {
+            launcher.removeEventListener('click', loadChatScriptAndTriggerClick, true);
+            // Trigger the click again so the real chat handler (from chat.js) runs
+            launcher.click();
+        };
+        document.body.appendChild(script);
+    }
+
+    launcher.addEventListener('click', loadChatScriptAndTriggerClick, true);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLazyChatLoader);
+} else {
+    setupLazyChatLoader();
+}
+</script>

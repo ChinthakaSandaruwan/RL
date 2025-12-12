@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+function initChatWidget() {
     const launcher = document.querySelector('.chat-launcher');
     const chatWindow = document.querySelector('.chat-window');
     const chatInput = document.querySelector('.chat-input');
@@ -283,4 +283,10 @@ document.addEventListener('DOMContentLoaded', function () {
         div.textContent = text;
         return div.innerHTML;
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChatWidget);
+} else {
+    initChatWidget();
+}
