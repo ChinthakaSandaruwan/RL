@@ -271,5 +271,6 @@ $user = current_user();
 <?php require __DIR__ . '/public/footer/footer.php'; ?>
 
 <script defer src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
+<?php require_once __DIR__ . '/super_admin/special_holidays/global_loader.php'; ?>
 </body>
 </html>

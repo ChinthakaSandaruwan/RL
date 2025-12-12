@@ -16,6 +16,8 @@ header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
 
+
+
 // Get stats
 $totalAdmins = $pdo->query("SELECT COUNT(*) FROM user WHERE role_id = 2")->fetchColumn();
 $totalOwners = $pdo->query("SELECT COUNT(*) FROM user WHERE role_id = 3")->fetchColumn();
@@ -132,9 +134,11 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
                         <i class="bi bi-shield-lock"></i> Manage Admins
                     </a>
                 </div>
- 
-              
-              
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/promotion/role_change/role_change.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-person-gear"></i> Change User Role
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -146,8 +150,7 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
         </div>
         <div class="card-body">
             <div class="row g-3">
-               
-                <div class="col-md-3">
+ <div class="col-md-3">
                     <a href="<?= app_url('super_admin/backup/database_backup/database_backup.php') ?>" class="btn btn-outline-dark w-100 py-3">
                         <i class="bi bi-database-down"></i> Database Backup
                     </a>
@@ -162,6 +165,14 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
                         <i class="bi bi-cone-striped"></i> Maintenance Mode
                     </a>
                 </div>
+                <!-- special holidays -->
+                <div class="col-md-3">
+                    <a href="<?= app_url('super_admin/special_holidays/holidays_manage.php') ?>" class="btn btn-outline-dark w-100 py-3">
+                        <i class="bi bi-snow"></i> Special Holidays
+                    </a>
+                </div>
+             
+
             </div>
         </div>
     </div>
@@ -169,5 +180,6 @@ $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
 
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
 <script src="<?= app_url('super_admin/index/index.js') ?>"></script>
+
 </body>
 </html>
