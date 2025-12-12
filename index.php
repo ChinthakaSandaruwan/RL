@@ -114,8 +114,8 @@ $user = current_user();
       "@type": "LocalBusiness",
       "@id": "<?= app_url() ?>#organization",
       "name": "Rental Lanka",
-      "image": "<?= app_url('public/assets/images/logo.png') ?>",
-      "logo": "<?= app_url('public/assets/images/logo.png') ?>",
+      "image": "<?= app_url('public/favicon/apple-touch-icon.png') ?>",
+      "logo": "<?= app_url('public/favicon/apple-touch-icon.png') ?>",
       "url": "<?= app_url() ?>",
       "telephone": "+94-XX-XXXXXXX",
       "priceRange": "LKR",
@@ -274,6 +274,7 @@ $user = current_user();
 
 <script defer src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
 <?php require __DIR__ . '/public/index_scrollup/scrollup.php'; ?>
+<?php require __DIR__ . '/public/chat/chat.php'; ?>
 <?php require_once __DIR__ . '/super_admin/special_holidays/global_loader.php'; ?>
 </body>
 </html>

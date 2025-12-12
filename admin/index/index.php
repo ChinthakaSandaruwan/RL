@@ -307,6 +307,11 @@ try {
                         <i class="bi bi-send"></i> Notify Customers
                     </a>
                 </div>
+                <div class="col-md-3">
+                    <a href="<?= app_url('admin/chat/index.php') ?>" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-chat-dots"></i> Chat Management
+                    </a>
+                </div>
             </div>
         </div>
     </div>

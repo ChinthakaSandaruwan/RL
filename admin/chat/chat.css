@@ -1,0 +1,34 @@
+/* Admin Chat Specific Styles */
+.list-group-item {
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item.active {
+    background-color: var(--hunter-green, #3a5a40) !important;
+    border-color: var(--hunter-green, #3a5a40) !important;
+}
+
+#chatMessages {
+    scroll-behavior: smooth;
+}
+
+/* Delete button - show on hover */
+.delete-conversation-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+    padding: 4px 8px;
+}
+
+.list-group-item:hover .delete-conversation-btn {
+    opacity: 1;
+}
+
+.delete-conversation-btn:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+}

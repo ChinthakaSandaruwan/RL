@@ -177,7 +177,7 @@ $pendingMobile = $_SESSION['pending_login_mobile'] ?? '';
 <div class="login-wrapper">
     <div class="glass-card">
         <div class="login-header">
-            <img src="<?= app_url('public/assets/images/logo.png') ?>" alt="Rental Lanka Logo" class="brand-logo mb-3" style="max-height: 60px; display: none;"> <!-- Placeholder if logo exists -->
+            <img src="<?= app_url('public/favicon/apple-touch-icon.png') ?>" alt="Rental Lanka Logo" class="brand-logo mb-3" style="max-height: 60px;">
             <h2>Welcome Back</h2>
             <p>Access your rental dashboard</p>
         </div>

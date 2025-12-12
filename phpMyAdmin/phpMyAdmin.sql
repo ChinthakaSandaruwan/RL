@@ -755,31 +755,31 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   CONSTRAINT `fk_transactions_method` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_method` (`method_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `chat` (
-  `chat_id` INT NOT NULL AUTO_INCREMENT,
-  `user1_id` INT NOT NULL, -- Usually customer
-  `user2_id` INT NOT NULL, -- Usually owner/admin
-  `related_type` ENUM('property', 'room', 'vehicle', 'general') NULL,
-  `related_id` INT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`chat_id`),
-  UNIQUE KEY `uk_chat_users_topic` (`user1_id`, `user2_id`, `related_type`, `related_id`),
-  CONSTRAINT `fk_chat_user1` FOREIGN KEY (`user1_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_chat_user2` FOREIGN KEY (`user2_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+-- Chat System Tables
+CREATE TABLE IF NOT EXISTS `chat_conversations` (
+  `conversation_id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `status` ENUM('open', 'closed') DEFAULT 'open',
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`conversation_id`),
+  KEY `idx_chat_conversations_user` (`user_id`),
+  KEY `idx_chat_conversations_status` (`status`),
+  CONSTRAINT `fk_chat_conversations_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `chat_message` (
-  `message_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `chat_id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `chat_messages` (
+  `message_id` INT NOT NULL AUTO_INCREMENT,
+  `conversation_id` INT NOT NULL,
   `sender_id` INT NOT NULL,
+  `sender_type` ENUM('user', 'admin') NOT NULL,
   `message` TEXT NOT NULL,
-  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_read` TINYINT(1) DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`message_id`),
-  KEY `idx_messages_chat` (`chat_id`),
-  CONSTRAINT `fk_messages_chat` FOREIGN KEY (`chat_id`) REFERENCES `chat` (`chat_id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_messages_sender` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+  KEY `idx_chat_messages_conversation` (`conversation_id`),
+  KEY `idx_chat_messages_read` (`is_read`),
+  CONSTRAINT `fk_chat_messages_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `chat_conversations` (`conversation_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `availability_block` (

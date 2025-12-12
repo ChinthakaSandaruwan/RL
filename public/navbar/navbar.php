@@ -230,7 +230,7 @@
 
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="<?= app_url('auth/logout') ?>">
+                                <a class="dropdown-item text-danger" href="<?= app_url('auth/logout/index.php') ?>">
                                     <i class="bi bi-box-arrow-right me-2"></i>Logout
                                 </a>
                             </li>
