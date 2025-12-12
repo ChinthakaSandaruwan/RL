@@ -71,6 +71,26 @@
             }
             ?>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
+                <!-- Create Dropdown -->
+                <?php if (isset($user) && $user['role_id'] == 3): ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-plus-circle me-1"></i> Create
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="createDropdown">
+                        <li><a class="dropdown-item" href="<?= app_url('owner/property/manage/create/property_create.php') ?>">
+                            <i class="bi bi-house-add me-2"></i>Property
+                        </a></li>
+                        <li><a class="dropdown-item" href="<?= app_url('owner/room/manage/create/room_create.php') ?>">
+                            <i class="bi bi-door-open me-2"></i>Room
+                        </a></li>
+                        <li><a class="dropdown-item" href="<?= app_url('owner/vehicle/manage/create/vehicle_create.php') ?>">
+                            <i class="bi bi-car-front me-2"></i>Vehicle
+                        </a></li>
+                    </ul>
+                </li>
+                <?php endif; ?>
+
                 <!-- All Properties Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="<?= app_url('public/property/view_all/view_all.php') ?>" id="propertiesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
