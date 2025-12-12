@@ -116,6 +116,7 @@ $statusMap = [
                                     <td class="text-end pe-4">
                                         <a href="<?= $viewLink ?>" class="btn btn-sm btn-outline-info action-btn me-1"><i class="bi bi-eye-fill"></i></a>
                                         <a href="update/room_update.php?id=<?= $room['room_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1"><i class="bi bi-pencil-fill"></i></a>
+
                                         <a href="delete/room_delete.php?id=<?= $room['room_id'] ?>" class="btn btn-sm btn-outline-danger action-btn" onclick="return confirm('Delete this room?')"><i class="bi bi-trash-fill"></i></a>
                                     </td>
                                 </tr>

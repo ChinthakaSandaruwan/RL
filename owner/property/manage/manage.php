@@ -153,6 +153,7 @@ $statusMap = [
                                         <a href="update/property_update.php?id=<?= $prop['property_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1" title="Edit">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
+
                                         <a href="delete/property_delete.php?id=<?= $prop['property_id'] ?>" 
                                            class="btn btn-sm btn-outline-danger action-btn" 
                                            title="Delete"
