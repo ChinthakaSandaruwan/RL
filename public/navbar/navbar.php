@@ -20,6 +20,15 @@
             <?php
             // Fetch types for navbar dropdowns
             $pdo_nav = get_pdo();
+            
+            // Ensure session/user context if not already set by parent
+            if (function_exists('ensure_session_started')) {
+                 ensure_session_started();
+            }
+            if (!isset($user) && function_exists('current_user')) {
+                $user = current_user();
+            }
+
             $navPropertyTypes = $pdo_nav->query("SELECT * FROM property_type ORDER BY type_name ASC")->fetchAll();
             $navRoomTypes = $pdo_nav->query("SELECT * FROM room_type ORDER BY type_name ASC")->fetchAll();
             $navVehicleTypes = $pdo_nav->query("SELECT * FROM vehicle_type ORDER BY type_name ASC")->fetchAll();
@@ -230,10 +239,10 @@
                 <?php else: ?>
                     <!-- Guest State -->
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= app_url('auth/login') ?>">Login</a>
+                        <a class="nav-link" href="<?= app_url('auth/login/index.php') ?>">Login</a>
                     </li>
                     <li class="nav-item ms-lg-2">
-                        <a class="nav-link btn" style="background-color: var(--dry-sage); color: var(--hunter-green) !important; font-weight: 600; padding: 0.5rem 1.25rem !important;" href="<?= app_url('auth/register') ?>">
+                        <a class="nav-link btn" style="background-color: var(--dry-sage); color: var(--hunter-green) !important; font-weight: 600; padding: 0.5rem 1.25rem !important;" href="<?= app_url('auth/register/index.php') ?>">
                             Register
                         </a>
                     </li>

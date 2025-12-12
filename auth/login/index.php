@@ -6,6 +6,11 @@ require __DIR__ . '/../../services/sms.php';
 
 ensure_session_started();
 
+if (isset($_SESSION['user_id'])) {
+    header('Location: ' . app_url('index.php'));
+    exit;
+}
+
 // Security Headers
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");

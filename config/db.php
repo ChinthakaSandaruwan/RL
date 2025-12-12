@@ -49,6 +49,7 @@ function ensure_session_started(): void {
         // Session hardening
         // Session configuration: 1 month lifetime
         $lifetime = 30 * 24 * 60 * 60; // 2,592,000 seconds
+
         ini_set('session.gc_maxlifetime', $lifetime);
         
         session_set_cookie_params([
