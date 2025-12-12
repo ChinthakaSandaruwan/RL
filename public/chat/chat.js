@@ -8,7 +8,7 @@ function initChatWidget() {
     if (!launcher || !chatWindow) return;
 
     let lastMessageId = 0;
-    let pollInterval;
+    let pollInterval = null;
     let conversationId = null; // Track the conversation ID
 
     // Toggle Chat
@@ -144,6 +144,7 @@ function initChatWidget() {
                     conversationId = data.conversation_id;
                     // Immediately fetch to show the sent message
                     fetchMessages();
+                    startPolling();
                 }
             })
             .catch(err => console.error('Send error:', err));
@@ -192,6 +193,9 @@ function initChatWidget() {
     }
 
     function showConversationEnded() {
+        // Stop polling when conversation ends
+        stopPolling();
+
         // Hide options if visible
         const options = document.querySelector('.chat-options');
         if (options) options.remove();
@@ -240,6 +244,9 @@ function initChatWidget() {
     function startNewConversation() {
         console.log('Starting new conversation...');
 
+        // Stop any existing polling first
+        stopPolling();
+
         // Remove ended message
         document.querySelector('.conversation-ended')?.remove();
 
@@ -247,7 +254,7 @@ function initChatWidget() {
         const messages = chatBody.querySelectorAll('.message-row:not(:first-child)');
         messages.forEach(msg => msg.remove());
 
-        // Reset
+        // Reset state variables
         lastMessageId = 0;
         conversationId = null;
 
@@ -275,10 +282,13 @@ function initChatWidget() {
         }
 
         chatInput.focus();
-        console.log('New conversation started successfully');
+        console.log('New conversation started (waiting for user message)');
     }
 
     function startPolling() {
+        // Clear any existing poller to avoid duplicates
+        if (pollInterval) stopPolling();
+
         // Poll messages every 8 seconds (reduced from 3s for better performance)
         // This reduces API requests from 20/min to 7.5/min per user
         pollInterval = setInterval(fetchMessages, 8000);
