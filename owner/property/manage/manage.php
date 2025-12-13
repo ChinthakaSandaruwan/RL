@@ -152,10 +152,11 @@ unset($_SESSION['_flash'], $_SESSION['success'], $_SESSION['error']);
                                         <a href="<?= $viewLink ?>" class="btn btn-sm btn-outline-info action-btn me-1" title="View Details">
                                             <i class="bi bi-eye-fill"></i>
                                         </a>
-                                        <a href="update/property_update.php?id=<?= $prop['property_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1" title="Edit">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-
+                                        <?php if ($prop['status_id'] == 4): ?>
+                                            <a href="update/property_update.php?id=<?= $prop['property_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1" title="Edit">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+                                        <?php endif; ?>
                                         <a href="delete/property_delete.php?id=<?= $prop['property_id'] ?>" 
                                            class="btn btn-sm btn-outline-danger action-btn" 
                                            title="Delete"

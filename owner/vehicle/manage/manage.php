@@ -120,8 +120,9 @@ $statusMap = [
                                     <td class="small text-muted"><?= date('M d, Y', strtotime($vehicle['created_at'])) ?></td>
                                     <td class="text-end pe-4">
                                         <a href="<?= $viewLink ?>" class="btn btn-sm btn-outline-info action-btn me-1"><i class="bi bi-eye-fill"></i></a>
-                                        <a href="update/vehicle_update.php?id=<?= $vehicle['vehicle_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1"><i class="bi bi-pencil-fill"></i></a>
-
+                                        <?php if ($vehicle['status_id'] == 4): ?>
+                                            <a href="update/vehicle_update.php?id=<?= $vehicle['vehicle_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1"><i class="bi bi-pencil-fill"></i></a>
+                                        <?php endif; ?>
                                         <a href="#" class="btn btn-sm btn-outline-danger action-btn" onclick="confirmDelete(<?= $vehicle['vehicle_id'] ?>); return false;"><i class="bi bi-trash-fill"></i></a>
                                     </td>
                                 </tr>
