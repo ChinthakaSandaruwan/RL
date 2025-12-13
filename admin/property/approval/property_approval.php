@@ -5,7 +5,8 @@ require __DIR__ . '/../../notification/owner/property_approval_notification/prop
 $user = current_user();
 
 // Check if user is Admin (role_id = 2)
-if (!$user || $user['role_id'] != 2) {
+// Check if user is Admin (2) or Super Admin (1)
+if (!$user || !in_array($user['role_id'], [1, 2])) {
     header('Location: ' . app_url('index.php'));
     exit;
 }
@@ -151,7 +152,7 @@ $properties = $stmt->fetchAll();
                                                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                                     <input type="hidden" name="property_id" value="<?= $property['property_id'] ?>">
                                                     <input type="hidden" name="action" value="approve">
-                                                    <button type="button" class="btn btn-success approve-btn">
+                                                    <button type="submit" class="btn btn-success approve-btn">
                                                         <i class="bi bi-check-circle"></i> Approve
                                                     </button>
                                                 </form>
@@ -159,7 +160,7 @@ $properties = $stmt->fetchAll();
                                                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                                     <input type="hidden" name="property_id" value="<?= $property['property_id'] ?>">
                                                     <input type="hidden" name="action" value="reject">
-                                                    <button type="button" class="btn btn-danger reject-btn">
+                                                    <button type="submit" class="btn btn-danger reject-btn" onclick="return confirm('Are you sure you want to REJECT this property? This will DELETE the listing and refund the owner\'s package quota. This action cannot be undone.')">
                                                         <i class="bi bi-x-circle"></i> Reject
                                                     </button>
                                                 </form>

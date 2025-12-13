@@ -5,10 +5,12 @@ ensure_session_started();
 $user = current_user();
 
 // Check if user is Admin (role_id = 2)
-if (!$user || $user['role_id'] != 2) {
+// Check if user is Admin (2) or Super Admin (1)
+if (!$user || !in_array($user['role_id'], [1, 2])) {
     header('Location: ' . app_url('index.php'));
     exit;
 }
+$csrf_token = generate_csrf_token();
 
 // Security Headers
 header("X-Frame-Options: DENY");
@@ -54,7 +56,29 @@ $stmt = $pdo->prepare("
     ORDER BY a.amenity_name ASC
 ");
 $stmt->execute([$propertyId]);
+$stmt->execute([$propertyId]);
 $amenityList = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Handle Actions (Approve/Reject) from this page
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) die("Invalid CSRF");
+    
+    $action = $_POST['action'] ?? '';
+    require_once __DIR__ . '/../../notification/owner/property_approval_notification/property_approval_notification_auto.php';
+
+    if ($action === 'approve') {
+        $pdo->prepare("UPDATE property SET status_id = 1 WHERE property_id = ?")->execute([$propertyId]);
+        notify_owner_property_status($property['owner_id'], $property['title'], 'approved');
+        header("Location: ".app_url("admin/property/view/property_view.php?id=$propertyId"));
+        exit;
+    } elseif ($action === 'reject') {
+        notify_owner_property_status($property['owner_id'], $property['title'], 'rejected');
+        increment_package_quota($property['owner_id'], 'property');
+        $pdo->prepare("DELETE FROM property WHERE property_id = ?")->execute([$propertyId]);
+        header("Location: ".app_url("admin/property/approval/property_approval.php?success=rejected"));
+        exit;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,14 +103,28 @@ $amenityList = $stmt->fetchAll(PDO::FETCH_COLUMN);
     <!-- Property Header -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="card-title mb-2"><?= htmlspecialchars($property['title']) ?></h2>
-                    <p class="text-muted mb-2">Property Code: <strong><?= htmlspecialchars($property['property_code']) ?></strong></p>
+                    <h2 class="card-title mb-1"><?= htmlspecialchars($property['title']) ?></h2>
+                    <p class="text-muted mb-0">Property Code: <strong><?= htmlspecialchars($property['property_code']) ?></strong></p>
                 </div>
-                <span class="badge bg-<?= $property['status_id'] == 1 ? 'success' : ($property['status_id'] == 4 ? 'warning' : 'danger') ?> fs-6">
-                    <?= htmlspecialchars($property['status_name']) ?>
-                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <?php if ($property['status_id'] == 4): // Pending ?>
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="action" value="approve">
+                            <button class="btn btn-success"><i class="bi bi-check-circle"></i> Approve</button>
+                        </form>
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="action" value="reject">
+                            <button class="btn btn-danger" onclick="return confirm('Are you sure you want to REJECT this listing? It will be DELETED.')"><i class="bi bi-x-circle"></i> Reject</button>
+                        </form>
+                    <?php endif; ?>
+                    <span class="badge bg-<?= $property['status_id'] == 1 ? 'success' : ($property['status_id'] == 4 ? 'warning' : 'danger') ?> fs-6">
+                        <?= htmlspecialchars($property['status_name']) ?>
+                    </span>
+                </div>
             </div>
         </div>
     </div>

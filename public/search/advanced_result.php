@@ -36,67 +36,36 @@ if ($category === 'property') {
     header("Location: " . app_url('public/search/property_search/property_search.php?' . $queryString));
     exit;
 
-} elseif ($category === 'room') {
-    
-     // We don't have a dedicated "room_search.php" yet, usually we might use the load_room.php logic but integrated into a page.
-     // For now, let's redirect to index.php with search params or creating a temporary results page.
-     // Ideally, we should have search pages for each. 
-     // Let's create a vehicle/room search page or redirect to index with advanced filters?
-     // Index.php only supports basic filters.
-     // So we forward to a new file: public/search/room_search/room_search.php (which I will create next if needed, but for now let's just create a generic result or fix the 404 by creating this actual file)
-     
-     // Note: Users request showed 404 on `advanced_result.php`. So THIS file is what was missing.
-     // I will implement basic redirection or handling here.
-     
-     // Construct Query for Room
+    // Construct Query for Room
      $queryParams = [
         'keyword' => $keyword,
         'province_id' => $province_id,
         'district_id' => $district_id,
         'city_id' => $city_id,
-        'category' => 'room', // Force category
-        // advanced params mapped to basic or ignored if index doesn't support
-        // But the user expects advanced results.
-        // For this step I will create a basic handler that dumps us back to index if specific pages don't exist, 
-        // OR ideally, redirect to the specific search pages if I create them.
-        // I created property_search.php. I probably need to create vehicle_search.php and room_search.php?
-        // Or I can make this file render the results directly.
+        'min_price' => $_GET['room_min_price'] ?? '',
+        'max_price' => $_GET['room_max_price'] ?? '',
+        'room_type_id' => $_GET['room_type_id'] ?? '',
+        'category' => 'room'
      ];
      
-     // Since I haven't strictly created `room_search.php` or `vehicle_search.php` fully like `property_search.php`, 
-     // I will use `index.php` as fallback BUT `index.php` logic (load_*.php) might not handle deep filters like "fuel_type".
-     
-     // STRATEGY: 
-     // 1. Create this file to fix 404.
-     // 2. Logic: If category == property -> redirect to property_search.php
-     // 3. If category == vehicle -> redirect to vehicle_search.php (I should create this or use index fallback)
-     // 4. If category == room -> redirect to room_search.php
-     
-     // Let's assume for now fallback to index.php with available basics to prevent error, 
-     // but ideally I should build those pages. 
-     
-     $queryString = http_build_query($_GET); // Pass everything
-     header("Location: " . app_url('index.php?' . $queryString)); 
+     $queryString = http_build_query($queryParams);
+     header("Location: " . app_url('public/search/room_search/room_search.php?' . $queryString)); 
      exit;
 
-     // Wait, the user has "prop_type_id" etc. `index.php` checks `$_GET['keyword']` etc.
-     // It might work for basic location but not advanced.
-     // However, fixing the 404 is Priority 1.
-
-} elseif ($category === 'vehicle') {
-    // Similar query prop logic
+    // Construct Query for Vehicle
     $queryParams = [
         'keyword' => $keyword,
         'province_id' => $province_id,
         'district_id' => $district_id,
         'city_id' => $city_id,
-        'category' => 'vehicle',
-        // 'veh_type_id' -> index.php load_vehicle.php *could* be updated to read these, 
-        // but currently load_vehicle.php only reads basic S_KEYWORD, S_CITY etc.
+        'vehicle_type_id' => $_GET['veh_type_id'] ?? '',
+        'brand_id' => $_GET['veh_brand_id'] ?? '',
+        'model_id' => $_GET['veh_model_id'] ?? '',
+        'category' => 'vehicle'
     ];
     
-     $queryString = http_build_query($_GET);
-     header("Location: " . app_url('index.php?' . $queryString));
+     $queryString = http_build_query($queryParams);
+     header("Location: " . app_url('public/search/vehicle_search/vehicle_search.php?' . $queryString));
      exit;
 } else {
     // Default

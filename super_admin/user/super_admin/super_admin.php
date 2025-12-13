@@ -43,8 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 try {
                     // role_id = 1 (Super Admin), status_id = 1 (Active)
-                    $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, role_id, status_id, created_at) VALUES (?, ?, ?, ?, 1, 1, NOW())");
-                    if ($stmt->execute([$name, $email, $mobile, $nic])) {
+                    // Generate random secure password for DB constraint (User uses OTP)
+                    $dummyPass = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+                    
+                    $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, password, role_id, status_id, created_at) VALUES (?, ?, ?, ?, ?, 1, 1, NOW())");
+                    if ($stmt->execute([$name, $email, $mobile, $nic, $dummyPass])) {
                         $success = "New Super Admin added successfully. They can login via OTP.";
                     } else {
                         $error = "Failed to create user.";

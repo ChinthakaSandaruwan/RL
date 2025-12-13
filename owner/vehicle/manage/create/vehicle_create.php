@@ -159,14 +159,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $validTypes = ['jpg', 'jpeg', 'png', 'webp'];
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
             
             foreach ($_FILES['vehicle_images']['tmp_name'] as $key => $tmpName) {
                 if ($_FILES['vehicle_images']['error'][$key] === UPLOAD_ERR_OK) {
                     $fileName = $_FILES['vehicle_images']['name'][$key];
                     $fileType = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                     
-                    if (!in_array($fileType, $validTypes)) {
-                        $errors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only.";
+                    // Security: Verify MIME type
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($tmpName);
+
+                    if (!in_array($fileType, $validTypes) || !in_array($mimeType, $allowedMimes)) {
+                        $errors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only. (Detected: $mimeType)";
                         break;
                     }
                     
@@ -246,6 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         .feature-checkbox-card {
@@ -285,7 +291,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
             
             <?php if ($success): ?>
-                <div class="alert alert-success shadow-sm"><?= $success ?></div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: '<?= addslashes($success) ?>',
+                            confirmButtonColor: 'var(--fern)',
+                            confirmButtonText: 'Great!'
+                        }).then((result) => {
+                             if (result.isConfirmed) {
+                                 window.location.href = '<?= app_url("owner/vehicle/manage/manage.php") ?>';
+                             }
+                        });
+                    });
+                </script>
             <?php endif; ?>
             
             <?php if ($errors): ?>

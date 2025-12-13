@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $driverCost = $_POST['driver_cost'] ?? 0;
     
     $addr = $_POST['address']; $postal = $_POST['postal']; $gmap = $_POST['gmap'];
+    $provinceId = $_POST['province_id'] ?? 0;
+    $districtId = $_POST['district_id'] ?? 0;
+    $cityId = $_POST['city_id'] ?? 0;
 
     try {
         $pdo->beginTransaction();
@@ -70,7 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$iid, $vid]); $path=$stmt->fetchColumn();
                 if($path) {
                     $pdo->prepare("DELETE FROM vehicle_image WHERE image_id=?")->execute([$iid]);
-                    if(file_exists(__DIR__.'/../../../../'.$path)) unlink(__DIR__.'/../../../../'.$path);
+                    // Security: Use basename to prevent directory traversal
+                    $safePath = 'public/uploads/vehicles/' . basename($path);
+                    $fullPath = __DIR__.'/../../../../' . $safePath;
+                    if(file_exists($fullPath)) unlink($fullPath);
                 }
             }
         }
@@ -86,9 +92,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt=$pdo->prepare("INSERT INTO vehicle_image(vehicle_id,image_path,primary_image) VALUES(?,?,0)");
             foreach($_FILES['new_imgs']['tmp_name'] as $k=>$tmp) {
                 if($_FILES['new_imgs']['error'][$k]===0) {
-                     $nm = 'vehicle_'.uniqid().time().'.jpg';
-                     move_uploaded_file($tmp, $dir.$nm);
-                     $stmt->execute([$vid, 'public/uploads/vehicles/'.$nm]);
+                     // Security Check
+                     $finfo = new finfo(FILEINFO_MIME_TYPE);
+                     $mime = $finfo->file($tmp);
+                     $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+                     
+                     if(in_array($mime, $allowed)) {
+                         $nm = 'vehicle_'.uniqid().time().'.jpg';
+                         move_uploaded_file($tmp, $dir.$nm);
+                         $stmt->execute([$vid, 'public/uploads/vehicles/'.$nm]);
+                     } else {
+                         $errors[] = "Invalid file type detected for one or more files.";
+                     }
                 }
             }
         }
@@ -109,6 +124,7 @@ $csrf = generate_csrf_token();
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>">
     <link rel="stylesheet" href="../create/vehicle_create.css"> <!-- Re-use create styles -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .img-manage-card {
             position: relative;
@@ -145,7 +161,17 @@ $csrf = generate_csrf_token();
             </div>
 
             <?php if ($success): ?>
-                <div class="alert alert-success shadow-sm"><?= $success ?></div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: '<?= addslashes($success) ?>',
+                            confirmButtonColor: 'var(--fern)',
+                            timer: 2000
+                        });
+                    });
+                </script>
             <?php endif; ?>
             
             <?php if ($errors): ?>

@@ -156,7 +156,7 @@ $priceLabel = isset($room['rent_per_month']) ? '/month' : '/day';
                 <form method="POST" class="d-inline">
                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                     <input type="hidden" name="action" value="reject">
-                    <button class="btn btn-danger"><i class="fas fa-times"></i> Reject</button>
+                    <button class="btn btn-danger" onclick="return confirm('Are you sure you want to REJECT this room? This cannot be undone and the quota will be refunded.')"><i class="fas fa-times"></i> Reject</button>
                 </form>
             <?php else: ?>
                 <span class="badge bg-<?= $room['status_id'] == 1 ? 'success' : 'secondary' ?> fs-5">

@@ -65,7 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
                 
-                if (!in_array($fileType, $allowedTypes)) {
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->file($fileTmp);
+                
+                if (!in_array($fileType, $allowedTypes) || !in_array($mimeType, $allowedMimes)) {
                     $errors[] = 'Invalid file type. Only JPG, JPEG, PNG, and WEBP are allowed.';
                 } elseif ($fileSize > 2 * 1024 * 1024) { // 2MB
                     $errors[] = 'File size exceeds 2MB limit.';

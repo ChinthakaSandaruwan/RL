@@ -5,7 +5,8 @@ ensure_session_started();
 $user = current_user();
 
 // Check if user is Admin (role_id = 2)
-if (!$user || $user['role_id'] != 2) {
+// Check if user is Admin (role_id = 2) or Super Admin (role_id = 1)
+if (!$user || !in_array($user['role_id'], [1, 2])) {
     header('Location: ' . app_url('index.php'));
     exit;
 }

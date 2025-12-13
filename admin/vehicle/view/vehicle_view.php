@@ -5,10 +5,12 @@ ensure_session_started();
 $user = current_user();
 
 // Check if user is Admin (role_id = 2)
-if (!$user || $user['role_id'] != 2) {
+// Check if user is Admin (2) or Super Admin (1)
+if (!$user || !in_array($user['role_id'], [1, 2])) {
     header('Location: ' . app_url('index.php'));
     exit;
 }
+$csrf_token = generate_csrf_token();
 
 // Security Headers
 header("X-Frame-Options: DENY");
@@ -49,6 +51,27 @@ if (!$vehicle) {
 $stmt = $pdo->prepare("SELECT * FROM vehicle_image WHERE vehicle_id = ? ORDER BY primary_image DESC");
 $stmt->execute([$vehicleId]);
 $images = $stmt->fetchAll();
+
+// Handle Actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) die("Invalid CSRF");
+    
+    $action = $_POST['action'] ?? '';
+    require_once __DIR__ . '/../../notification/owner/vehicle_approval_notification/vehicle_approval_notification_auto.php';
+
+    if ($action === 'approve') {
+        $pdo->prepare("UPDATE vehicle SET status_id = 1 WHERE vehicle_id = ?")->execute([$vehicleId]);
+        notify_owner_vehicle_status($vehicle['owner_id'], $vehicle['title'], 'approved');
+        header("Location: ".app_url("admin/vehicle/view/vehicle_view.php?id=$vehicleId"));
+        exit;
+    } elseif ($action === 'reject') {
+        notify_owner_vehicle_status($vehicle['owner_id'], $vehicle['title'], 'rejected');
+        increment_package_quota($vehicle['owner_id'], 'vehicle');
+        $pdo->prepare("DELETE FROM vehicle WHERE vehicle_id = ?")->execute([$vehicleId]);
+        header("Location: ".app_url("admin/vehicle/approval/vehicle_approval.php?success=rejected"));
+        exit;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,14 +96,28 @@ $images = $stmt->fetchAll();
     <!-- Vehicle Header -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="card-title mb-2"><?= htmlspecialchars($vehicle['title']) ?></h2>
-                    <p class="text-muted mb-2">Vehicle Code: <strong><?= htmlspecialchars($vehicle['vehicle_code']) ?></strong></p>
+                    <h2 class="card-title mb-1"><?= htmlspecialchars($vehicle['title']) ?></h2>
+                    <p class="text-muted mb-0">Vehicle Code: <strong><?= htmlspecialchars($vehicle['vehicle_code']) ?></strong></p>
                 </div>
-                <span class="badge bg-<?= $vehicle['status_id'] == 1 ? 'success' : ($vehicle['status_id'] == 4 ? 'warning' : 'danger') ?> fs-6">
-                    <?= htmlspecialchars($vehicle['status_name']) ?>
-                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <?php if ($vehicle['status_id'] == 4): // Pending ?>
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="action" value="approve">
+                            <button class="btn btn-success"><i class="bi bi-check-circle"></i> Approve</button>
+                        </form>
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="action" value="reject">
+                            <button class="btn btn-danger" onclick="return confirm('Are you sure you want to REJECT this listing? It will be DELETED.')"><i class="bi bi-x-circle"></i> Reject</button>
+                        </form>
+                    <?php endif; ?>
+                    <span class="badge bg-<?= $vehicle['status_id'] == 1 ? 'success' : ($vehicle['status_id'] == 4 ? 'warning' : 'danger') ?> fs-6">
+                        <?= htmlspecialchars($vehicle['status_name']) ?>
+                    </span>
+                </div>
             </div>
         </div>
     </div>

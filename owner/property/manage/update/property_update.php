@@ -71,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ptype = intval($_POST['type_id']);
     
     // Update Location
+    $provinceId = intval($_POST['province_id'] ?? 0);
+    $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id']);
     $addr = trim($_POST['address']);
     $postal = trim($_POST['postal_code']);
@@ -85,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE property SET title=?, description=?, price_per_month=?, sqft=?, bedrooms=?, bathrooms=?, property_type_id=? WHERE property_id=?");
         $stmt->execute([$title, $desc, $price, $sqft, $beds, $baths, $ptype, $propId]);
 
-        $stmt = $pdo->prepare("UPDATE property_location SET city_id=?, address=?, postal_code=?, google_map_link=? WHERE property_id=?");
-        $stmt->execute([$cityId, $addr, $postal, $gmap, $propId]);
+        $stmt = $pdo->prepare("UPDATE property_location SET province_id=?, district_id=?, city_id=?, address=?, postal_code=?, google_map_link=? WHERE property_id=?");
+        $stmt->execute([$provinceId, $districtId, $cityId, $addr, $postal, $gmap, $propId]);
 
         // Update Amenities
         $pdo->prepare("DELETE FROM property_amenity WHERE property_id=?")->execute([$propId]);
@@ -105,7 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $path = $stmt->fetchColumn();
                 if ($path) {
                     $pdo->prepare("DELETE FROM property_image WHERE image_id=?")->execute([$imgId]);
-                    if (file_exists(__DIR__ . '/../../../../' . $path)) unlink(__DIR__ . '/../../../../' . $path);
+                    // Security: Use basename
+                    $safePath = 'public/uploads/properties/' . basename($path);
+                    $fullPath = __DIR__ . '/../../../../' . $safePath;
+                    if (file_exists($fullPath)) unlink($fullPath);
                 }
             }
         }
@@ -128,8 +133,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ext = strtolower(pathinfo($_FILES['new_images']['name'][$k], PATHINFO_EXTENSION));
                     if (in_array($ext, $valid)) {
                         $fname = 'prop_' . uniqid() . '_' . time() . '.' . $ext;
-                        move_uploaded_file($tmp, $uploadDir . $fname);
-                        $stmt->execute([$propId, 'public/uploads/properties/' . $fname]);
+                        
+                        // Security Check
+                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                        $mime = $finfo->file($tmp);
+                        $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+
+                        if (in_array($mime, $allowed)) {
+                            move_uploaded_file($tmp, $uploadDir . $fname);
+                            $stmt->execute([$propId, 'public/uploads/properties/' . $fname]);
+                        } else {
+                            $errors[] = "Invalid file type detected.";
+                        }
                     }
                 }
             }
@@ -155,6 +170,7 @@ $csrf_token = generate_csrf_token();
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>">
     <link rel="stylesheet" href="../create/property_create.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .img-manage-card {
             position: relative;
@@ -189,7 +205,19 @@ $csrf_token = generate_csrf_token();
                 </a>
             </div>
             
-            <?php if ($success): ?><div class="alert alert-success shadow-sm"><?= $success ?></div><?php endif; ?>
+            <?php if ($success): ?>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: '<?= addslashes($success) ?>',
+                        confirmButtonColor: 'var(--fern)',
+                        timer: 2000
+                    });
+                });
+            </script>
+            <?php endif; ?>
             <?php if ($errors): ?><div class="alert alert-danger shadow-sm"><?= implode('<br>', $errors) ?></div><?php endif; ?>
 
             <form method="POST" enctype="multipart/form-data">
@@ -256,7 +284,7 @@ $csrf_token = generate_csrf_token();
                          <div class="row g-3 mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Province</label>
-                                <select id="province" class="form-select">
+                                <select name="province_id" id="province" class="form-select">
                                     <?php foreach($provinces as $p): ?>
                                     <option value="<?= $p['id'] ?>" <?= $p['id'] == $currentProvinceId ? 'selected' : '' ?>><?= $p['name_en'] ?></option>
                                     <?php endforeach; ?>
@@ -264,7 +292,7 @@ $csrf_token = generate_csrf_token();
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">District</label>
-                                <select id="district" class="form-select"></select>
+                                <select name="district_id" id="district" class="form-select"></select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">City <span class="text-danger">*</span></label>

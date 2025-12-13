@@ -18,7 +18,9 @@ if ($property_id <= 0) {
 
 $pdo = get_pdo();
 $error = '';
+$error = '';
 $success = '';
+$csrf_token = generate_csrf_token();
 
 // 2. Fetch Property
 $stmt = $pdo->prepare("
@@ -37,6 +39,8 @@ if (!$property) {
 
 // 3. Handle Post
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) die("Invalid Request (CSRF)");
+
     // Check if user already has a pending/active rent for this property
     $sqlCheck = "SELECT COUNT(*) FROM property_rent 
                  WHERE property_id = ? AND status_id IN (2, 3)";
@@ -144,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4">
                             <form method="POST">
+                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                 <h5 class="fw-bold mb-3 text-secondary">Application Details</h5>
                                 <p class="text-muted small">You are applying to rent this property. The owner will review your request.</p>
                                 

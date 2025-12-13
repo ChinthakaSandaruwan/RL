@@ -60,14 +60,14 @@ $statusMap = [
         </a>
     </div>
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show"><?= $_SESSION['success'] ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-        <?php unset($_SESSION['success']); ?>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show"><?= $_SESSION['error'] ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-        <?php unset($_SESSION['error']); ?>
-    <?php endif; ?>
+    <!-- Flash Messages are now handled via SweetAlert in JS below -->
+    <?php 
+    $msgSuccess = $_SESSION['success'] ?? null;
+    $msgError = $_SESSION['error'] ?? null;
+    // Clear session messages after capturing
+    if ($msgSuccess) unset($_SESSION['success']);
+    if ($msgError) unset($_SESSION['error']);
+    ?>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -118,7 +118,7 @@ $statusMap = [
                                         <a href="<?= $viewLink ?>" class="btn btn-sm btn-outline-info action-btn me-1"><i class="bi bi-eye-fill"></i></a>
                                         <a href="update/vehicle_update.php?id=<?= $vehicle['vehicle_id'] ?>" class="btn btn-sm btn-outline-primary action-btn me-1"><i class="bi bi-pencil-fill"></i></a>
 
-                                        <a href="delete/vehicle_delete.php?id=<?= $vehicle['vehicle_id'] ?>" class="btn btn-sm btn-outline-danger action-btn" onclick="return confirm('Delete this vehicle?')"><i class="bi bi-trash-fill"></i></a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger action-btn" onclick="confirmDelete(<?= $vehicle['vehicle_id'] ?>); return false;"><i class="bi bi-trash-fill"></i></a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -130,5 +130,45 @@ $statusMap = [
     </div>
 </div>
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Handle Server Messages
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if ($msgSuccess): ?>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?= addslashes($msgSuccess) ?>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        <?php endif; ?>
+
+        <?php if ($msgError): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '<?= addslashes($msgError) ?>'
+        });
+        <?php endif; ?>
+    });
+
+    // Handle Delete Confirmation
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this! The vehicle listing will be permanently deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'delete/vehicle_delete.php?id=' + id;
+            }
+        });
+    }
+</script>
 </body>
 </html>

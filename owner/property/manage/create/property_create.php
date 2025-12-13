@@ -88,8 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($_FILES['property_images']['tmp_name'] as $k => $tmp) {
                 if ($_FILES['property_images']['error'][$k] === UPLOAD_ERR_OK) {
                     $ext = strtolower(pathinfo($_FILES['property_images']['name'][$k], PATHINFO_EXTENSION));
-                    if (!in_array($ext, $validTypes)) {
-                        $errors[] = "Invalid format. JPG, PNG, WEBP only. File: " . $_FILES['property_images']['name'][$k];
+                    
+                    // Security: Verify MIME type
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($tmp);
+                    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+
+                    if (!in_array($ext, $validTypes) || !in_array($mimeType, $allowedMimes)) {
+                        $errors[] = "Invalid format or content. JPG, PNG, WEBP only. File: " . $_FILES['property_images']['name'][$k];
                         break; 
                     }
                     
@@ -197,6 +203,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- SweetAlert Hidden Inputs -->
             <input type="hidden" id="swal-success" value="<?= htmlspecialchars($successStr) ?>">
             <input type="hidden" id="swal-error" value="<?= htmlspecialchars($errorStr) ?>">
+            
+            <?php if ($successStr): ?>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: '<?= addslashes($successStr) ?>',
+                        confirmButtonColor: 'var(--fern)',
+                        confirmButtonText: 'Great!'
+                    }).then((result) => {
+                         if (result.isConfirmed) {
+                             window.location.href = '../manage.php';
+                         }
+                    });
+                });
+            </script>
+            <?php endif; ?>
 
             <!-- Location Data for JS -->
             <input type="hidden" id="districtsData" value="<?= htmlspecialchars(json_encode($districts), ENT_QUOTES, 'UTF-8') ?>">
