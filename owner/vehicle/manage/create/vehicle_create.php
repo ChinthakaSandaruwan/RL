@@ -121,15 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id'] ?? 0);
 
-    // Features
-    $ac = isset($_POST['ac']) ? 1 : 0;
-    $gps = isset($_POST['gps']) ? 1 : 0;
-    $bluetooth = isset($_POST['bluetooth']) ? 1 : 0;
-    $childSeat = isset($_POST['child_seat']) ? 1 : 0;
-    $usbCharger = isset($_POST['usb_charger']) ? 1 : 0;
+
 
     // Validation
-    // Validation
+// Features
+    // Removed unused variables as per request $ac, $gps etc.
     if (!$title || !$typeId || !$modelId || !$colorId || !$address) {
         $errors[] = 'Title, Type, Model, Color, and Address are required.';
     }
@@ -430,6 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">Driver Cost Per Day (LKR)</label>
                                 <input type="number" step="0.01" name="driver_cost_per_day" class="form-control" id="driverCost" disabled>
                             </div>
+
                         </div>
                     </div>
                 </div>

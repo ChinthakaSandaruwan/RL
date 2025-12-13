@@ -30,7 +30,14 @@ $districts = $pdo->query("SELECT * FROM districts")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities")->fetchAll();
 
 // Location logic
-$cid = $l['city_id']; $did = $l['district_id']; $pid = $l['province_id'];
+if ($l) {
+    $cid = $l['city_id'] ?? 0;
+    $did = $l['district_id'] ?? 0;
+    $pid = $l['province_id'] ?? 0;
+} else {
+    $cid = 0; $did = 0; $pid = 0;
+    $l = ['address'=>'', 'postal_code'=>'', 'google_map_link'=>''];
+}
 
 $success=null; $errors=[];
 
@@ -45,9 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $plate = trim($_POST['plate']); $driverAvail = isset($_POST['driver_available']) ? 1 : 0;
     $driverCost = $_POST['driver_cost'] ?? 0;
     
-    $provinceId = $_POST['province_id']; $districtId = $_POST['district_id']; $cityId = $_POST['city_id'];
     $addr = $_POST['address']; $postal = $_POST['postal']; $gmap = $_POST['gmap'];
-    $pickup = $_POST['pickup_instructions'];
 
     try {
         $pdo->beginTransaction();
@@ -55,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE vehicle SET title=?, description=?, model_id=?, year=?, vehicle_type_id=?, fuel_type_id=?, transmission_type_id=?, color_id=?, number_of_seats=?, mileage=?, pricing_type_id=?, price_per_day=?, price_per_km=?, security_deposit=?, license_plate=?, is_driver_available=?, driver_cost_per_day=? WHERE vehicle_id=?")
             ->execute([$title, $desc, $modelId, $year, $typeId, $fuelId, $transId, $colorId, $seats, $mileage, $pricingTypeId, $priceDay, $priceKm, $deposit, $plate, $driverAvail, $driverCost, $vid]);
         
-        $pdo->prepare("UPDATE vehicle_location SET province_id=?, district_id=?, city_id=?, address=?, postal_code=?, google_map_link=?, pickup_instructions=? WHERE vehicle_id=?")
-            ->execute([$provinceId, $districtId, $cityId, $addr, $postal, $gmap, $pickup, $vid]);
+        $pdo->prepare("UPDATE vehicle_location SET province_id=?, district_id=?, city_id=?, address=?, postal_code=?, google_map_link=? WHERE vehicle_id=?")
+            ->execute([$provinceId, $districtId, $cityId, $addr, $postal, $gmap, $vid]);
 
         // Image Delete
         if (isset($_POST['del_img'])) {
@@ -178,7 +183,7 @@ $csrf = generate_csrf_token();
                 <div class="col-12"><label>Address</label><input type="text" name="address" class="form-control" value="<?= $l['address'] ?>"></div>
                 <div class="col-md-6"><label>Postal</label><input type="text" name="postal" class="form-control" value="<?= $l['postal_code'] ?>"></div>
                 <div class="col-md-6"><label>Map</label><input type="text" name="gmap" class="form-control" value="<?= $l['google_map_link'] ?>"></div>
-                <div class="col-12"><label>Pickup Instructions</label><textarea name="pickup_instructions" class="form-control"><?= $l['pickup_instructions'] ?></textarea></div>
+
             </div>
         </div>
 
@@ -202,31 +207,100 @@ $csrf = generate_csrf_token();
     </form>
 </div>
 <script>
-const models=<?= json_encode($models) ?>, ds=<?= json_encode($districts) ?>, cs=<?= json_encode($cities) ?>;
-let curModel=<?= $vehicle['model_id'] ?>, pd=<?= $pid ?>, dd=<?= $did ?>, cd=<?= $cid ?>;
+document.addEventListener('DOMContentLoaded', function() {
+    // Data from PHP
+    const models = <?= json_encode($models) ?>;
+    const districts = <?= json_encode($districts) ?>;
+    const cities = <?= json_encode($cities) ?>;
 
-// Brand-Model
-document.getElementById('brandSel').onchange=function() {
-    let bid=this.value, ms=document.getElementById('modelSel'); ms.innerHTML='<option>Select</option>';
-    models.filter(m=>m.brand_id==bid).forEach(m=>{ let o=new Option(m.model_name,m.model_id); if(m.model_id==curModel)o.selected=true; ms.add(o); });
-};
-document.getElementById('brandSel').dispatchEvent(new Event('change'));
+    // Current Values
+    let currentModelId = <?= $vehicle['model_id'] ?>;
+    let currentProvinceId = <?= $pid ?>;
+    let currentDistrictId = <?= $did ?>;
+    let currentCityId = <?= $cid ?>;
 
-// Location
-function ld(pid, sel=0) {
-    let d=document.getElementById('dist'); d.innerHTML='<option>Select</option>';
-    if(pid) ds.filter(x=>x.province_id==pid).forEach(x=>{ let o=new Option(x.name_en,x.id); if(x.id==sel)o.selected=true; d.add(o); });
-}
-function lc(did, sel=0) {
-    let c=document.getElementById('city'); c.innerHTML='<option>Select</option>';
-    if(did) cs.filter(x=>x.district_id==did).forEach(x=>{ let o=new Option(x.name_en,x.id); if(x.id==sel)o.selected=true; c.add(o); });
-}
-ld(pd, dd); lc(dd, cd);
-document.getElementById('prov').onchange=function(){ ld(this.value); };
-document.getElementById('dist').onchange=function(){ lc(this.value); };
+    // --- Brand & Model Logic ---
+    const brandSel = document.getElementById('brandSel');
+    const modelSel = document.getElementById('modelSel');
 
-// Driver toggle
-document.getElementById('driverChk').onchange=function(){ document.getElementById('driverCost').disabled=!this.checked; };
+    function populateModels(brandId, selectedModelId = null) {
+        modelSel.innerHTML = '<option value="">Select Model</option>';
+        if (brandId) {
+            const filteredModels = models.filter(m => m.brand_id == brandId);
+            filteredModels.forEach(m => {
+                const option = new Option(m.model_name, m.model_id);
+                if (m.model_id == selectedModelId) option.selected = true;
+                modelSel.add(option);
+            });
+        }
+    }
+
+    brandSel.addEventListener('change', function() {
+        populateModels(this.value);
+    });
+
+    // Initial Population
+    if (brandSel.value) {
+        populateModels(brandSel.value, currentModelId);
+    }
+
+
+    // --- Location Logic ---
+    const provSel = document.getElementById('prov');
+    const distSel = document.getElementById('dist');
+    const citySel = document.getElementById('city');
+
+    function populateDistricts(provId, selectedDistId = null) {
+        distSel.innerHTML = '<option value="">Select District</option>';
+        citySel.innerHTML = '<option value="">Select City</option>'; // Reset city too
+        
+        if (provId) {
+            const filteredDistricts = districts.filter(d => d.province_id == provId);
+            filteredDistricts.forEach(d => {
+                const option = new Option(d.name_en, d.id);
+                if (d.id == selectedDistId) option.selected = true;
+                distSel.add(option);
+            });
+        }
+    }
+
+    function populateCities(distId, selectedCityId = null) {
+        citySel.innerHTML = '<option value="">Select City</option>';
+        if (distId) {
+            const filteredCities = cities.filter(c => c.district_id == distId);
+            filteredCities.forEach(c => {
+                const option = new Option(c.name_en, c.id);
+                if (c.id == selectedCityId) option.selected = true;
+                citySel.add(option);
+            });
+        }
+    }
+
+    provSel.addEventListener('change', function() {
+        populateDistricts(this.value);
+    });
+
+    distSel.addEventListener('change', function() {
+        populateCities(this.value);
+    });
+
+    // Initial Location Population
+    if (currentProvinceId) {
+        populateDistricts(currentProvinceId, currentDistrictId);
+        if (currentDistrictId) {
+            populateCities(currentDistrictId, currentCityId);
+        }
+    }
+
+    // --- Driver Toggle ---
+    const driverChk = document.getElementById('driverChk');
+    const driverCost = document.getElementById('driverCost');
+    if (driverChk) {
+        driverChk.addEventListener('change', function() {
+            driverCost.disabled = !this.checked;
+        });
+    }
+});
 </script>
 <script src="vehicle_update.js"></script>
 </body>

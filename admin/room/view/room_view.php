@@ -15,6 +15,7 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
+$csrf_token = generate_csrf_token(); // Generate Token
 $roomId = intval($_GET['id'] ?? 0);
 
 if (!$roomId) {
@@ -80,16 +81,38 @@ $meals = $stmt->fetchAll();
 
 // Handle Approval / Rejection
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        die("Invalid CSRF Token");
+    }
+
     $action = $_POST['action'] ?? '';
+    
+    // Include Notification Logic
+    require_once __DIR__ . '/../../notification/owner/room_approval_notification/room_approval_notification_auto.php';
+
     if ($action === 'approve') {
         $upd = $pdo->prepare("UPDATE room SET status_id = 1 WHERE room_id = ?");
         $upd->execute([$roomId]);
+        
+        if ($room) {
+            notify_owner_room_status($room['owner_id'], $room['title'], 'approved');
+        }
+
         header("Location: ".app_url("admin/room/view/room_view.php?id=$roomId"));
         exit;
     } elseif ($action === 'reject') {
-        $upd = $pdo->prepare("UPDATE room SET status_id = 3 WHERE room_id = ?");
-        $upd->execute([$roomId]);
-        header("Location: ".app_url("admin/room/view/room_view.php?id=$roomId"));
+        if ($room) {
+            notify_owner_room_status($room['owner_id'], $room['title'], 'rejected');
+            // Refund the quota
+            increment_package_quota($room['owner_id'], 'room');
+        }
+
+        // Delete the room matching approval page logic
+        $del = $pdo->prepare("DELETE FROM room WHERE room_id = ?");
+        $del->execute([$roomId]);
+        
+        // Redirect to Approval List since room is deleted
+        header("Location: ".app_url("admin/room/approval/room_approval.php?success=rejected"));
         exit;
     }
 }
@@ -126,10 +149,12 @@ $priceLabel = isset($room['rent_per_month']) ? '/month' : '/day';
         <div>
             <?php if ($room['status_id'] == 4): // Pending ?>
                 <form method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                     <input type="hidden" name="action" value="approve">
                     <button class="btn btn-success me-2"><i class="fas fa-check"></i> Approve</button>
                 </form>
                 <form method="POST" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                     <input type="hidden" name="action" value="reject">
                     <button class="btn btn-danger"><i class="fas fa-times"></i> Reject</button>
                 </form>
