@@ -103,108 +103,304 @@ $csrf = generate_csrf_token();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Update Vehicle</title>
+    <meta charset="UTF-8">
+    <title>Edit Vehicle - Rental Lanka</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="vehicle_update.css">
+    <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>">
+    <link rel="stylesheet" href="../create/vehicle_create.css"> <!-- Re-use create styles -->
+    <style>
+        .img-manage-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            margin-bottom: 10px;
+        }
+        .img-manage-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        .img-actions {
+            padding: 8px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 <body>
+
 <?php require __DIR__ . '/../../../../public/navbar/navbar.php'; ?>
-<div class="container py-5">
-    <h2>Edit Vehicle</h2>
-    <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
-        
-        <!-- Basic -->
-        <div class="card p-4 mb-3">
-            <h5>Basic Details</h5>
-            <div class="row g-3">
-                <div class="col-12"><label>Title</label><input type="text" name="title" class="form-control" value="<?= htmlspecialchars($vehicle['title']) ?>"></div>
-                <div class="col-md-4"><label>Brand</label><select id="brandSel" class="form-control"><option>Select</option>
-                    <?php foreach($brands as $b): $curModel = $models[array_search($vehicle['model_id'], array_column($models, 'model_id'))]; $curBrand = $curModel['brand_id'] ?? 0; ?>
-                        <option value="<?= $b['brand_id'] ?>" <?= $b['brand_id']==$curBrand?'selected':'' ?>><?= $b['brand_name'] ?></option>
-                    <?php endforeach; ?>
-                </select></div>
-                <div class="col-md-4"><label>Model</label><select name="model_id" id="modelSel" class="form-control"></select></div>
-                <div class="col-md-4"><label>Year</label><input type="number" name="year" class="form-control" value="<?= $vehicle['year'] ?>"></div>
-                <div class="col-12"><label>Description</label><textarea name="description" class="form-control"><?= $vehicle['description'] ?></textarea></div>
-            </div>
-        </div>
 
-        <!-- Specs -->
-        <div class="card p-4 mb-3">
-            <h5>Specifications</h5>
-            <div class="row g-3">
-                <div class="col-md-3"><label>Type</label><select name="type_id" class="form-control">
-                    <?php foreach($types as $t) echo "<option value='{$t['type_id']}' ".($t['type_id']==$vehicle['vehicle_type_id']?'selected':'').">{$t['type_name']}</option>"; ?>
-                </select></div>
-                <div class="col-md-3"><label>Fuel</label><select name="fuel_id" class="form-control">
-                    <?php foreach($fuels as $f) echo "<option value='{$f['type_id']}' ".($f['type_id']==$vehicle['fuel_type_id']?'selected':'').">{$f['type_name']}</option>"; ?>
-                </select></div>
-                <div class="col-md-3"><label>Transmission</label><select name="trans_id" class="form-control">
-                    <?php foreach($transmissions as $tr) echo "<option value='{$tr['type_id']}' ".($tr['type_id']==$vehicle['transmission_type_id']?'selected':'').">{$tr['type_name']}</option>"; ?>
-                </select></div>
-                <div class="col-md-3"><label>Color</label><select name="color_id" class="form-control">
-                    <?php foreach($colors as $c) echo "<option value='{$c['color_id']}' ".($c['color_id']==$vehicle['color_id']?'selected':'').">{$c['color_name']}</option>"; ?>
-                </select></div>
-                <div class="col-md-4"><label>Seats</label><input type="number" name="seats" class="form-control" value="<?= $vehicle['number_of_seats'] ?>"></div>
-                <div class="col-md-4"><label>Mileage (km/L)</label><input type="number" step="0.01" name="mileage" class="form-control" value="<?= $vehicle['mileage'] ?>"></div>
-                <div class="col-md-4"><label>License Plate</label><input type="text" name="plate" class="form-control" value="<?= $vehicle['license_plate'] ?>"></div>
+<div class="container py-5 profile-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark mb-0">Edit Vehicle</h2>
+                <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id='.$vid) ?>" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="bi bi-eye"></i> View Live
+                </a>
             </div>
-        </div>
 
-        <!-- Pricing -->
-        <div class="card p-4 mb-3">
-            <h5>Pricing</h5>
-            <div class="row g-3">
-                <div class="col-md-3"><label>Type</label><select name="pricing_type_id" class="form-control">
-                    <?php foreach($pricingTypes as $pt) echo "<option value='{$pt['type_id']}' ".($pt['type_id']==$vehicle['pricing_type_id']?'selected':'').">{$pt['type_name']}</option>"; ?>
-                </select></div>
-                <div class="col-md-3"><label>Per Day</label><input type="number" step="0.01" name="price_day" class="form-control" value="<?= $vehicle['price_per_day'] ?>"></div>
-                <div class="col-md-3"><label>Per Km</label><input type="number" step="0.01" name="price_km" class="form-control" value="<?= $vehicle['price_per_km'] ?>"></div>
-                <div class="col-md-3"><label>Deposit</label><input type="number" step="0.01" name="deposit" class="form-control" value="<?= $vehicle['security_deposit'] ?>"></div>
-                <div class="col-12">
-                    <div class="form-check"><input type="checkbox" name="driver_available" id="driverChk" class="form-check-input" <?= $vehicle['is_driver_available']?'checked':'' ?>><label for="driverChk">Driver Available</label></div>
+            <?php if ($success): ?>
+                <div class="alert alert-success shadow-sm"><?= $success ?></div>
+            <?php endif; ?>
+            
+            <?php if ($errors): ?>
+                <div class="alert alert-danger shadow-sm">
+                    <ul class="mb-0 ps-3">
+                        <?php foreach ($errors as $err): ?><li><?= $err ?></li><?php endforeach; ?>
+                    </ul>
                 </div>
-                <div class="col-md-4"><label>Driver Cost/Day</label><input type="number" step="0.01" name="driver_cost" id="driverCost" class="form-control" value="<?= $vehicle['driver_cost_per_day'] ?>" <?= !$vehicle['is_driver_available']?'disabled':'' ?>></div>
-            </div>
-        </div>
+            <?php endif; ?>
 
-        <!-- Location -->
-        <div class="card p-4 mb-3">
-            <h5>Location</h5>
-            <div class="row g-3">
-                <div class="col-md-4"><label>Province</label><select name="province_id" id="prov" class="form-control">
-                    <?php foreach($provinces as $p) echo "<option value='{$p['id']}' ".($p['id']==$pid?'selected':'').">{$p['name_en']}</option>"; ?>
-                </select></div>
-                <div class="col-md-4"><label>District</label><select name="district_id" id="dist" class="form-control"></select></div>
-                <div class="col-md-4"><label>City</label><select name="city_id" id="city" class="form-control"></select></div>
-                <div class="col-12"><label>Address</label><input type="text" name="address" class="form-control" value="<?= $l['address'] ?>"></div>
-                <div class="col-md-6"><label>Postal</label><input type="text" name="postal" class="form-control" value="<?= $l['postal_code'] ?>"></div>
-                <div class="col-md-6"><label>Map</label><input type="text" name="gmap" class="form-control" value="<?= $l['google_map_link'] ?>"></div>
-
-            </div>
-        </div>
-
-        <!-- Images -->
-        <div class="card p-4 mb-3">
-            <h5>Images</h5>
-            <div class="mb-3">
-                <?php foreach($images as $im): ?>
-                <div class="img-card">
-                    <img src="<?= app_url($im['image_path']) ?>">
-                    <input type="checkbox" name="del_img[]" value="<?= $im['image_id'] ?>" class="del-chk">
-                    <div class="primary-radio-label"><input type="radio" name="set_primary" value="<?= $im['image_id'] ?>" <?= $im['primary_image']?'checked':'' ?>> Main</div>
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+                
+                <!-- Basic Info -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">Basic Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <label class="form-label">Vehicle Title <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($vehicle['title']) ?>" required>
+                            </div>
+                            
+                            <!-- Hidden inputs for cascading JS to pick up initial values -->
+                            <!-- Note: JS reads PHP vars directly, this structure matches Create for user consistency -->
+                            
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($vehicle['description']) ?></textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <?php endforeach; ?>
-            </div>
-            <label>Add New</label>
-            <input type="file" name="new_imgs[]" multiple class="form-control">
-        </div>
 
-        <button class="btn btn-primary btn-lg">Save Changes</button>
-    </form>
+                <!-- Vehicle Specifications -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">Vehicle Specifications</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand <span class="text-danger">*</span></label>
+                                <select id="brandSel" class="form-select" required>
+                                    <option value="">Select Brand</option>
+                                    <?php 
+                                    // Helper to find brand of current model
+                                    $curBrandId = 0;
+                                    foreach($models as $m) { if($m['model_id'] == $vehicle['model_id']) { $curBrandId = $m['brand_id']; break; } }
+                                    foreach($brands as $b): ?>
+                                        <option value="<?= $b['brand_id'] ?>" <?= $b['brand_id'] == $curBrandId ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($b['brand_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Model <span class="text-danger">*</span></label>
+                                <select name="model_id" id="modelSel" class="form-select" required></select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Year <span class="text-danger">*</span></label>
+                                <input type="number" name="year" class="form-control" value="<?= $vehicle['year'] ?>">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Vehicle Type <span class="text-danger">*</span></label>
+                                <select name="type_id" class="form-select">
+                                    <?php foreach($types as $t): ?>
+                                        <option value="<?= $t['type_id'] ?>" <?= $t['type_id'] == $vehicle['vehicle_type_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($t['type_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Fuel Type <span class="text-danger">*</span></label>
+                                <select name="fuel_id" class="form-select">
+                                    <?php foreach($fuels as $f): ?>
+                                        <option value="<?= $f['type_id'] ?>" <?= $f['type_id'] == $vehicle['fuel_type_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($f['type_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Transmission <span class="text-danger">*</span></label>
+                                <select name="trans_id" class="form-select">
+                                    <?php foreach($transmissions as $tr): ?>
+                                        <option value="<?= $tr['type_id'] ?>" <?= $tr['type_id'] == $vehicle['transmission_type_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($tr['type_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Color <span class="text-danger">*</span></label>
+                                <select name="color_id" class="form-select">
+                                    <?php foreach($colors as $c): ?>
+                                        <option value="<?= $c['color_id'] ?>" <?= $c['color_id'] == $vehicle['color_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($c['color_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Number of Seats</label>
+                                <input type="number" name="seats" class="form-control" value="<?= $vehicle['number_of_seats'] ?>">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">License Plate</label>
+                                <input type="text" name="plate" class="form-control" value="<?= htmlspecialchars($vehicle['license_plate']) ?>">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Mileage (km/L)</label>
+                                <input type="number" step="0.01" name="mileage" class="form-control" value="<?= $vehicle['mileage'] ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">Pricing</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                             <div class="col-md-6">
+                                <label class="form-label">Pricing Type</label>
+                                <select name="pricing_type_id" class="form-select">
+                                    <?php foreach($pricingTypes as $pt): ?>
+                                        <option value="<?= $pt['type_id'] ?>" <?= $pt['type_id'] == $vehicle['pricing_type_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($pt['type_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Security Deposit (LKR)</label>
+                                <input type="number" step="0.01" name="deposit" class="form-control" value="<?= $vehicle['security_deposit'] ?>">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Price Per Day (LKR)</label>
+                                <input type="number" step="0.01" name="price_day" class="form-control" value="<?= $vehicle['price_per_day'] ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Price Per KM (LKR)</label>
+                                <input type="number" step="0.01" name="price_km" class="form-control" value="<?= $vehicle['price_per_km'] ?>">
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="form-check p-3 border rounded bg-light">
+                                    <input class="form-check-input" type="checkbox" name="driver_available" id="driverChk" <?= $vehicle['is_driver_available'] ? 'checked' : '' ?>>
+                                    <label class="form-check-label fw-bold" for="driverChk">Driver Available</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Driver Cost Per Day (LKR)</label>
+                                <input type="number" step="0.01" name="driver_cost" id="driverCost" class="form-control" value="<?= $vehicle['driver_cost_per_day'] ?>" <?= !$vehicle['is_driver_available'] ? 'disabled' : '' ?>>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Media -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold" style="color: var(--hunter-green);">Location & Media</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-4">
+                             <div class="col-md-4">
+                                <label class="form-label">Province</label>
+                                <select name="province_id" id="prov" class="form-select">
+                                    <?php foreach($provinces as $p): ?>
+                                        <option value="<?= $p['id'] ?>" <?= $p['id'] == $pid ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($p['name_en']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">District</label>
+                                <select name="district_id" id="dist" class="form-select"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">City</label>
+                                <select name="city_id" id="city" class="form-select"></select>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label">Pickup Address</label>
+                                <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($l['address']) ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Postal Code</label>
+                                <input type="text" name="postal" class="form-control" value="<?= htmlspecialchars($l['postal_code']) ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Google Map Link</label>
+                                <input type="url" name="gmap" class="form-control" value="<?= htmlspecialchars($l['google_map_link']) ?>">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="fw-bold mb-3">Existing Images</h6>
+                        <div class="row g-3 mb-4">
+                            <?php foreach($images as $im): ?>
+                            <div class="col-6 col-md-3">
+                                <div class="img-manage-card">
+                                    <img src="<?= app_url($im['image_path']) ?>" alt="Vehicle Image">
+                                    <div class="img-actions">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="del_img[]" value="<?= $im['image_id'] ?>" id="del_<?= $im['image_id'] ?>">
+                                            <label class="form-check-label text-danger small" for="del_<?= $im['image_id'] ?>">Delete</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="set_primary" value="<?= $im['image_id'] ?>" id="prim_<?= $im['image_id'] ?>" <?= $im['primary_image'] ? 'checked' : '' ?>>
+                                            <label class="form-check-label small" for="prim_<?= $im['image_id'] ?>">Set Primary</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Add New Images</label>
+                            <input type="file" name="new_imgs[]" class="form-control" multiple accept="image/*">
+                            <div class="form-text">Upload new images to add to the gallery. (Max 5MB each)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="<?= app_url('index.php') ?>" class="btn btn-outline-secondary px-5">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5 btn-lg shadow-sm" style="background-color: var(--fern); border-color: var(--fern);">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

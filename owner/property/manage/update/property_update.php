@@ -150,15 +150,30 @@ $csrf_token = generate_csrf_token();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Update Property - Rental Lanka</title>
+    <title>Edit Property - Rental Lanka</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= app_url('public/profile/profile.css') ?>">
+    <link rel="stylesheet" href="../create/property_create.css">
     <style>
-        .img-edit-card { position: relative; width: 150px; border:1px solid #ddd; padding:5px; border-radius:5px; }
-        .img-edit-card img { width: 100%; height: 100px; object-fit: cover; }
-        .del-check { position: absolute; top:5px; right:5px; z-index:10; }
-        .primary-radio { position: absolute; bottom: 5px; left: 5px; }
+        .img-manage-card {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            margin-bottom: 10px;
+        }
+        .img-manage-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        .img-actions {
+            padding: 8px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -167,26 +182,31 @@ $csrf_token = generate_csrf_token();
 <div class="container py-5 profile-container">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <h2 class="mb-4 text-dark fw-bold">Edit Property</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark mb-0">Edit Property</h2>
+               <a href="<?= app_url('public/property/view/property_view.php?id='.$propId) ?>" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="bi bi-eye"></i> View Live
+                </a>
+            </div>
             
-            <?php if ($success): ?><div class="alert alert-success"><?= $success ?></div><?php endif; ?>
-            <?php if ($errors): ?><div class="alert alert-danger"><?= implode('<br>', $errors) ?></div><?php endif; ?>
+            <?php if ($success): ?><div class="alert alert-success shadow-sm"><?= $success ?></div><?php endif; ?>
+            <?php if ($errors): ?><div class="alert alert-danger shadow-sm"><?= implode('<br>', $errors) ?></div><?php endif; ?>
 
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
 
+                <!-- Basic Info -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">Details</div>
-                    <div class="card-body">
+                    <div class="card-header bg-white py-3 fw-bold">Basic Information</div>
+                    <div class="card-body p-4">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label>Title</label>
+                                <label class="form-label">Property Title <span class="text-danger">*</span></label>
                                 <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($property['title']) ?>" required>
                             </div>
-                            <!-- Type, Price, Desc... similar to create -->
                              <div class="col-md-6">
-                                <label>Type</label>
-                                <select name="type_id" class="form-control">
+                                <label class="form-label">Property Type <span class="text-danger">*</span></label>
+                                <select name="type_id" class="form-select" required>
                                     <?php foreach ($types as $t): ?>
                                     <option value="<?= $t['type_id'] ?>" <?= $t['type_id'] == $property['property_type_id'] ? 'selected' : '' ?>>
                                         <?= $t['type_name'] ?>
@@ -195,89 +215,106 @@ $csrf_token = generate_csrf_token();
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label>Price (LKR)</label>
+                                <label class="form-label">Monthly Price (LKR) <span class="text-danger">*</span></label>
                                 <input type="number" name="price" class="form-control" value="<?= htmlspecialchars($property['price_per_month']) ?>" required>
                             </div>
-                            <div class="col-md-4"><label>Sqft</label><input type="number" name="sqft" class="form-control" value="<?= $property['sqft'] ?>"></div>
-                            <div class="col-md-4"><label>Beds</label><input type="number" name="bedrooms" class="form-control" value="<?= $property['bedrooms'] ?>"></div>
-                            <div class="col-md-4"><label>Baths</label><input type="number" name="bathrooms" class="form-control" value="<?= $property['bathrooms'] ?>"></div>
-                            <div class="col-12"><label>Description</label><textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($property['description']) ?></textarea></div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($property['description']) ?></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Features -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">Location</div>
-                    <div class="card-body">
-                         <div class="row g-3">
+                    <div class="card-header bg-white py-3 fw-bold">Features & Amenities</div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4"><label class="form-label">Bedrooms</label><input type="number" name="bedrooms" class="form-control" value="<?= $property['bedrooms'] ?>"></div>
+                            <div class="col-md-4"><label class="form-label">Bathrooms</label><input type="number" name="bathrooms" class="form-control" value="<?= $property['bathrooms'] ?>"></div>
+                            <div class="col-md-4"><label class="form-label">Area (Sqft)</label><input type="number" name="sqft" class="form-control" value="<?= $property['sqft'] ?>"></div>
+                        </div>
+                        <label class="form-label mb-2">Amenities</label>
+                        <div class="row g-3">
+                             <?php foreach ($amenities as $a): ?>
+                            <div class="col-6 col-md-3">
+                                <div class="form-check amenity-card">
+                                    <input type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" id="am_<?= $a['amenity_id'] ?>" class="form-check-input" <?= in_array($a['amenity_id'], $currentAmenities) ? 'checked' : '' ?>>
+                                    <label class="form-check-label w-100" for="am_<?= $a['amenity_id'] ?>"><?= $a['amenity_name'] ?></label>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 fw-bold">Location</div>
+                    <div class="card-body p-4">
+                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
-                                <label>Province</label>
-                                <select id="province" class="form-control">
+                                <label class="form-label">Province</label>
+                                <select id="province" class="form-select">
                                     <?php foreach($provinces as $p): ?>
                                     <option value="<?= $p['id'] ?>" <?= $p['id'] == $currentProvinceId ? 'selected' : '' ?>><?= $p['name_en'] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label>District</label>
-                                <select id="district" class="form-control">
-                                     <!-- Populated by JS on load -->
-                                </select>
+                                <label class="form-label">District</label>
+                                <select id="district" class="form-select"></select>
                             </div>
                             <div class="col-md-4">
-                                <label>City</label>
-                                <select name="city_id" id="city" class="form-control">
-                                     <!-- Populated by JS on load -->
-                                </select>
+                                <label class="form-label">City <span class="text-danger">*</span></label>
+                                <select name="city_id" id="city" class="form-select" required></select>
                             </div>
-                            <div class="col-12"><label>Address</label><input type="text" name="address" class="form-control" value="<?= htmlspecialchars($location['address']) ?>"></div>
-                             <div class="col-6"><label>Postal</label><input type="text" name="postal_code" class="form-control" value="<?= htmlspecialchars($location['postal_code']) ?>"></div>
-                             <div class="col-6"><label>Map Link</label><input type="text" name="google_map_link" class="form-control" value="<?= htmlspecialchars($location['google_map_link']) ?>"></div>
+                        </div>
+                         <div class="mb-3">
+                            <label class="form-label">Address <span class="text-danger">*</span></label>
+                            <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($location['address']) ?>" required>
+                        </div>
+                        <div class="row g-3">
+                             <div class="col-md-6"><label class="form-label">Postal Code</label><input type="text" name="postal_code" class="form-control" value="<?= htmlspecialchars($location['postal_code']) ?>"></div>
+                             <div class="col-md-6"><label class="form-label">Google Maps Link</label><input type="text" name="google_map_link" class="form-control" value="<?= htmlspecialchars($location['google_map_link']) ?>"></div>
                          </div>
                     </div>
                 </div>
 
+                <!-- Images -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">Images</div>
-                    <div class="card-body">
-                        <label class="mb-3">Existing Images (Check to Delete, Select Radio for Primary)</label>
-                        <div class="d-flex flex-wrap gap-3 mb-3">
+                    <div class="card-header bg-white py-3 fw-bold">Photos</div>
+                    <div class="card-body p-4">
+                        <label class="mb-3 fw-bold">Existing Images</label>
+                        <div class="row g-3 mb-4">
                             <?php foreach ($images as $img): ?>
-                            <div class="img-edit-card">
-                                <img src="<?= app_url($img['image_path']) ?>">
-                                <div class="form-check del-check bg-white p-1 rounded border">
-                                    <input type="checkbox" name="delete_images[]" value="<?= $img['image_id'] ?>" class="form-check-input bg-danger border-danger">
-                                </div>
-                                <div class="primary-radio bg-white p-1 rounded border">
-                                    <input type="radio" name="set_primary" value="<?= $img['image_id'] ?>" <?= $img['primary_image'] ? 'checked' : '' ?>> Set Main
+                            <div class="col-6 col-md-3">
+                                <div class="img-manage-card">
+                                    <img src="<?= app_url($img['image_path']) ?>">
+                                    <div class="img-actions">
+                                        <div class="form-check mb-1">
+                                            <input type="checkbox" name="delete_images[]" value="<?= $img['image_id'] ?>" id="del_<?= $img['image_id'] ?>" class="form-check-input">
+                                            <label class="form-check-label text-danger small" for="del_<?= $img['image_id'] ?>">Delete</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="radio" name="set_primary" value="<?= $img['image_id'] ?>" id="prim_<?= $img['image_id'] ?>" <?= $img['primary_image'] ? 'checked' : '' ?> class="form-check-input">
+                                            <label class="form-check-label small" for="prim_<?= $img['image_id'] ?>">Set Cover</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
                         </div>
-                        <label>Add New Images</label>
+                        <label class="form-label">Add New Images</label>
                         <input type="file" name="new_images[]" class="form-control" multiple accept="image/*">
+                        <div class="form-text">Upload new images to add to gallery.</div>
                     </div>
                 </div>
 
-                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">Amenities</div>
-                    <div class="card-body">
-                        <div class="row g-2">
-                             <?php foreach ($amenities as $a): ?>
-                            <div class="col-6 col-md-3">
-                                <div class="form-check">
-                                    <input type="checkbox" name="amenities[]" value="<?= $a['amenity_id'] ?>" class="form-check-input" <?= in_array($a['amenity_id'], $currentAmenities) ? 'checked' : '' ?>>
-                                    <label class="form-check-label"><?= $a['amenity_name'] ?></label>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                 </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                     <a href="../manage.php" class="btn btn-secondary">Cancel</a>
-                     <button type="submit" class="btn btn-primary">Update Changes</button>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                     <a href="../manage.php" class="btn btn-outline-secondary px-5">Cancel</a>
+                     <button type="submit" class="btn btn-primary px-5 btn-lg shadow-sm" style="background-color: var(--fern); border-color: var(--fern);">Update Changes</button>
                 </div>
             </form>
         </div>
