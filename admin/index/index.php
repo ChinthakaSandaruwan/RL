@@ -21,6 +21,19 @@ $totalUsers = $pdo->query("SELECT COUNT(*) FROM user")->fetchColumn();
 $totalProperties = $pdo->query("SELECT COUNT(*) FROM property")->fetchColumn();
 $totalVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle")->fetchColumn();
 
+// Get pending approvals
+$pendingProperties = $pdo->query("SELECT COUNT(*) FROM property WHERE status_id = 4")->fetchColumn();
+$pendingRooms = $pdo->query("SELECT COUNT(*) FROM room WHERE status_id = 4")->fetchColumn();
+$pendingVehicles = $pdo->query("SELECT COUNT(*) FROM vehicle WHERE status_id = 4")->fetchColumn();
+$pendingPackages = $pdo->query("SELECT COUNT(*) FROM bought_package WHERE payment_status_id = 1")->fetchColumn();
+
+// Get pending chats
+try {
+    $pendingChats = $pdo->query("SELECT COUNT(*) FROM chat_messages WHERE is_read = 0 AND sender_type = 'user'")->fetchColumn();
+} catch (PDOException $e) {
+    $pendingChats = 0;
+}
+
 // Try to get pending requests (table may not exist yet)
 try {
     $pendingRequests = $pdo->query("SELECT COUNT(*) FROM user_type_change_request WHERE status_id = 1")->fetchColumn();
@@ -79,7 +92,10 @@ try {
             <div class="card stat-card shadow-sm h-100">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">Pending Requests</h6>
-                    <h2 class="fw-bold text-danger"><?= number_format($pendingRequests) ?></h2>
+                    <?php 
+                        $totalPending = $pendingRequests + $pendingProperties + $pendingRooms + $pendingVehicles + $pendingPackages + $pendingChats;
+                    ?>
+                    <h2 class="fw-bold text-danger"><?= number_format($totalPending) ?></h2>
                 </div>
             </div>
         </div>
@@ -97,16 +113,25 @@ try {
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/property/approval/property_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-building-check"></i> Property Approval
+                        <?php if ($pendingProperties > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingProperties ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/room/approval/room_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-door-closed-fill"></i> Room Approval
+                        <?php if ($pendingRooms > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingRooms ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/vehicle/approval/vehicle_approval.php') ?>" class="btn btn-outline-success w-100 py-3">
                         <i class="bi bi-car-front-fill"></i> Vehicle Approval
+                        <?php if ($pendingVehicles > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingVehicles ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -120,6 +145,9 @@ try {
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/bought_ads_package/approve/package_approval.php') ?>" class="btn btn-outline-warning w-100 py-3">
                         <i class="bi bi-box-seam"></i> Ads Package Approval
+                        <?php if ($pendingPackages > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingPackages ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
             </div>
@@ -310,6 +338,9 @@ try {
                 <div class="col-md-3">
                     <a href="<?= app_url('admin/chat/index.php') ?>" class="btn btn-outline-primary w-100 py-3">
                         <i class="bi bi-chat-dots"></i> Chat Management
+                        <?php if ($pendingChats > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingChats ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
             </div>
