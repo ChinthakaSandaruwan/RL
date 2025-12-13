@@ -190,22 +190,22 @@ $total_rentals = count($property_rentals) + count($room_rentals) + count($vehicl
         <!-- Tabs -->
         <ul class="nav nav-tabs mb-4" id="rentalTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
                     All (<?= $total_rentals ?>)
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties" type="button">
+                <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties" type="button" role="tab" aria-controls="properties" aria-selected="false">
                     Properties (<?= count($property_rentals) ?>)
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button">
+                <button class="nav-link" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab" aria-controls="rooms" aria-selected="false">
                     Rooms (<?= count($room_rentals) ?>)
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="vehicles-tab" data-bs-toggle="tab" data-bs-target="#vehicles" type="button">
+                <button class="nav-link" id="vehicles-tab" data-bs-toggle="tab" data-bs-target="#vehicles" type="button" role="tab" aria-controls="vehicles" aria-selected="false">
                     Vehicles (<?= count($vehicle_rentals) ?>)
                 </button>
             </li>
@@ -213,7 +213,7 @@ $total_rentals = count($property_rentals) + count($room_rentals) + count($vehicl
 
         <div class="tab-content" id="rentalTabsContent">
             <!-- All Tab -->
-            <div class="tab-pane fade show active" id="all">
+            <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
                 <?php
                 $all_rentals = array_merge(
                     array_map(function($r) { $r['type'] = 'property'; return $r; }, $property_rentals),
@@ -231,7 +231,7 @@ $total_rentals = count($property_rentals) + count($room_rentals) + count($vehicl
             </div>
 
             <!-- Properties Tab -->
-            <div class="tab-pane fade" id="properties">
+            <div class="tab-pane fade" id="properties" role="tabpanel" aria-labelledby="properties-tab">
                 <?php if (empty($property_rentals)): ?>
                     <div class="text-center py-5">
                         <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
@@ -246,7 +246,7 @@ $total_rentals = count($property_rentals) + count($room_rentals) + count($vehicl
             </div>
 
             <!-- Rooms Tab -->
-            <div class="tab-pane fade" id="rooms">
+            <div class="tab-pane fade" id="rooms" role="tabpanel" aria-labelledby="rooms-tab">
                 <?php if (empty($room_rentals)): ?>
                     <div class="text-center py-5">
                         <i class="bi bi-door-open text-muted" style="font-size: 3rem;"></i>
@@ -261,7 +261,7 @@ $total_rentals = count($property_rentals) + count($room_rentals) + count($vehicl
             </div>
 
             <!-- Vehicles Tab -->
-            <div class="tab-pane fade" id="vehicles">
+            <div class="tab-pane fade" id="vehicles" role="tabpanel" aria-labelledby="vehicles-tab">
                 <?php if (empty($vehicle_rentals)): ?>
                     <div class="text-center py-5">
                         <i class="bi bi-car-front text-muted" style="font-size: 3rem;"></i>

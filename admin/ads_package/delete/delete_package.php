@@ -10,8 +10,13 @@ if (!$user || $user['role_id'] != 2) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+
+// Flash Data Retrieval
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+unset($_SESSION['_flash']);
+
+$csrf_token = generate_csrf_token();
 
 // Get package ID
 $packageId = intval($_GET['id'] ?? 0);
@@ -61,7 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } elseif ($action === 'hard_delete') {
             if ($usageCount > 0) {
-                $errors[] = "Cannot delete package that has been purchased by owners. Please deactivate instead.";
+                // This shouldn't happen if UI is disabled, but valid check
+                $_SESSION['_flash']['errors'][] = "Cannot delete package that has been purchased by owners. Please deactivate instead.";
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit;
             } else {
                 // Hard delete - completely remove from database
                 $stmt = $pdo->prepare("DELETE FROM package WHERE package_id = ?");
@@ -73,7 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } catch (Exception $e) {
-        $errors[] = "Error: " . $e->getMessage();
+        $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
     }
 }
 

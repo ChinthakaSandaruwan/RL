@@ -104,7 +104,7 @@
             ?>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
                 <!-- Create Dropdown -->
-                <?php if (isset($user) && $user['role_id'] == 3): ?>
+                <?php if (is_array($user) && isset($user['role_id']) && $user['role_id'] == 3): ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-plus-circle me-1"></i> Create
@@ -284,13 +284,15 @@
                                     <i class="bi bi-person-circle me-2"></i>Profile
                                 </a>
                             </li>
+                            <?php if ((int)$user['role_id'] === 3): ?>
                             <li>
                                 <a class="dropdown-item" href="<?= app_url('public/transactions/my_transactions.php') ?>">
                                     <i class="bi bi-receipt me-2"></i>My Transactions
                                 </a>
                             </li>
+                            <?php endif; ?>
                             
-                            <?php if ($user['role_id'] == 4): ?>
+                            <?php if ((int)$user['role_id'] === 4): ?>
                             <li>
                                 <a class="dropdown-item" href="<?= app_url('public/user_type_change/send_user_type_change_request.php') ?>">
                                     <i class="bi bi-shop-window me-2"></i>Become Owner

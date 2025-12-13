@@ -12,6 +12,12 @@ $fuelType = $_GET['fuel'] ?? '';
 $transmissionType = $_GET['transmission'] ?? '';
 $minPrice = floatval($_GET['min_price'] ?? 0);
 $maxPrice = floatval($_GET['max_price'] ?? 0);
+$provinceId = $_GET['province_id'] ?? '';
+$districtId = $_GET['district_id'] ?? '';
+$cityId = $_GET['city_id'] ?? '';
+$brandId = $_GET['brand'] ?? '';
+$minSeats = $_GET['seats'] ?? '';
+$driver = $_GET['driver'] ?? '';
 $sortBy = $_GET['sort'] ?? 'newest';
 
 // Fetch vehicle types for filter
@@ -97,6 +103,32 @@ if ($minPrice > 0) {
 if ($maxPrice > 0) {
     $sql .= " AND v.price_per_day <= ?";
     $params[] = $maxPrice;
+}
+
+// Location Filters
+if ($cityId) {
+    $sql .= " AND vl.city_id = ?";
+    $params[] = $cityId;
+} elseif ($districtId) {
+    $sql .= " AND c.district_id = ?";
+    $params[] = $districtId;
+} elseif ($provinceId) {
+    $sql .= " AND d.province_id = ?";
+    $params[] = $provinceId;
+}
+
+// Additional Filters
+if ($brandId) {
+    $sql .= " AND vm.brand_id = ?";
+    $params[] = $brandId;
+}
+if ($minSeats) {
+    $sql .= " AND v.number_of_seats >= ?";
+    $params[] = $minSeats;
+}
+if ($driver !== '') {
+    $sql .= " AND v.is_driver_available = ?";
+    $params[] = $driver;
 }
 
 // Sorting

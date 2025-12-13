@@ -16,14 +16,28 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+
+// Flash Data Retrieval
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+// $old_input was retrieved earlier but maybe not used effectively if HTML uses $_POST directly.
+// Login HTML uses $_POST['mobile'] ?? $_GET['mobile'].
+// Let's ensure $_POST is populated.
+$_POST = $_SESSION['_flash']['old'] ?? $_POST;
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 // Handle 'Change Number' request (GET)
 if (isset($_GET['action']) && $_GET['action'] === 'change_number') {
     unset($_SESSION['pending_login_user_id'], $_SESSION['pending_login_mobile']);
     header('Location: ' . app_url('auth/login/index.php'));
+    exit;
+}
+
+if (isset($_GET['logout']) && $_GET['logout'] === 'success') {
+    $_SESSION['_flash']['success'] = 'You have been successfully logged out.';
+    header("Location: " . app_url('auth/login/index.php'));
     exit;
 }
 
@@ -45,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$mobile]);
             $user = $stmt->fetch();
             if (!$user) {
-                // Redirect to register page with pre-filled mobile
+                // Redirect to register page
                 header('Location: ' . app_url('auth/register/index.php?mobile=' . urlencode($mobile)));
                 exit;
             } else {
@@ -68,19 +82,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $smsMessage = 'Your RentalLanka login OTP is ' . $otp . ' (valid for 5 minutes).';
                 $sent = smslenz_send_sms($formattedMobile, $smsMessage);
 
-                // Allow bypass in local environment
                 $isLocal = env('APP_ENV') === 'local';
 
                 if ($sent) {
-                    $success = 'OTP sent via SMS.';
+                    $_SESSION['_flash']['success'] = 'OTP sent via SMS.';
                 } elseif ($isLocal) {
-                    $success = 'OTP Warning: SMS failed but bypassed for LOCAL ENV. Code: ' . $otp;
+                    $_SESSION['_flash']['success'] = 'OTP Warning: SMS failed but bypassed for LOCAL ENV. Code: ' . $otp;
                 } else {
-                    $errors[] = 'Failed to send OTP SMS. Please try again later.';
-                    // If SMS fails, maybe don't change state? For now, we set session so UI changes.
-                    // If critical failure, we might want to unset session.
+                    $_SESSION['_flash']['errors'][] = 'Failed to send OTP SMS. Please try again later.';
+                    // If SMS fails, we might want to stay on the mobile input screen?
+                    // Currently session is set, so it will show OTP screen.
+                    // Let's unset session if it failed critically, or allow entry if local.
+                    if (!$sent && !$isLocal) {
+                        unset($_SESSION['pending_login_user_id'], $_SESSION['pending_login_mobile']);
+                    }
                 }
+                
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit;
             }
+        }
+        
+        // Handle validation errors for request_otp
+        if (!empty($errors)) {
+            $_SESSION['_flash']['errors'] = $errors;
+            $_SESSION['_flash']['old'] = $_POST;
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
         }
     } elseif ($action === 'verify_otp') {
         $otp = trim($_POST['otp'] ?? '');
@@ -107,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->prepare('UPDATE `otp_verification` SET `is_verified` = 1 WHERE `otp_id` = ?')
                             ->execute([$row['otp_id']]);
 
-
                         session_regenerate_id(true);
                         $_SESSION['user_id'] = $pendingUserId;
                         unset($_SESSION['pending_login_user_id'], $_SESSION['pending_login_mobile']);
@@ -118,6 +145,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+
+        if (!empty($errors)) {
+            $_SESSION['_flash']['errors'] = $errors;
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
+        }
+
     } elseif ($action === 'resend_otp') {
         // Resend Logic
         $pendingUserId = $_SESSION['pending_login_user_id'] ?? null;
@@ -141,12 +175,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
              $isLocal = env('APP_ENV') === 'local';
              if ($sent) {
-                 $success = 'OTP resent via SMS.';
+                 $_SESSION['_flash']['success'] = 'OTP resent via SMS.';
              } elseif ($isLocal) {
-                 $success = 'OTP Resent (Local): ' . $otp;
+                 $_SESSION['_flash']['success'] = 'OTP Resent (Local): ' . $otp;
              } else {
-                 $errors[] = 'Failed to resend OTP SMS.';
+                 $_SESSION['_flash']['errors'][] = 'Failed to resend OTP SMS.';
              }
+             
+             header("Location: " . $_SERVER['REQUEST_URI']);
+             exit;
         }
     }
 }

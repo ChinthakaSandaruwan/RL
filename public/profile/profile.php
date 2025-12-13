@@ -156,9 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1 class="display-5 fw-bold">My Profile</h1>
         <p class="lead opacity-75">Update your personal details</p>
         <div class="mt-4">
+            <?php if ((int)$user['role_id'] === 3): ?>
             <a href="<?= app_url('public/transactions/my_transactions.php') ?>" class="btn btn-light shadow-sm fw-bold" style="color: var(--hunter-green);">
                 <i class="bi bi-receipt me-2"></i>My Transactions
             </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

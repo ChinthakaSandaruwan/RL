@@ -10,8 +10,14 @@ if (!$user || $user['role_id'] != 2) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+
+// Flash Data Retrieval
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$_POST = $_SESSION['_flash']['old'] ?? $_POST;
+unset($_SESSION['_flash']);
+
+$csrf_token = generate_csrf_token();
 
 // Fetch package types
 $packageTypes = $pdo->query("SELECT * FROM package_type ORDER BY type_name ASC")->fetchAll();
@@ -62,14 +68,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $description
             ]);
 
-            $success = "Package created successfully!";
+            $_SESSION['_flash']['success'] = "Package created successfully!";
             
-            // Clear form
-            $_POST = [];
+            // Redirect to self to clear form (PRG)
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
             
         } catch (Exception $e) {
             $errors[] = "Error: " . $e->getMessage();
         }
+    }
+    
+    // If we're here, there were errors
+    if (!empty($errors)) {
+        $_SESSION['_flash']['errors'] = $errors;
+        $_SESSION['_flash']['old'] = $_POST;
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
     }
 }
 

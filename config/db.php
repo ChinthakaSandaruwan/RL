@@ -86,7 +86,15 @@ function current_user() {
     $pdo = get_pdo();
     $stmt = $pdo->prepare('SELECT u.*, ur.role_name FROM `user` u JOIN `user_role` ur ON u.role_id = ur.role_id WHERE u.user_id = ? LIMIT 1');
     $stmt->execute([$_SESSION['user_id']]);
-    return $stmt->fetch();
+    $user = $stmt->fetch();
+    
+    if (!$user) {
+        // Invalid session (User deleted or DB changed) - Force Logout
+        logout_user();
+        return null;
+    }
+    
+    return $user;
 }
 
 function logout_user(): void {

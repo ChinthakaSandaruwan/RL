@@ -1,28 +1,22 @@
 // Room Rental Booking - Dynamic Pricing & Validation
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('bookingForm');
+    const form = document.getElementById('rentForm');
     const checkinInput = document.getElementById('checkin_date');
     const checkoutInput = document.getElementById('checkout_date');
     const guestsInput = document.getElementById('guests');
-    const mealSelect = document.getElementById('meal_id');
 
     // Elements for pricing display
-    const nightsCountSpan = document.getElementById('nightsCount');
-    const nightsCount2Span = document.getElementById('nightsCount2');
-    const roomTotalSpan = document.getElementById('roomTotal');
-    const mealTotalSpan = document.getElementById('mealTotal');
-    const grandTotalSpan = document.getElementById('grandTotal');
-    const mealRow = document.getElementById('mealRow');
-    const mealNameSpan = document.getElementById('mealName');
+    const summaryNights = document.getElementById('summary_nights');
+    const summaryTotal = document.getElementById('summary_total');
 
     // Calculate and update pricing
     function updatePricing() {
         const checkinDate = checkinInput.value;
         const checkoutDate = checkoutInput.value;
         const guests = parseInt(guestsInput.value) || 1;
-        const selectedMeal = mealSelect ? mealSelect.options[mealSelect.selectedIndex] : null;
-        const mealPrice = selectedMeal && selectedMeal.value ? parseFloat(selectedMeal.dataset.price) || 0 : 0;
-        const mealName = selectedMeal && selectedMeal.value ? selectedMeal.text : '';
+
+        // PRICE_PER_NIGHT is defined in the php file script tag
+        const pricePerNight = typeof PRICE_PER_NIGHT !== 'undefined' ? PRICE_PER_NIGHT : 0;
 
         if (!checkinDate || !checkoutDate) {
             resetPricing();
@@ -32,45 +26,31 @@ document.addEventListener('DOMContentLoaded', function () {
         // Calculate number of nights
         const checkin = new Date(checkinDate);
         const checkout = new Date(checkoutDate);
+
+        // Set time to noon to avoid timezone/daylight saving issues
+        checkin.setHours(12, 0, 0, 0);
+        checkout.setHours(12, 0, 0, 0);
+
         const timeDiff = checkout.getTime() - checkin.getTime();
-        const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        let nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
         if (nights <= 0) {
             resetPricing();
             return;
         }
 
-        // Calculate totals
-        const roomTotal = nights * roomData.pricePerDay;
-        const mealTotal = mealPrice > 0 ? nights * guests * mealPrice : 0;
-        const grandTotal = roomTotal + mealTotal;
+        // Calculate total
+        const grandTotal = nights * pricePerNight;
 
         // Update display
-        nightsCountSpan.textContent = nights;
-        nightsCount2Span.textContent = nights;
-        roomTotalSpan.textContent = 'LKR ' + formatNumber(roomTotal.toFixed(2));
-        grandTotalSpan.textContent = 'LKR ' + formatNumber(grandTotal.toFixed(2));
-
-        // Show/hide meal row
-        if (mealTotal > 0) {
-            mealRow.style.display = 'flex';
-            mealTotalSpan.textContent = 'LKR ' + formatNumber(mealTotal.toFixed(2));
-            mealNameSpan.textContent = mealName;
-        } else {
-            mealRow.style.display = 'none';
-        }
-
-        // Add animation
-        animateValue(grandTotalSpan, grandTotal);
+        if (summaryNights) summaryNights.textContent = nights + (nights === 1 ? ' Night' : ' Nights');
+        if (summaryTotal) summaryTotal.textContent = 'LKR ' + formatNumber(grandTotal.toFixed(2));
     }
 
     // Reset pricing display
     function resetPricing() {
-        nightsCountSpan.textContent = '0';
-        nightsCount2Span.textContent = '0';
-        roomTotalSpan.textContent = 'LKR 0.00';
-        grandTotalSpan.textContent = 'LKR 0.00';
-        mealRow.style.display = 'none';
+        if (summaryNights) summaryNights.textContent = '0 Nights';
+        if (summaryTotal) summaryTotal.textContent = 'LKR 0.00';
     }
 
     // Format number with thousand separators
@@ -81,32 +61,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Animate number changes
-    function animateValue(element, newValue) {
-        element.style.transition = 'all 0.3s ease';
-        element.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            element.style.transform = 'scale(1)';
-        }, 300);
-    }
-
     // Event listeners
     if (checkinInput) {
         checkinInput.addEventListener('change', function () {
-            // Update minimum checkout date
-            const checkinDate = new Date(this.value);
-            const minCheckout = new Date(checkinDate);
-            minCheckout.setDate(minCheckout.getDate() + 1);
+            if (this.value) {
+                // Update minimum checkout date to checkin + 1 day
+                const checkin = new Date(this.value);
+                const nextDay = new Date(checkin);
+                nextDay.setDate(checkin.getDate() + 1);
 
-            if (checkoutInput) {
-                checkoutInput.min = minCheckout.toISOString().split('T')[0];
+                if (checkoutInput) {
+                    checkoutInput.min = nextDay.toISOString().split('T')[0];
 
-                // If checkout is before new minimum, reset it
-                if (checkoutInput.value && new Date(checkoutInput.value) <= checkinDate) {
-                    checkoutInput.value = '';
+                    // If current checkout is invalid, clear it
+                    if (checkoutInput.value && new Date(checkoutInput.value) <= checkin) {
+                        checkoutInput.value = '';
+                    }
                 }
             }
-
             updatePricing();
         });
     }
@@ -116,24 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (guestsInput) {
-        guestsInput.addEventListener('input', function () {
-            // Enforce max guests
-            const maxGuests = parseInt(this.max);
-            if (parseInt(this.value) > maxGuests) {
-                this.value = maxGuests;
-            }
-            if (parseInt(this.value) < 1) {
-                this.value = 1;
-            }
-            updatePricing();
-        });
+        guestsInput.addEventListener('input', updatePricing);
     }
 
-    if (mealSelect) {
-        mealSelect.addEventListener('change', updatePricing);
-    }
-
-    // Form validation
+    // Form submission validation
     if (form) {
         form.addEventListener('submit', function (e) {
             const checkinDate = new Date(checkinInput.value);
@@ -141,145 +99,28 @@ document.addEventListener('DOMContentLoaded', function () {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Validate dates
-            if (checkinDate < today) {
+            // Basic validation
+            if (checkinInput.value && checkinDate < today) {
                 e.preventDefault();
-                showError('Check-in date cannot be in the past.');
-                checkinInput.focus();
+                alert('Check-in date cannot be in the past.');
                 return false;
             }
 
-            if (checkoutDate <= checkinDate) {
+            if (checkoutInput.value && checkoutDate <= checkinDate) {
                 e.preventDefault();
-                showError('Check-out date must be after check-in date.');
-                checkoutInput.focus();
+                alert('Check-out date must be after check-in date.');
                 return false;
             }
 
-            // Validate guests
-            const guests = parseInt(guestsInput.value);
-            if (guests < 1 || guests > roomData.maxGuests) {
-                e.preventDefault();
-                showError(`Number of guests must be between 1 and ${roomData.maxGuests}.`);
-                guestsInput.focus();
-                return false;
-            }
-
-            // Add loading state to button
+            // Allow form submission
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-            }
-
-            return true;
-        });
-    }
-
-    // Show error message
-    function showError(message) {
-        // Remove existing error alerts
-        const existingAlerts = document.querySelectorAll('.alert-danger');
-        existingAlerts.forEach(alert => alert.remove());
-
-        // Create new alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-        alertDiv.setAttribute('role', 'alert');
-        alertDiv.innerHTML = `
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-
-        // Insert before form
-        form.parentNode.insertBefore(alertDiv, form);
-
-        // Scroll to alert
-        alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // Real-time date validation with visual feedback
-    function addDateValidation() {
-        if (checkinInput) {
-            checkinInput.addEventListener('blur', function () {
-                const checkinDate = new Date(this.value);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                if (this.value && checkinDate < today) {
-                    this.classList.add('is-invalid');
-                    this.classList.remove('is-valid');
-                } else if (this.value) {
-                    this.classList.add('is-valid');
-                    this.classList.remove('is-invalid');
-                }
-            });
-        }
-
-        if (checkoutInput) {
-            checkoutInput.addEventListener('blur', function () {
-                const checkinDate = new Date(checkinInput.value);
-                const checkoutDate = new Date(this.value);
-
-                if (this.value && checkoutDate <= checkinDate) {
-                    this.classList.add('is-invalid');
-                    this.classList.remove('is-valid');
-                } else if (this.value) {
-                    this.classList.add('is-valid');
-                    this.classList.remove('is-invalid');
-                }
-            });
-        }
-
-        if (guestsInput) {
-            guestsInput.addEventListener('blur', function () {
-                const guests = parseInt(this.value);
-                if (guests >= 1 && guests <= roomData.maxGuests) {
-                    this.classList.add('is-valid');
-                    this.classList.remove('is-invalid');
-                } else {
-                    this.classList.add('is-invalid');
-                    this.classList.remove('is-valid');
-                }
-            });
-        }
-    }
-
-    addDateValidation();
-
-    // Auto-dismiss alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert:not(.alert-info)');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
-    });
-
-    // Add smooth scroll for better UX
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Book Now';
             }
         });
-    });
+    }
 
-    // Initialize pricing on page load
+    // Initialize pricing on page load if values exist
     updatePricing();
-
-    // Add entrance animation
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
 });

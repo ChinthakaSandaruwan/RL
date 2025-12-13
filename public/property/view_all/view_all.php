@@ -12,6 +12,12 @@ $minBedrooms = intval($_GET['min_bedrooms'] ?? 0);
 $minBathrooms = intval($_GET['min_bathrooms'] ?? 0);
 $minPrice = floatval($_GET['min_price'] ?? 0);
 $maxPrice = floatval($_GET['max_price'] ?? 0);
+$provinceId = $_GET['province_id'] ?? '';
+$districtId = $_GET['district_id'] ?? '';
+$cityId = $_GET['city_id'] ?? '';
+$minSqft = $_GET['sqft_min'] ?? '';
+$maxSqft = $_GET['sqft_max'] ?? '';
+$amenities = $_GET['amenities'] ?? [];
 $sortBy = $_GET['sort'] ?? 'newest';
 
 // Fetch property types for filter
@@ -93,7 +99,37 @@ if ($maxPrice > 0) {
     $params[] = $maxPrice;
 }
 
-// Sorting
+// Location Filters
+if ($cityId) {
+    $sql .= " AND pl.city_id = ?";
+    $params[] = $cityId;
+} elseif ($districtId) {
+    $sql .= " AND c.district_id = ?";
+    $params[] = $districtId;
+} elseif ($provinceId) {
+    $sql .= " AND d.province_id = ?";
+    $params[] = $provinceId;
+}
+
+// Area Filters
+if ($minSqft) {
+    $sql .= " AND p.square_feet >= ?";
+    $params[] = $minSqft;
+}
+if ($maxSqft) {
+    $sql .= " AND p.square_feet <= ?";
+    $params[] = $maxSqft;
+}
+
+// Amenities Filter
+if (!empty($amenities) && is_array($amenities)) {
+    foreach ($amenities as $amenityId) {
+        $sql .= " AND EXISTS (SELECT 1 FROM property_amenity pa_filter WHERE pa_filter.property_id = p.property_id AND pa_filter.amenity_id = ?)";
+        $params[] = $amenityId;
+    }
+}
+
+// Sort logic
 switch ($sortBy) {
     case 'price_low':
         $sql .= " ORDER BY p.rent_per_month ASC";

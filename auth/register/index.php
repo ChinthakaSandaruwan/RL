@@ -11,8 +11,13 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+
+// Flash Data Retrieval
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$_POST = $_SESSION['_flash']['old'] ?? $_POST; // Populate $_POST with old input if available
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -64,10 +69,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $emailSent = send_welcome_email($email, $name);
         
         if ($emailSent) {
-            $success = 'Registration successful! A welcome email has been sent to your inbox. You can now request an OTP to login.';
+            $_SESSION['_flash']['success'] = 'Registration successful! A welcome email has been sent to your inbox. You can now request an OTP to login.';
         } else {
-            $success = 'Registration successful! You can now request an OTP to login.';
+            $_SESSION['_flash']['success'] = 'Registration successful! You can now request an OTP to login.';
         }
+        
+        // Redirect to self (PRG)
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+    
+    // Handle Errors
+    if (!empty($errors)) {
+        $_SESSION['_flash']['errors'] = $errors;
+        // Ideally we should preserve input here too, but for now just errors.
+        // Let's preserve input:
+        // (Assuming retrieval logic needs to be added to HTML values, which I'll do next if needed, 
+        // but current HTML uses $_POST. I need to update HTML to look at session too or just _POST will be empty on redirect)
+        // Actually, the HTML reads $_POST. After redirect $_POST is empty.
+        // So I need to store old input in session and update HTML to read it.
+        // Let's store it now.
+        $_SESSION['_flash']['old'] = $_POST;
+        
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
     }
 }
 ?>

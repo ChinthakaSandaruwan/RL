@@ -218,28 +218,34 @@ $user = current_user();
 
         <!-- Sidebar -->
         <div class="col-lg-4">
+            <!-- Owner Card (Status Hidden) -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Contact Owner</h5>
+                    <h5 class="fw-bold mb-4">Interested?</h5>
                     <div class="d-flex align-items-center mb-4">
-                         <img src="<?= $vehicle['owner_image'] ? app_url($vehicle['owner_image']) : 'https://ui-avatars.com/api/?name='.urlencode($vehicle['owner_name']).'&background=random' ?>" 
-                             class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-person-fill text-muted fs-3"></i>
+                        </div>
                         <div>
-                            <h6 class="fw-bold mb-0"><?= htmlspecialchars($vehicle['owner_name']) ?></h6>
-                            <small class="text-muted">Owner</small>
+                            <h6 class="fw-bold mb-0">Verified Owner</h6>
+                            <small class="text-muted">Contact via platform</small>
                         </div>
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <a href="<?= app_url('public/rent/rent_vehicle/rent_vehicle.php?id=' . $vehicle['vehicle_id']) ?>" class="btn btn-theme btn-lg mb-2">
-                            <i class="bi bi-calendar-check me-2"></i> Rent Now
-                        </a>
-                        <a href="tel:<?= htmlspecialchars($vehicle['owner_phone']) ?>" class="btn btn-outline-theme">
-                            <i class="bi bi-telephone-fill me-2"></i> Call Now
-                        </a>
-                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $vehicle['owner_phone']) ?>" target="_blank" class="btn btn-outline-theme">
-                            <i class="bi bi-whatsapp me-2"></i> WhatsApp
-                        </a>
+                        <?php if (isset($user) && $user): ?>
+                            <a href="<?= app_url('public/rent/rent_vehicle/rent_vehicle.php?id=' . $vehicle['vehicle_id']) ?>" class="btn btn-theme btn-lg">
+                                <i class="bi bi-calendar-check me-2"></i> Rent Request
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= app_url('auth/login/index.php') ?>" class="btn btn-theme btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Login to Rent
+                            </a>
+                        <?php endif; ?>
+
+                         <div class="alert alert-info small mb-0 mt-2">
+                            <i class="bi bi-info-circle me-1"></i> Owner details will be shared after rental approval.
+                        </div>
                     </div>
                 </div>
             </div>

@@ -12,6 +12,11 @@ $minBeds = intval($_GET['min_beds'] ?? 0);
 $minBathrooms = intval($_GET['min_bathrooms'] ?? 0);
 $minPrice = floatval($_GET['min_price'] ?? 0);
 $maxPrice = floatval($_GET['max_price'] ?? 0);
+$provinceId = $_GET['province_id'] ?? '';
+$districtId = $_GET['district_id'] ?? '';
+$cityId = $_GET['city_id'] ?? '';
+$minGuests = $_GET['guests'] ?? '';
+$amenities = $_GET['amenities'] ?? [];
 $sortBy = $_GET['sort'] ?? 'newest';
 
 // Fetch room types for filter
@@ -89,6 +94,32 @@ if ($minPrice > 0) {
 if ($maxPrice > 0) {
     $sql .= " AND r.price_per_day <= ?";
     $params[] = $maxPrice;
+}
+
+// Location Filters
+if ($cityId) {
+    $sql .= " AND rl.city_id = ?";
+    $params[] = $cityId;
+} elseif ($districtId) {
+    $sql .= " AND c.district_id = ?";
+    $params[] = $districtId;
+} elseif ($provinceId) {
+    $sql .= " AND d.province_id = ?";
+    $params[] = $provinceId;
+}
+
+// Guest Filter
+if ($minGuests) {
+    $sql .= " AND r.maximum_guests >= ?";
+    $params[] = $minGuests;
+}
+
+// Amenities Filter
+if (!empty($amenities) && is_array($amenities)) {
+    foreach ($amenities as $amenityId) {
+        $sql .= " AND EXISTS (SELECT 1 FROM room_amenity ra_filter WHERE ra_filter.room_id = r.room_id AND ra_filter.amenity_id = ?)";
+        $params[] = $amenityId;
+    }
 }
 
 // Sorting

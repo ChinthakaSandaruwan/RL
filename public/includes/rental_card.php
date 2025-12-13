@@ -103,16 +103,58 @@ if ($rental['type'] == 'property') {
                     <h5 class="text-success mb-2">LKR <?= number_format($price, 2) ?></h5>
                     <p class="text-muted small mb-3"><?= $price_label ?></p>
                     
-                    <div class="d-grid gap-2">
-                        <a href="<?= $view_link ?>" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye me-1"></i>View Details
-                        </a>
-                        <?php if (!empty($rental['owner_phone'])): ?>
-                            <a href="tel:<?= htmlspecialchars($rental['owner_phone']) ?>" class="btn btn-sm btn-success">
-                                <i class="bi bi-telephone me-1"></i>Call Owner
-                            </a>
-                        <?php endif; ?>
+                <?php 
+                    // Visibility Logic: Only show owner details if status is 'Confirmed' or 'Booked'
+                    $is_confirmed = (isset($rental['status_name']) && in_array($rental['status_name'], ['Confirmed', 'Booked']));
+                ?>
+
+                <!-- Owner Details Section -->
+                <?php if ($is_confirmed): ?>
+                    <div class="mt-3 pt-2 border-top">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Owner Details</small>
+                        <div class="d-flex align-items-center mt-1 mb-2">
+                             <i class="bi bi-person-check-fill text-success me-2"></i>
+                             <span class="fw-bold text-dark small"><?= htmlspecialchars($rental['owner_name'] ?? 'Owner') ?></span>
+                        </div>
+                        
+                        <div class="d-grid gap-1">
+                             <?php if (!empty($rental['owner_phone'])): ?>
+                                <a href="tel:<?= htmlspecialchars($rental['owner_phone']) ?>" class="btn btn-sm btn-outline-success text-start">
+                                    <i class="bi bi-telephone-fill me-2"></i>Call: <?= htmlspecialchars($rental['owner_phone']) ?>
+                                </a>
+                                <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $rental['owner_phone']) ?>" target="_blank" class="btn btn-sm btn-outline-success text-start">
+                                    <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!empty($rental['owner_email'])): ?>
+                                <a href="mailto:<?= htmlspecialchars($rental['owner_email']) ?>" class="btn btn-sm btn-outline-secondary text-start">
+                                    <i class="bi bi-envelope-fill me-2"></i><?= htmlspecialchars($rental['owner_email']) ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
+                <?php else: ?>
+                    <div class="mt-3 pt-2 border-top">
+                        <div class="alert alert-light border mb-0 py-2 px-2 small text-muted">
+                            <i class="bi bi-lock-fill me-1"></i>Owner details hidden
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="d-grid mt-2 gap-2">
+                    <a href="<?= $view_link ?>" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye me-1"></i>View Listing
+                    </a>
+
+                    <?php if ($rental['status_name'] === 'Pending'): ?>
+                        <form action="<?= app_url('public/my_rent/cancel_rental.php') ?>" method="POST" onsubmit="return confirm('Are you sure you want to cancel this request?');" class="d-block w-100">
+                            <input type="hidden" name="rent_id" value="<?= $rental['rent_id'] ?>">
+                            <input type="hidden" name="type" value="<?= $rental['type'] ?>">
+                            <button type="submit" class="btn btn-sm btn-danger w-100">
+                                <i class="bi bi-x-circle me-1"></i>Cancel Request
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

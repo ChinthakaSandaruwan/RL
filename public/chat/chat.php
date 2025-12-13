@@ -96,38 +96,4 @@ if (function_exists('is_chat_enabled') && !is_chat_enabled()) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function setupLazyChatLoader() {
-    const launcher = document.querySelector('.chat-launcher');
-    if (!launcher) return;
-
-    let chatLoaded = false;
-
-    function loadChatScriptAndTriggerClick(event) {
-        if (chatLoaded) return;
-        chatLoaded = true;
-
-        if (event) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-        }
-
-        const script = document.createElement('script');
-        script.src = "<?= app_url('public/chat/chat.js') ?>";
-        script.onload = function () {
-            launcher.removeEventListener('click', loadChatScriptAndTriggerClick, true);
-            // Trigger the click again so the real chat handler (from chat.js) runs
-            launcher.click();
-        };
-        document.body.appendChild(script);
-    }
-
-    launcher.addEventListener('click', loadChatScriptAndTriggerClick, true);
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupLazyChatLoader);
-} else {
-    setupLazyChatLoader();
-}
-</script>
+<script src="<?= app_url('public/chat/chat.js') ?>"></script>
