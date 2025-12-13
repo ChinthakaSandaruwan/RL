@@ -274,7 +274,10 @@ $priceLabel = isset($room['rent_per_month']) ? '/month' : '/day';
             <!-- Owner Profile -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center">
-                    <img src="<?= $room['owner_image'] ? app_url($room['owner_image']) : 'https://via.placeholder.com/150' ?>" class="owner-avatar mb-3" alt="Owner">
+                    <?php 
+                        $ownerImgSrc = $room['owner_image'] ? app_url($room['owner_image']) : 'https://ui-avatars.com/api/?name='.urlencode($room['owner_name']).'&background=random&color=ffffff&size=150';
+                    ?>
+                    <img src="<?= $ownerImgSrc ?>" class="owner-avatar mb-3" alt="Owner">
                     <h5 class="fw-bold"><?= htmlspecialchars($room['owner_name']) ?></h5>
                     <p class="text-muted small mb-3">Property Owner</p>
                     <div class="d-grid gap-2">
