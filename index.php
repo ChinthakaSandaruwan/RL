@@ -249,6 +249,25 @@ $user = current_user();
             font-display: swap;
         }
     </style>
+    
+    <!-- Lenis Smooth Scroll CSS -->
+    <style>
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <?php require __DIR__ . '/public/navbar/navbar.php'; ?>
@@ -258,7 +277,6 @@ $user = current_user();
 
 <?php require __DIR__ . '/public/search/search/search.php'; ?>
 
-<?php require __DIR__ . '/public/user_recommendations/user_recommendations.php'; ?>
 
 
 <?php require __DIR__ . '/public/property/load/load_property.php'; ?>
@@ -266,6 +284,8 @@ $user = current_user();
 <?php require __DIR__ . '/public/room/load/load_room.php'; ?>
 
 <?php require __DIR__ . '/public/vehicle/load/load_vehicle.php'; ?>
+<?php require __DIR__ . '/public/user_recommendations/user_recommendations.php'; ?>
+
 <br><br><br>
 <?php require __DIR__ . '/public/review/review.php'; ?>
 </main>
@@ -276,5 +296,23 @@ $user = current_user();
 <?php require __DIR__ . '/public/index_scrollup/scrollup.php'; ?>
 <?php require __DIR__ . '/public/chat/chat.php'; ?>
 <?php require_once __DIR__ . '/super_admin/special_holidays/global_loader.php'; ?>
+
+<!-- Lenis Smooth Scroll Script -->
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script> 
+<script>
+    const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smooth: true,
+        smoothTouch: false, // Disable on touch devices for better performance/native feel
+    });
+
+    function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+</script>
 </body>
 </html>

@@ -47,8 +47,8 @@ function get_pdo(): PDO {
 function ensure_session_started(): void {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         // Session hardening
-        // Session configuration: 1 month lifetime
-        $lifetime = 30 * 24 * 60 * 60; // 2,592,000 seconds
+        // Session configuration: 1 week lifetime
+        $lifetime = 7 * 24 * 60 * 60; // 604,800 seconds
 
         ini_set('session.gc_maxlifetime', $lifetime);
         
