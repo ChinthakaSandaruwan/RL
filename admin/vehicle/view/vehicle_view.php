@@ -23,14 +23,19 @@ if (!$vehicleId) {
 }
 
 // Fetch vehicle details
-$stmt = $pdo->prepare("SELECT v.*, u.name as owner_name, u.email as owner_email, u.mobile_number as owner_phone,
+$stmt = $pdo->prepare("SELECT v.*, u.name as owner_name, u.email as owner_email, u.mobile_number as owner_phone, u.profile_image as owner_image,
     vt.type_name, ls.status_name,
+    vb.brand_name as make, vm.model_name as model,
+    ft.type_name as fuel_type,
     vl.address, vl.postal_code, vl.google_map_link
     FROM vehicle v
     LEFT JOIN user u ON v.owner_id = u.user_id
     LEFT JOIN vehicle_type vt ON v.vehicle_type_id = vt.type_id
     LEFT JOIN listing_status ls ON v.status_id = ls.status_id
     LEFT JOIN vehicle_location vl ON v.vehicle_id = vl.vehicle_id
+    LEFT JOIN vehicle_model vm ON v.model_id = vm.model_id
+    LEFT JOIN vehicle_brand vb ON vm.brand_id = vb.brand_id
+    LEFT JOIN fuel_type ft ON v.fuel_type_id = ft.type_id
     WHERE v.vehicle_id = ?");
 $stmt->execute([$vehicleId]);
 $vehicle = $stmt->fetch();
@@ -39,6 +44,11 @@ if (!$vehicle) {
     header('Location: ' . app_url('admin/index/index.php'));
     exit;
 }
+
+// Fetch Images
+$stmt = $pdo->prepare("SELECT * FROM vehicle_image WHERE vehicle_id = ? ORDER BY primary_image DESC");
+$stmt->execute([$vehicleId]);
+$images = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -78,15 +88,37 @@ if (!$vehicle) {
     <div class="row g-4">
         <!-- Main Content -->
         <div class="col-lg-8">
-            <!-- Vehicle Image Placeholder -->
-            <div class="card shadow-sm mb-4">
+            <!-- Vehicle Images -->
+            <div class="card shadow-sm mb-4 overflow-hidden">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0 fw-bold">Vehicle Image</h5>
+                    <h5 class="mb-0 fw-bold">Vehicle Images</h5>
                 </div>
-                <div class="card-body">
-                    <div class="text-center py-5">
-                        <img src="https://via.placeholder.com/600x400?text=Vehicle+Image" class="img-fluid vehicle-main-image" alt="Vehicle image">
-                    </div>
+                <div class="card-body p-0">
+                    <?php if (!empty($images)): ?>
+                        <div id="vehicleCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <?php foreach ($images as $k => $img): ?>
+                                    <div class="carousel-item <?= $k === 0 ? 'active' : '' ?>">
+                                        <img src="<?= app_url($img['image_path']) ?>" class="d-block w-100" alt="Vehicle Image" style="height: 400px; object-fit: cover;">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php if (count($images) > 1): ?>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#vehicleCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <img src="https://via.placeholder.com/600x400?text=No+Image+Available" class="img-fluid" alt="No Image">
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -116,10 +148,10 @@ if (!$vehicle) {
                             'usb_charger' => 'USB Charger',
                             'spare_tyre' => 'Spare Tyre',
                             'insurance' => 'Insurance Included',
-                            'driver_available' => 'Driver Available'
+                            'is_driver_available' => 'Driver Available'
                         ];
                         foreach ($features as $key => $label):
-                            if ($vehicle[$key]):
+                            if (!empty($vehicle[$key])):
                         ?>
                             <div class="col-6 col-md-4">
                                 <div class="feature-badge">
@@ -142,10 +174,22 @@ if (!$vehicle) {
                 <div class="card-header bg-white">
                     <h5 class="mb-0 fw-bold">Owner Information</h5>
                 </div>
-                <div class="card-body">
-                    <p class="mb-2"><strong>Name:</strong> <?= htmlspecialchars($vehicle['owner_name']) ?></p>
-                    <p class="mb-2"><strong>Email:</strong> <?= htmlspecialchars($vehicle['owner_email']) ?></p>
-                    <p class="mb-0"><strong>Phone:</strong> <?= htmlspecialchars($vehicle['owner_phone']) ?></p>
+                <div class="card-body text-center">
+                    <?php 
+                        $ownerImgSrc = !empty($vehicle['owner_image']) ? app_url($vehicle['owner_image']) : 'https://ui-avatars.com/api/?name='.urlencode($vehicle['owner_name']).'&background=random&color=ffffff&size=150';
+                    ?>
+                    <img src="<?= $ownerImgSrc ?>" class="rounded-circle mb-3" alt="Owner" style="width: 100px; height: 100px; object-fit: cover;">
+                    <h5 class="fw-bold mb-1"><?= htmlspecialchars($vehicle['owner_name']) ?></h5>
+                    <p class="text-muted small mb-3">Vehicle Owner</p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="mailto:<?= htmlspecialchars($vehicle['owner_email']) ?>" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-envelope"></i> Email
+                        </a>
+                        <a href="tel:<?= htmlspecialchars($vehicle['owner_phone']) ?>" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-telephone"></i> Call
+                        </a>
+                    </div>
                 </div>
             </div>
 
