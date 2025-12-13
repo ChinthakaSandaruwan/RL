@@ -16,13 +16,18 @@
 }
 
 /* Hover Dropdown Behavior (Desktop Only) */
-@media (min-width: 992px) {
-    .custom-navbar .nav-item.dropdown:hover .dropdown-menu {
-        display: block;
-        margin-top: 0;
-        animation: slideDown 0.3s ease;
-    }
+.custom-navbar .nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+    animation: slideDown 0.3s ease;
 }
+
+/* Strict right alignment for end-aligned dropdowns on hover */
+.custom-navbar .nav-item.dropdown:hover .dropdown-menu.dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+}
+
 
 .custom-navbar .navbar-brand {
     font-weight: 700;
@@ -226,4 +231,80 @@
 
 .wishlist-btn.active:hover {
     background: #c82333;
+}
+
+/* Notification Dropdown Styles */
+.notification-dropdown {
+    min-width: 350px;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.notification-header {
+    padding: 10px 15px;
+    background-color: var(--hunter-green);
+    color: white;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+    display: block;
+    color: #333 !important;
+    text-decoration: none;
+    white-space: normal !important;
+    /* Allow wrapping */
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+    color: var(--hunter-green) !important;
+}
+
+.notification-item.unread {
+    background-color: #e8f5e9;
+}
+
+.notification-footer {
+    padding: 10px;
+    text-align: center;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.notification-footer a {
+    color: var(--hunter-green);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.badge-notification {
+    position: absolute;
+    top: 5px;
+    right: 0px;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 50%;
+}
+
+/* Scrollbar for notification list */
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
 }

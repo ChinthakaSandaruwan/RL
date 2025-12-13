@@ -44,6 +44,17 @@ if (!$property) {
 $stmt = $pdo->prepare("SELECT * FROM property_image WHERE property_id = ? ORDER BY primary_image DESC, image_id ASC");
 $stmt->execute([$propertyId]);
 $images = $stmt->fetchAll();
+
+// Fetch property amenities
+$stmt = $pdo->prepare("
+    SELECT a.amenity_name 
+    FROM property_amenity pa 
+    JOIN amenity a ON pa.amenity_id = a.amenity_id 
+    WHERE pa.property_id = ?
+    ORDER BY a.amenity_name ASC
+");
+$stmt->execute([$propertyId]);
+$amenityList = $stmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -131,29 +142,17 @@ $images = $stmt->fetchAll();
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <?php
-                        $amenities = [
-                            'living_rooms' => 'Living Rooms',
-                            'kitchen' => 'Kitchen',
-                            'garden' => 'Garden',
-                            'gym' => 'Gym',
-                            'pool' => 'Swimming Pool',
-                            'parking' => 'Parking',
-                            'water_supply' => 'Water Supply',
-                            'electricity_supply' => 'Electricity'
-                        ];
-                        foreach ($amenities as $key => $label):
-                            if ($property[$key]):
-                        ?>
-                            <div class="col-6 col-md-4">
-                                <div class="feature-badge">
-                                    <i class="bi bi-check-circle-fill text-success"></i> <?= $label ?>
+                        <?php if (empty($amenityList)): ?>
+                            <div class="col-12 text-muted fst-italic">No specific amenities listed.</div>
+                        <?php else: ?>
+                            <?php foreach ($amenityList as $amenity): ?>
+                                <div class="col-6 col-md-4">
+                                    <div class="feature-badge">
+                                        <i class="bi bi-check-circle-fill text-success"></i> <?= htmlspecialchars($amenity) ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php
-                            endif;
-                        endforeach;
-                        ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

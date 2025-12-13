@@ -4,7 +4,7 @@
 <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
     <div class="container">
         <!-- Brand on Left -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="<?= app_url('index.php') ?>">
+        <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="<?= app_url('index.php') ?>">
             <img src="<?= app_url('public/favicon/apple-touch-icon.png') ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-top rounded">
             Rental Lanka
         </a>
@@ -13,6 +13,8 @@
         <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#rentalLankaNavbar" aria-controls="rentalLankaNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+
 
         <!-- Navbar Links -->
         <div class="collapse navbar-collapse" id="rentalLankaNavbar">
@@ -76,6 +78,28 @@
                 if (str_contains($lower, 'suv') || str_contains($lower, 'pickup')) return 'bi-truck-front-fill';
                 if (str_contains($lower, 'motorcycle') || str_contains($lower, 'bike')) return 'bi-bicycle';
                 return 'bi-car-front';
+            }
+
+            // Fetch Notifications for Dropdown
+            $navUnreadCount = 0;
+            $navNotifications = [];
+            if (isset($user) && $user) {
+                // Unread Count
+                $stmt = $pdo_nav->prepare("SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0");
+                $stmt->execute([$user['user_id']]);
+                $navUnreadCount = $stmt->fetchColumn();
+
+                // Recent Notifications
+                $stmt = $pdo_nav->prepare("
+                    SELECT n.*, nt.type_name 
+                    FROM notification n
+                    LEFT JOIN notification_type nt ON n.type_id = nt.type_id
+                    WHERE n.user_id = ?
+                    ORDER BY n.created_at DESC
+                    LIMIT 5
+                ");
+                $stmt->execute([$user['user_id']]);
+                $navNotifications = $stmt->fetchAll();
             }
             ?>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
@@ -160,6 +184,51 @@
                 <?php if (isset($user) && $user): ?>
                     <!-- Logged In State -->
                     <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="<?= app_url('public/wishlist/wishlist.php') ?>" title="My Wishlist">
+                            <i class="bi bi-heart-fill"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <?php if ($navUnreadCount > 0): ?>
+                                <span class="badge bg-danger badge-notification"><?= $navUnreadCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown" aria-labelledby="notificationDropdown">
+                            <li class="notification-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Notifications</span>
+                                    <?php if ($navUnreadCount > 0): ?>
+                                        <span class="badge bg-light text-dark"><?= $navUnreadCount ?> New</span>
+                                    <?php endif; ?>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="notification-list">
+                                    <?php if (empty($navNotifications)): ?>
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="bi bi-bell-slash mb-2 d-block fs-4"></i>
+                                            No notifications
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($navNotifications as $notif): ?>
+                                            <a href="<?= app_url('public/notification/notification.php') ?>" class="notification-item <?= !$notif['is_read'] ? 'unread' : '' ?>">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <strong class="text-truncate" style="max-width: 200px;"><?= htmlspecialchars($notif['title']) ?></strong>
+                                                    <small class="text-muted" style="font-size: 0.75rem;"><?= date('M j', strtotime($notif['created_at'])) ?></small>
+                                                </div>
+                                                <div class="small text-muted text-truncate"><?= htmlspecialchars($notif['message']) ?></div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </li>
+                            <li class="notification-footer">
+                                <a href="<?= app_url('public/notification/notification.php') ?>">View All Notifications</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= app_url('public/my_rent/my_rent.php') ?>">
                             <i class="bi bi-calendar-check me-1"></i> My Rent
