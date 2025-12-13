@@ -5,7 +5,7 @@ $user = current_user();
 
 header('Content-Type: application/json');
 
-if (!$user || $user['role_id'] != 2) {
+if (!$user) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }

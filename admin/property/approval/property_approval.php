@@ -47,14 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . app_url('admin/property/approval/property_approval.php?success=approved'));
         exit;
     } elseif ($action === 'reject') {
-        $stmt = $pdo->prepare("UPDATE property SET status_id = 3 WHERE property_id = ?");
-        $stmt->execute([$propertyId]);
-        
         if ($propInfo) {
             notify_owner_property_status($propInfo['owner_id'], $propInfo['title'], 'rejected');
             // Refund the quota since it was rejected
             increment_package_quota($propInfo['owner_id'], 'property');
         }
+        
+        // Delete the property instead of marking as status 3
+        $stmt = $pdo->prepare("DELETE FROM property WHERE property_id = ?");
+        $stmt->execute([$propertyId]);
 
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/property/approval/property_approval.php?success=rejected'));

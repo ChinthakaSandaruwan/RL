@@ -49,14 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=approved'));
         exit;
     } elseif ($action === 'reject') {
-        $stmt = $pdo->prepare("UPDATE vehicle SET status_id = 3 WHERE vehicle_id = ?");
-        $stmt->execute([$vehicleId]);
-        
         if ($vehicleInfo) {
             notify_owner_vehicle_status($vehicleInfo['owner_id'], $vehicleInfo['title'], 'rejected');
             // Refund the quota
             increment_package_quota($vehicleInfo['owner_id'], 'vehicle');
         }
+        
+        // Delete the vehicle instead of marking as status 3
+        $stmt = $pdo->prepare("DELETE FROM vehicle WHERE vehicle_id = ?");
+        $stmt->execute([$vehicleId]);
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=rejected'));

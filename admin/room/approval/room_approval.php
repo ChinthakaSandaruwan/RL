@@ -49,14 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . app_url('admin/room/approval/room_approval.php?success=approved'));
         exit;
     } elseif ($action === 'reject') {
-        $stmt = $pdo->prepare("UPDATE room SET status_id = 3 WHERE room_id = ?");
-        $stmt->execute([$roomId]);
-        
         if ($roomInfo) {
             notify_owner_room_status($roomInfo['owner_id'], $roomInfo['title'], 'rejected');
             // Refund the quota
             increment_package_quota($roomInfo['owner_id'], 'room');
         }
+        
+        // Delete the room instead of marking as status 3
+        $stmt = $pdo->prepare("DELETE FROM room WHERE room_id = ?");
+        $stmt->execute([$roomId]);
         
         // Redirect to prevent form resubmission
         header('Location: ' . app_url('admin/room/approval/room_approval.php?success=rejected'));
