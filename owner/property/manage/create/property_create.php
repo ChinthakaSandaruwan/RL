@@ -11,9 +11,19 @@ if (!$user || !in_array($user['role_id'], [3])) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$successStr = '';
-$errorStr = '';
+// Flash Data
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$successStr = $_SESSION['_flash']['success'] ?? '';
+$errorStr = $_SESSION['_flash']['error'] ?? '';
+$old = $_SESSION['_flash']['old'] ?? [
+    'title' => '', 'description' => '', 'price' => '', 'type_id' => '',
+    'sqft' => '', 'bedrooms' => '1', 'bathrooms' => '1',
+    'province_id' => '', 'district_id' => '', 'city_id' => '',
+    'address' => '', 'postal_code' => '', 'google_map_link' => '',
+    'amenities' => []
+];
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 // Check Quota
@@ -31,22 +41,12 @@ $districts = $pdo->query("SELECT * FROM `districts` ORDER BY `name_en` ASC")->fe
 $cities = $pdo->query("SELECT * FROM `cities` ORDER BY `name_en` ASC")->fetchAll();
 $amenities = $pdo->query("SELECT * FROM `amenity` WHERE `category` IN ('property', 'both') ORDER BY `amenity_name` ASC")->fetchAll();
 
-// Form Data Holders (for repopulation)
-$old = [
-    'title' => '', 'description' => '', 'price' => '', 'type_id' => '',
-    'sqft' => '', 'bedrooms' => '1', 'bathrooms' => '1',
-    'province_id' => '', 'district_id' => '', 'city_id' => '',
-    'address' => '', 'postal_code' => '', 'google_map_link' => '',
-    'amenities' => []
-];
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentErrors = [];
+    
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $errors[] = 'Invalid CSRF Token';
+        $currentErrors[] = 'Invalid CSRF Token';
     }
-
-    // Capture POST data for repopulation
-    $old = array_merge($old, $_POST);
 
     // Input Sanitization
     $title = trim($_POST['title'] ?? '');
@@ -70,16 +70,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validation
     if (!$title || !$price || !$typeId || !$cityId || !$address) {
-        $errors[] = "Please fill in all required fields.";
+        $currentErrors[] = "Please fill in all required fields.";
     }
 
     // Image Upload
     $uploadedImages = [];
     if (!empty($_FILES['property_images']['name'][0])) {
         $count = count($_FILES['property_images']['name']);
-        if ($count < 3) $errors[] = "Please upload at least 3 images.";
+        if ($count < 3) $currentErrors[] = "Please upload at least 3 images.";
         
-        if (!$errors) {
+        if (!$currentErrors) {
             $uploadDir = __DIR__ . '/../../../../public/uploads/properties/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
             
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
 
                     if (!in_array($ext, $validTypes) || !in_array($mimeType, $allowedMimes)) {
-                        $errors[] = "Invalid format or content. JPG, PNG, WEBP only. File: " . $_FILES['property_images']['name'][$k];
+                        $currentErrors[] = "Invalid format or content. JPG, PNG, WEBP only. File: " . $_FILES['property_images']['name'][$k];
                         break; 
                     }
                     
@@ -107,10 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        $errors[] = "Please upload images.";
+        $currentErrors[] = "Please upload images.";
     }
 
-    if (!$errors) {
+    if (!$currentErrors) {
         try {
             $pdo->beginTransaction();
             
@@ -134,8 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $isMain = ($idx === $primaryIdx) ? 1 : 0;
                 $stmt->execute([$propId, $path, $isMain]);
             }
-            // If primary index was out of bounds (e.g., deleted file), set first as primary
-            // (Database logic might need a separate check, but simplistic approach here)
 
             // 4. Insert Amenities
             if ($selectedAmenities) {
@@ -149,26 +147,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             decrement_package_quota($packageCheck['package_id'], 'property');
 
             $pdo->commit();
-            $successStr = "Property submitted successfully and is pending approval.";
-            
-            // Reset form
-            $old = [
-                'title' => '', 'description' => '', 'price' => '', 'type_id' => '',
-                'sqft' => '', 'bedrooms' => '1', 'bathrooms' => '1',
-                'province_id' => '', 'district_id' => '', 'city_id' => '',
-                'address' => '', 'postal_code' => '', 'google_map_link' => '',
-                'amenities' => []
-            ];
-
+            $_SESSION['_flash']['success'] = "Property submitted successfully and is pending approval.";
+            // Clear inputs
+            unset($_SESSION['_flash']['old']);
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = "System Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "System Error: " . $e->getMessage();
+            $_SESSION['_flash']['old'] = $_POST;
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentErrors;
+        $_SESSION['_flash']['old'] = $_POST;
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
-    if (!empty($errors)) {
-        $errorStr = implode('<br>', $errors);
-    }
+if (!empty($errors)) {
+    $errorStr = implode('<br>', $errors);
 }
 ?>
 <!DOCTYPE html>

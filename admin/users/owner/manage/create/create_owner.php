@@ -9,13 +9,25 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = '';
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? '';
+$old = $_SESSION['_flash']['old'] ?? [];
+unset($_SESSION['_flash']);
+
+$name = $old['name'] ?? '';
+$email = $old['email'] ?? '';
+$mobile = $old['mobile'] ?? '';
+$nic = $old['nic'] ?? '';
+$status_id = intval($old['status_id'] ?? 1);
+
 $csrf_token = generate_csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentActionErrors = [];
+
+    // Basic CSRF Check
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $errors[] = 'Invalid CSRF Token';
+        $currentActionErrors[] = 'Invalid CSRF Token';
     }
 
     $name = trim($_POST['name'] ?? '');
@@ -25,27 +37,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status_id = intval($_POST['status_id'] ?? 1);
 
     if (!$name || !$email || !$mobile) {
-        $errors[] = 'All required fields must be filled.';
+        $currentActionErrors[] = 'All required fields must be filled.';
     }
 
-    if (!$errors) {
+    if (!$currentActionErrors) {
         $stmt = $pdo->prepare("SELECT user_id FROM user WHERE email = ?");
         $stmt->execute([$email]);
-        if ($stmt->fetch()) $errors[] = 'Email is already registered.';
+        if ($stmt->fetch()) $currentActionErrors[] = 'Email is already registered.';
 
         $stmt = $pdo->prepare("SELECT user_id FROM user WHERE mobile_number = ?");
         $stmt->execute([$mobile]);
-        if ($stmt->fetch()) $errors[] = 'Mobile number is already registered.';
+        if ($stmt->fetch()) $currentActionErrors[] = 'Mobile number is already registered.';
 
         if ($nic) {
             $stmt = $pdo->prepare("SELECT user_id FROM user WHERE nic = ?");
             $stmt->execute([$nic]);
-            if ($stmt->fetch()) $errors[] = 'NIC is already registered.';
+            if ($stmt->fetch()) $currentActionErrors[] = 'NIC is already registered.';
         }
     }
 
     $profileImagePath = null;
-    if (!$errors && !empty($_FILES['profile_image']['name'])) {
+    if (!$currentActionErrors && !empty($_FILES['profile_image']['name'])) {
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
         $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
          if (in_array($ext, $allowed)) {
@@ -56,26 +68,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadDir . $newName)) {
                     $profileImagePath = 'public/uploads/users/' . $newName;
                 } else {
-                    $errors[] = 'Failed to upload image.';
+                    $currentActionErrors[] = 'Failed to upload image.';
                 }
             } else {
-                $errors[] = 'Image size too large (Max 2MB).';
+                $currentActionErrors[] = 'Image size too large (Max 2MB).';
             }
         } else {
-            $errors[] = 'Invalid file type. Only JPG, PNG, WEBP allowed.';
+            $currentActionErrors[] = 'Invalid file type. Only JPG, PNG, WEBP allowed.';
         }
     }
 
-    if (empty($errors)) {
+    if (empty($currentActionErrors)) {
         try {
             $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, profile_image, role_id, status_id) VALUES (?, ?, ?, ?, ?, 3, ?)");
             $stmt->execute([$name, $email, $mobile, $nic, $profileImagePath, $status_id]);
-            $success = "Owner account created successfully!";
-            $name = $email = $mobile = $nic = '';
+            $_SESSION['_flash']['success'] = "Owner account created successfully!";
+            // Clear old inputs to clear the form
+            unset($_SESSION['_flash']['old']); 
         } catch (Exception $e) {
-            $errors[] = "System Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "System Error: " . $e->getMessage();
+            $_SESSION['_flash']['old'] = $_POST;
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentActionErrors;
+        $_SESSION['_flash']['old'] = $_POST;
     }
+    
+    // Redirect to self (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 <!DOCTYPE html>

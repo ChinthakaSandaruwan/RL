@@ -11,8 +11,10 @@ if (!$user || !in_array($user['role_id'], [3])) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+$success = $_SESSION['_flash']['success'] ?? null;
+$errors = $_SESSION['_flash']['errors'] ?? [];
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 $roomId = $_GET['id'] ?? 0;
@@ -97,8 +99,9 @@ $stmt = $pdo->prepare("SELECT meal_type_id, price FROM room_meal WHERE room_id =
 $stmt->execute([$roomId]);
 $currentMeals = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // [type_id => price]
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentErrors = [];
+
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         die('Invalid CSRF Token');
     }
@@ -124,10 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $meal_prices = $_POST['meal_prices'] ?? []; 
 
     if (!$title || !$price || !$typeId || !$address) {
-        $errors[] = 'Title, Price, Room Type, and Address are required.';
+        $currentErrors[] = 'Title, Price, Room Type, and Address are required.';
     }
 
-    if (!$errors) {
+    if (!$currentErrors) {
         try {
             $pdo->beginTransaction();
 
@@ -212,23 +215,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $pdo->commit();
-            $success = "Room updated successfully!";
-            // Refresh data
-            // header("Refresh:0");
-            // Re-fetch crucial data to show updates
-            $stmt = $pdo->prepare("SELECT * FROM room WHERE room_id = ?");
-            $stmt->execute([$roomId]);
-            $room = $stmt->fetch();
-            // Re-fetch images
-            $stmt = $pdo->prepare("SELECT * FROM room_image WHERE room_id = ?");
-            $stmt->execute([$roomId]);
-            $images = $stmt->fetchAll();
-
+            $_SESSION['_flash']['success'] = "Room updated successfully!";
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = "Database Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Database Error: " . $e->getMessage();
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentErrors;
     }
+    
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 <!DOCTYPE html>

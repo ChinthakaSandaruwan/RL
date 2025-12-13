@@ -18,7 +18,8 @@ header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
 $errors = [];
-$success = null;
+$success = $_SESSION['_flash']['success'] ?? null;
+unset($_SESSION['_flash']);
 $csrf_token = generate_csrf_token();
 
 // Handle Approve/Reject Actions
@@ -46,8 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             notify_owner_vehicle_status($vehicleInfo['owner_id'], $vehicleInfo['title'], 'approved');
         }
         
+        $_SESSION['_flash']['success'] = 'Vehicle approved successfully!';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=approved'));
+        header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php'));
         exit;
     } elseif ($action === 'reject') {
         if ($vehicleInfo) {
@@ -60,18 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("DELETE FROM vehicle WHERE vehicle_id = ?");
         $stmt->execute([$vehicleId]);
         
+        $_SESSION['_flash']['success'] = 'Vehicle rejected.';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php?success=rejected'));
+        header('Location: ' . app_url('admin/vehicle/approval/vehicle_approval.php'));
         exit;
-    }
-}
-
-// Handle success messages from GET parameters
-if (isset($_GET['success'])) {
-    if ($_GET['success'] === 'approved') {
-        $success = 'Vehicle approved successfully!';
-    } elseif ($_GET['success'] === 'rejected') {
-        $success = 'Vehicle rejected.';
     }
 }
 

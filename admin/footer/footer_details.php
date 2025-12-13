@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 2) { // 2 = Admin
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -52,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fb, $tw, $go, $in, $li, $gh,
                 $copyright, $show_social, $show_products, $show_useful, $show_contact
             ]);
-            $message = "Footer settings updated successfully!";
+            $_SESSION['_flash']['success'] = "Footer settings updated successfully!";
         } else {
             // Insert (Should happen via seed, but fallback)
             $sql = "INSERT INTO footer_content 
@@ -66,11 +67,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fb, $tw, $go, $in, $li, $gh,
                 $copyright, $show_social, $show_products, $show_useful, $show_contact
             ]);
-            $message = "Footer settings created successfully!";
+            $_SESSION['_flash']['success'] = "Footer settings created successfully!";
         }
     } catch (PDOException $e) {
-        $error = "Database Error: " . $e->getMessage();
+        $_SESSION['_flash']['error'] = "Database Error: " . $e->getMessage();
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Current Data

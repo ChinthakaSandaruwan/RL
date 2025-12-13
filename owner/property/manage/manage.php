@@ -32,6 +32,10 @@ $statusMap = [
     3 => ['label' => 'Inactive', 'class' => 'bg-warning'],
     4 => ['label' => 'Pending', 'class' => 'bg-info']
 ];
+// Flash Data
+$flashSuccess = $_SESSION['_flash']['success'] ?? $_SESSION['success'] ?? null;
+$flashError = $_SESSION['_flash']['error'] ?? $_SESSION['error'] ?? null;
+unset($_SESSION['_flash'], $_SESSION['success'], $_SESSION['error']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,20 +80,18 @@ $statusMap = [
     </div>
 
     <!-- Feedback Messages -->
-    <?php if (isset($_SESSION['success'])): ?>
+    <?php if ($flashSuccess): ?>
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <?= $_SESSION['success'] ?>
+            <?= $flashSuccess ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['error'])): ?>
+    <?php if ($flashError): ?>
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <?= $_SESSION['error'] ?>
+            <?= $flashError ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
     <div class="card shadow-sm border-0">

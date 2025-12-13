@@ -20,6 +20,10 @@ if (!$user || $user['role_id'] != 1) {
 
 $lockFile = __DIR__ . '/../../maintenance.lock';
 
+$message = $_SESSION['_flash']['success'] ?? $_SESSION['_flash']['warning'] ?? null;
+$status = isset($_SESSION['_flash']['success']) ? 'success' : 'warning';
+unset($_SESSION['_flash']['success'], $_SESSION['_flash']['warning']);
+
 // Handle Toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['toggle_maintenance'])) {
@@ -29,15 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_exists($lockFile)) {
                 unlink($lockFile);
             }
-            $message = "Maintenance mode disabled. Site is live.";
-            $status = "success";
+            $_SESSION['_flash']['success'] = "Maintenance mode disabled. Site is live.";
         } elseif ($action === 'enable') {
             $blockedRoles = $_POST['blocked_roles'] ?? [];
-            
-            // Validate: Must not be empty, otherwise what's the point?
-            // Actually, if empty, maybe block no one? But typically user wants to block someone.
-            // Let's assume selecting nothing means effectively disabled, or block everyone except Super Admin if logic dictates.
-            // UI should default to block logic.
             
             // To ensure 0 (Guest) is handled correctly as a string '0' from POST
             $data = [
@@ -45,9 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             
             file_put_contents($lockFile, json_encode($data));
-            $message = "Maintenance mode enabled for selected user types.";
-            $status = "warning";
+            $_SESSION['_flash']['warning'] = "Maintenance mode enabled for selected user types.";
         }
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
     }
 }
 

@@ -10,7 +10,8 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        header('Location: ../read/read_customer.php?error=Invalid CSRF Token');
+        $_SESSION['_flash']['error'] = 'Invalid CSRF Token';
+        header('Location: ../read/read_customer.php');
         exit;
     }
 
@@ -24,17 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$userId]);
             
             if ($stmt->rowCount() > 0) {
-                header('Location: ../read/read_customer.php?success=Customer deleted successfully');
+                 $_SESSION['_flash']['success'] = 'Customer deleted successfully';
             } else {
-                header('Location: ../read/read_customer.php?error=Customer not found or invalid role');
+                 $_SESSION['_flash']['error'] = 'Customer not found or invalid role';
             }
         } catch (Exception $e) {
-            header('Location: ../read/read_customer.php?error=Error deleting customer: ' . urlencode($e->getMessage()));
+             $_SESSION['_flash']['error'] = 'Error deleting customer: ' . $e->getMessage();
         }
     } else {
-        header('Location: ../read/read_customer.php?error=Invalid User ID');
+         $_SESSION['_flash']['error'] = 'Invalid User ID';
     }
-} else {
-    header('Location: ../read/read_customer.php');
 }
+header('Location: ../read/read_customer.php');
 exit;

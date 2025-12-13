@@ -11,8 +11,9 @@ if (!$currentUser || $currentUser['role_id'] != 1) {
 }
 
 $pdo = get_pdo();
-$error = '';
-$success = '';
+$error = $_SESSION['_flash']['error'] ?? '';
+$success = $_SESSION['_flash']['success'] ?? '';
+unset($_SESSION['_flash']['error'], $_SESSION['_flash']['success']);
 
 // 2. Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,23 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = trim($_POST['email']);
         $mobile = trim($_POST['mobile']); 
         $nic = trim($_POST['nic']); 
-        // No password input needed for OTP-based login systems unless we auto-generate one for fallback?
-        // But schema likely requires NOT NULL password if not changed. 
-        // However, user request says "im not use passwrod only otp use for login".
-        // If the 'password' column is NOT NULL in DB, we must provide a dummy value (or random).
-        // Let's generate a random password to satisfy DB constraint, but user won't know it.
-
 
         if (empty($name) || empty($email) || empty($mobile)) {
-            $error = "Name, Email, and Mobile are required.";
+            $_SESSION['_flash']['error'] = "Name, Email, and Mobile are required.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = "Invalid email format.";
+            $_SESSION['_flash']['error'] = "Invalid email format.";
         } else {
             // Check if email or mobile already exists
             $stmt = $pdo->prepare("SELECT user_id FROM user WHERE email = ? OR mobile_number = ?");
             $stmt->execute([$email, $mobile]);
             if ($stmt->fetch()) {
-                $error = "Email or Mobile Number already registered.";
+                $_SESSION['_flash']['error'] = "Email or Mobile Number already registered.";
             } else {
                 try {
                     // role_id = 1 (Super Admin), status_id = 1 (Active)
@@ -48,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, nic, password, role_id, status_id, created_at) VALUES (?, ?, ?, ?, ?, 1, 1, NOW())");
                     if ($stmt->execute([$name, $email, $mobile, $nic, $dummyPass])) {
-                        $success = "New Super Admin added successfully. They can login via OTP.";
+                        $_SESSION['_flash']['success'] = "New Super Admin added successfully. They can login via OTP.";
                     } else {
-                        $error = "Failed to create user.";
+                        $_SESSION['_flash']['error'] = "Failed to create user.";
                     }
                 } catch (PDOException $e) {
-                    $error = "Database error: " . $e->getMessage();
+                    $_SESSION['_flash']['error'] = "Database error: " . $e->getMessage();
                 }
             }
         }
@@ -64,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delete_id = (int)$_POST['user_id'];
         
         if ($delete_id == $currentUser['user_id']) {
-            $error = "You cannot delete your own account.";
+            $_SESSION['_flash']['error'] = "You cannot delete your own account.";
         } else {
             try {
                 $stmt = $pdo->prepare("SELECT role_id FROM user WHERE user_id = ?");
@@ -74,15 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($target && $target['role_id'] == 1) {
                     $stmt = $pdo->prepare("DELETE FROM user WHERE user_id = ?");
                     $stmt->execute([$delete_id]);
-                    $success = "Super Admin removed successfully.";
+                    $_SESSION['_flash']['success'] = "Super Admin removed successfully.";
                 } else {
-                    $error = "Invalid user target.";
+                    $_SESSION['_flash']['error'] = "Invalid user target.";
                 }
             } catch (PDOException $e) {
-                $error = "Could not delete user. " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Could not delete user. " . $e->getMessage();
             }
         }
     }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 // 3. Fetch All Super Admins

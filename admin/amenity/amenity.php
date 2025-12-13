@@ -9,8 +9,11 @@ if (!$user || $user['role_id'] != 2) { // Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+
+// Flash Data Retrieval
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("INSERT INTO amenity (amenity_name, category) VALUES (?, ?)");
                 $stmt->execute([$name, $category]);
-                $message = "Amenity added successfully!";
+                $_SESSION['_flash']['success'] = "Amenity added successfully!";
             } catch (PDOException $e) {
-                $error = "Error adding amenity: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error adding amenity: " . $e->getMessage();
             }
         } else {
-            $error = "Amenity name is required.";
+            $_SESSION['_flash']['error'] = "Amenity name is required.";
         }
     } elseif ($action === 'update') {
         $id = intval($_POST['amenity_id']);
@@ -40,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("UPDATE amenity SET amenity_name = ?, category = ? WHERE amenity_id = ?");
                 $stmt->execute([$name, $category, $id]);
-                $message = "Amenity updated successfully!";
+                $_SESSION['_flash']['success'] = "Amenity updated successfully!";
             } catch (PDOException $e) {
-                $error = "Error updating amenity: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error updating amenity: " . $e->getMessage();
             }
         } else {
-            $error = "Invalid data for update.";
+            $_SESSION['_flash']['error'] = "Invalid data for update.";
         }
     } elseif ($action === 'delete') {
         $id = intval($_POST['amenity_id']);
@@ -53,12 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("DELETE FROM amenity WHERE amenity_id = ?");
                 $stmt->execute([$id]);
-                $message = "Amenity deleted successfully!";
+                $_SESSION['_flash']['success'] = "Amenity deleted successfully!";
             } catch (PDOException $e) {
-                $error = "Cannot delete amenity used in properties or rooms.";
+                $_SESSION['_flash']['error'] = "Cannot delete amenity used in properties or rooms.";
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Amenities

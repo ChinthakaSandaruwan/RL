@@ -10,8 +10,9 @@ if (!$user || $user['role_id'] != 2) {
 }
 
 $pdo = get_pdo();
-$success = null;
-$errors = [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$errors = $_SESSION['_flash']['errors'] ?? [];
+unset($_SESSION['_flash']);
 
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare("INSERT INTO admin_bank (bank_name) VALUES (?)");
             $stmt->execute([$bank_name]);
-            $success = "Bank added successfully!";
+            $_SESSION['_flash']['success'] = "Bank added successfully!";
         } catch (Exception $e) {
-            $errors[] = "Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
         }
     } elseif ($action === 'add_account') {
         $bank_id = intval($_POST['bank_id']);
@@ -37,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare("INSERT INTO admin_bank_account (bank_id, branch, account_number, account_holder_name) VALUES (?, ?, ?, ?)");
             $stmt->execute([$bank_id, $branch, $account_number, $holder_name]);
-            $success = "Bank account added successfully!";
+            $_SESSION['_flash']['success'] = "Bank account added successfully!";
         } catch (Exception $e) {
-            $errors[] = "Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
         }
     } elseif ($action === 'update_account') {
         $account_id = intval($_POST['account_id']);
@@ -51,18 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare("UPDATE admin_bank_account SET bank_id=?, branch=?, account_number=?, account_holder_name=? WHERE account_id=?");
             $stmt->execute([$bank_id, $branch, $account_number, $holder_name, $account_id]);
-            $success = "Bank account updated successfully!";
+            $_SESSION['_flash']['success'] = "Bank account updated successfully!";
         } catch (Exception $e) {
-            $errors[] = "Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
         }
     } elseif ($action === 'delete_account') {
         $account_id = intval($_POST['account_id']);
         try {
             $stmt = $pdo->prepare("DELETE FROM admin_bank_account WHERE account_id = ?");
             $stmt->execute([$account_id]);
-            $success = "Bank account deleted successfully!";
+            $_SESSION['_flash']['success'] = "Bank account deleted successfully!";
         } catch (Exception $e) {
-            $errors[] = "Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
         }
     } elseif ($action === 'delete_bank') {
         $bank_id = intval($_POST['bank_id']);
@@ -71,16 +72,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check = $pdo->prepare("SELECT COUNT(*) FROM admin_bank_account WHERE bank_id = ?");
             $check->execute([$bank_id]);
             if ($check->fetchColumn() > 0) {
-                $errors[] = "Cannot delete bank with existing accounts. Delete accounts first.";
+                $_SESSION['_flash']['errors'][] = "Cannot delete bank with existing accounts. Delete accounts first.";
             } else {
                 $stmt = $pdo->prepare("DELETE FROM admin_bank WHERE bank_id = ?");
                 $stmt->execute([$bank_id]);
-                $success = "Bank deleted successfully!";
+                $_SESSION['_flash']['success'] = "Bank deleted successfully!";
             }
         } catch (Exception $e) {
-            $errors[] = "Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch all banks

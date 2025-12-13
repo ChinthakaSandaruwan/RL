@@ -12,7 +12,7 @@ if (!$user || $user['role_id'] != 1) {
 $message = '';
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_backup'])) {
+if (isset($_GET['create_backup'])) {
     
     // Increase execution time for large backups
     set_time_limit(0);
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_backup'])) {
                             </ul>
                         </div>
 
-                        <form method="POST" id="backupForm">
+                        <form method="GET" id="backupForm">
                             <input type="hidden" name="create_backup" value="1">
                             <button type="submit" class="btn btn-primary btn-lg px-5" id="backupBtn">
                                 <span id="btnText"><i class="bi bi-download me-2"></i>Download Backup</span>

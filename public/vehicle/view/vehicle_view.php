@@ -137,13 +137,14 @@ $user = current_user();
                             </div>
                         </div>
                         <div class="text-end">
-                            <h2 class="h3 fw-bold text-theme mb-0">LKR <?= number_format($vehicle['price_per_day'], 2) ?></h2>
-                            <small class="text-muted">/ Day</small>
+                            <?php if ($vehicle['pricing_type_id'] == 2): ?>
+                                <h2 class="h3 fw-bold text-theme mb-0">LKR <?= number_format($vehicle['price_per_km'], 2) ?>/km</h2>
+                            <?php else: ?>
+                                <h2 class="h3 fw-bold text-theme mb-0">LKR <?= number_format($vehicle['price_per_day'], 2) ?>/day</h2>
+                            <?php endif; ?>
                             <?php if($vehicle['is_driver_available']): ?>
                                 <div class="badge bg-info mt-1 d-block">+ Driver Available</div>
-                                <small class="text-muted"><?= number_format($vehicle['driver_cost_per_day']) ?>/day</small>
-                            <?php else: ?>
-                                <div class="badge bg-secondary mt-1 d-block">Self Drive Only</div>
+                                <div class="badge bg-secondary mt-1 d-block">Driver Cost Per Day: LKR <?= number_format($vehicle['driver_cost_per_day']) ?></div>
                             <?php endif; ?>
                         </div>
                     </div>

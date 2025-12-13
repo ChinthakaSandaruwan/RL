@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 2) { // Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("INSERT INTO meal_type (type_name) VALUES (?)");
                 $stmt->execute([$name]);
-                $message = "Meal Type added successfully!";
+                $_SESSION['_flash']['success'] = "Meal Type added successfully!";
             } catch (PDOException $e) {
-                $error = "Error adding meal type: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error adding meal type: " . $e->getMessage();
             }
         } else {
-            $error = "Meal type name is required.";
+            $_SESSION['_flash']['error'] = "Meal type name is required.";
         }
     } elseif ($action === 'update') {
         $id = intval($_POST['type_id']);
@@ -36,12 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("UPDATE meal_type SET type_name = ? WHERE type_id = ?");
                 $stmt->execute([$name, $id]);
-                $message = "Meal Type updated successfully!";
+                $_SESSION['_flash']['success'] = "Meal Type updated successfully!";
             } catch (PDOException $e) {
-                $error = "Error updating meal type: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error updating meal type: " . $e->getMessage();
             }
         } else {
-            $error = "Invalid data for update.";
+            $_SESSION['_flash']['error'] = "Invalid data for update.";
         }
     } elseif ($action === 'delete') {
         $id = intval($_POST['type_id']);
@@ -49,12 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("DELETE FROM meal_type WHERE type_id = ?");
                 $stmt->execute([$id]);
-                $message = "Meal Type deleted successfully!";
+                $_SESSION['_flash']['success'] = "Meal Type deleted successfully!";
             } catch (PDOException $e) {
-                $error = "Cannot delete meal type because it is used in room listings.";
+                $_SESSION['_flash']['error'] = "Cannot delete meal type because it is used in room listings.";
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Meal Types

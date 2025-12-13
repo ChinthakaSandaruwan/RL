@@ -30,8 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mobile = trim($_POST['mobile'] ?? '');
     $nic    = trim($_POST['nic'] ?? '');
 
+    $terms_accepted = isset($_POST['terms']) && $_POST['terms'] === '1';
+
     if ($name === '' || $email === '' || $mobile === '' || $nic === '') {
         $errors[] = 'Name, email, mobile, and NIC are required.';
+    }
+
+    if (!$terms_accepted) {
+        $errors[] = 'You must agree to the Terms and Conditions to register.';
     }
 
     // Name: Letters and spaces only, min 3 chars
@@ -157,6 +163,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label for="nicInput">NIC Number</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Terms and Conditions Checkbox -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="terms" value="1" id="termsCheck" required>
+                            <label class="form-check-label small" for="termsCheck">
+                                I agree to the <a href="<?= app_url('public/terms_of_service/terms_of_service.php') ?>" target="_blank" class="text-decoration-none">Terms and Conditions</a>
+                            </label>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 shadow-sm btn-lg mt-2">Create Account</button>

@@ -94,11 +94,20 @@ if (isset($user) && $user) {
                                 <?php endif; ?>
                             </div>
                             <div class="card-body">
-                                <span class="badge badge-theme mb-2"><?= htmlspecialchars($vehicle['type_name'] ?? 'Vehicle') ?></span>
+                                <div class="mb-2">
+                                    <span class="badge badge-theme"><?= htmlspecialchars($vehicle['type_name'] ?? 'Vehicle') ?></span>
+                                    <?php if($vehicle['is_driver_available']): ?>
+                                        <span class="badge bg-info text-dark ms-1" style="font-size: 0.75rem;"><i class="bi bi-person-check me-1"></i>Driver Available</span>
+                                    <?php endif; ?>
+                                </div>
                                 <h3 class="card-title h5"><?= htmlspecialchars($vehicle['title']) ?></h3>
                                 <p class="card-text text-muted"><strong><?= htmlspecialchars(($vehicle['brand_name'] ?? '') . ' ' . ($vehicle['model_name'] ?? '')) ?></strong></p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="price-tag">LKR <?= number_format($vehicle['price_per_day'], 2) ?>/day</span>
+                                    <?php if ($vehicle['pricing_type_id'] == 2): ?>
+                                        <span class="price-tag">LKR <?= number_format($vehicle['price_per_km'], 2) ?>/km</span>
+                                    <?php else: ?>
+                                        <span class="price-tag">LKR <?= number_format($vehicle['price_per_day'], 2) ?>/day</span>
+                                    <?php endif; ?>
                                     <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id=' . $vehicle['vehicle_id']) ?>" class="btn-view-details">View <i class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>

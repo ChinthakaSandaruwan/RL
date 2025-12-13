@@ -55,11 +55,16 @@ foreach ($districts as $d) {
     }
 }
 
-$success = null;
-$errors = [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$errors = $_SESSION['_flash']['errors'] ?? [];
+unset($_SESSION['_flash']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) die("Invalid Token");
+    $currentErrors = [];
+
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+         die("Invalid Token");
+    }
 
     // Update Basic Info
     $title = trim($_POST['title']);
@@ -143,22 +148,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             move_uploaded_file($tmp, $uploadDir . $fname);
                             $stmt->execute([$propId, 'public/uploads/properties/' . $fname]);
                         } else {
-                            $errors[] = "Invalid file type detected.";
+                            $currentErrors[] = "Invalid file type detected.";
                         }
                     }
                 }
             }
         }
 
-        $pdo->commit();
-        $success = "Property updated successfully.";
-        // Refresh Data
-        header("Refresh:0");
+        if (empty($currentErrors)) {
+            $pdo->commit();
+            $_SESSION['_flash']['success'] = "Property updated successfully.";
+        } else {
+            $pdo->rollBack();
+            $_SESSION['_flash']['errors'] = $currentErrors;
+        }
+
     } catch (Exception $e) {
         $pdo->rollBack();
-        $errors[] = "Error: " . $e->getMessage();
+        $_SESSION['_flash']['errors'][] = "Error: " . $e->getMessage();
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
+
 $csrf_token = generate_csrf_token();
 ?>
 <!DOCTYPE html>

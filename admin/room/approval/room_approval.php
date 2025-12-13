@@ -17,7 +17,8 @@ header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
 $errors = [];
-$success = null;
+$success = $_SESSION['_flash']['success'] ?? null;
+unset($_SESSION['_flash']);
 $csrf_token = generate_csrf_token();
 
 // Handle Approve/Reject Actions
@@ -45,8 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             notify_owner_room_status($roomInfo['owner_id'], $roomInfo['title'], 'approved');
         }
         
+        $_SESSION['_flash']['success'] = 'Room approved successfully!';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/room/approval/room_approval.php?success=approved'));
+        header('Location: ' . app_url('admin/room/approval/room_approval.php'));
         exit;
     } elseif ($action === 'reject') {
         if ($roomInfo) {
@@ -59,18 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("DELETE FROM room WHERE room_id = ?");
         $stmt->execute([$roomId]);
         
+        $_SESSION['_flash']['success'] = 'Room rejected.';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/room/approval/room_approval.php?success=rejected'));
+        header('Location: ' . app_url('admin/room/approval/room_approval.php'));
         exit;
-    }
-}
-
-// Handle success messages from GET parameters
-if (isset($_GET['success'])) {
-    if ($_GET['success'] === 'approved') {
-        $success = 'Room approved successfully!';
-    } elseif ($_GET['success'] === 'rejected') {
-        $success = 'Room rejected.';
     }
 }
 

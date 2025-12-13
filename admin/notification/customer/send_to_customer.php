@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 2) { // Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Send
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send'])) {
@@ -28,20 +29,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send'])) {
             }
             
             if (empty($customer_ids)) {
-                $error = "Please select at least one customer or enable 'Send to All'.";
+                $_SESSION['_flash']['error'] = "Please select at least one customer or enable 'Send to All'.";
             } else {
                 $stmt = $pdo->prepare("INSERT INTO notification (user_id, title, message, type_id) VALUES (?, ?, ?, 1)");
                 foreach ($customer_ids as $cid) {
                     $stmt->execute([intval($cid), $title, $messageText]);
                 }
-                $message = "Notification sent to " . count($customer_ids) . " customer(s) successfully!";
+                $_SESSION['_flash']['success'] = "Notification sent to " . count($customer_ids) . " customer(s) successfully!";
             }
         } catch (Exception $e) {
-            $error = "Error sending notification: " . $e->getMessage();
+            $_SESSION['_flash']['error'] = "Error sending notification: " . $e->getMessage();
         }
     } else {
-        $error = "Title and Message are required.";
+        $_SESSION['_flash']['error'] = "Title and Message are required.";
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch all customers

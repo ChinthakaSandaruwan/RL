@@ -39,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+        
+        $_SESSION['_flash']['success'] = "Holiday '{$holidays[$holiday]['name']}' updated successfully.";
     }
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
@@ -69,6 +71,15 @@ foreach ($holidays as $key => $info) {
 <?php require __DIR__ . '/../../public/navbar/navbar.php'; ?>
 
 <div class="container mt-5">
+
+    <?php if (isset($_SESSION['_flash']['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show mb-4">
+            <i class="bi bi-check-circle me-2"></i> <?= $_SESSION['_flash']['success'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['_flash']['success']); ?>
+    <?php endif; ?>
+
     <div class="row mb-4">
         <div class="col">
             <h2 class="fw-bold">Special Holidays Management</h2>

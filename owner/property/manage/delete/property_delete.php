@@ -23,7 +23,7 @@ $stmt->execute([$id, $user['user_id']]);
 $property = $stmt->fetch();
 
 if (!$property) {
-    $_SESSION['error'] = "Property not found or access denied.";
+    $_SESSION['_flash']['error'] = "Property not found or access denied.";
     header('Location: ../manage.php');
     exit;
 }
@@ -62,11 +62,11 @@ try {
         }
     }
 
-    $_SESSION['success'] = "Property deleted successfully.";
+    $_SESSION['_flash']['success'] = "Property deleted successfully.";
 
 } catch (Exception $e) {
     $pdo->rollBack();
-    $_SESSION['error'] = "Failed to delete property: " . $e->getMessage();
+    $_SESSION['_flash']['error'] = "Failed to delete property: " . $e->getMessage();
 }
 
 header('Location: ../manage.php');

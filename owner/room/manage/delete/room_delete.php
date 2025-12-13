@@ -10,7 +10,7 @@ if (!$user || !in_array($user['role_id'], [3])) {
 
 $rid = $_GET['id'] ?? 0;
 if (!$rid) { 
-    $_SESSION['error'] = "Invalid room ID.";
+    $_SESSION['_flash']['error'] = "Invalid room ID.";
     header('Location: ../manage.php'); 
     exit; 
 }
@@ -21,7 +21,7 @@ $pdo = get_pdo();
 $stmt = $pdo->prepare("SELECT room_id FROM room WHERE room_id = ? AND owner_id = ?");
 $stmt->execute([$rid, $user['user_id']]);
 if (!$stmt->fetch()) { 
-    $_SESSION['error'] = "Access Denied or Room not found."; 
+    $_SESSION['_flash']['error'] = "Access Denied or Room not found."; 
     header('Location: ../manage.php'); 
     exit; 
 }
@@ -53,11 +53,11 @@ try {
         }
     }
 
-    $_SESSION['success'] = "Room deleted successfully.";
+    $_SESSION['_flash']['success'] = "Room deleted successfully.";
     
 } catch (Exception $e) {
     $pdo->rollBack();
-    $_SESSION['error'] = "Delete failed: " . $e->getMessage();
+    $_SESSION['_flash']['error'] = "Delete failed: " . $e->getMessage();
 }
 
 header('Location: ../manage.php');

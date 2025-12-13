@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 2) { // Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("INSERT INTO vehicle_type (type_name) VALUES (?)");
                 $stmt->execute([$name]);
-                $message = "Vehicle Type added successfully!";
+                $_SESSION['_flash']['success'] = "Vehicle Type added successfully!";
             } catch (PDOException $e) {
-                $error = "Error adding type: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error adding type: " . $e->getMessage();
             }
         } else {
-            $error = "Type name is required.";
+            $_SESSION['_flash']['error'] = "Type name is required.";
         }
     } elseif ($action === 'update') {
         $id = intval($_POST['type_id']);
@@ -36,12 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("UPDATE vehicle_type SET type_name = ? WHERE type_id = ?");
                 $stmt->execute([$name, $id]);
-                $message = "Vehicle Type updated successfully!";
+                $_SESSION['_flash']['success'] = "Vehicle Type updated successfully!";
             } catch (PDOException $e) {
-                $error = "Error updating type: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error updating type: " . $e->getMessage();
             }
         } else {
-            $error = "Invalid data for update.";
+            $_SESSION['_flash']['error'] = "Invalid data for update.";
         }
     } elseif ($action === 'delete') {
         $id = intval($_POST['type_id']);
@@ -49,12 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("DELETE FROM vehicle_type WHERE type_id = ?");
                 $stmt->execute([$id]);
-                $message = "Vehicle Type deleted successfully!";
+                $_SESSION['_flash']['success'] = "Vehicle Type deleted successfully!";
             } catch (PDOException $e) {
-                $error = "Cannot delete type because it is assigned to vehicles.";
+                $_SESSION['_flash']['error'] = "Cannot delete type because it is assigned to vehicles.";
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Types

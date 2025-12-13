@@ -10,7 +10,8 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        header('Location: ../read/read_owner.php?error=Invalid CSRF Token');
+        $_SESSION['_flash']['error'] = 'Invalid CSRF Token';
+        header('Location: ../read/read_owner.php');
         exit;
     }
 
@@ -23,17 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$userId]);
             
             if ($stmt->rowCount() > 0) {
-                header('Location: ../read/read_owner.php?success=Owner deleted successfully');
+                $_SESSION['_flash']['success'] = 'Owner deleted successfully';
             } else {
-                header('Location: ../read/read_owner.php?error=Owner not found or invalid role');
+                $_SESSION['_flash']['error'] = 'Owner not found or invalid role';
             }
         } catch (Exception $e) {
-            header('Location: ../read/read_owner.php?error=Error deleting owner: ' . urlencode($e->getMessage()));
+            $_SESSION['_flash']['error'] = 'Error deleting owner: ' . $e->getMessage();
         }
     } else {
-        header('Location: ../read/read_owner.php?error=Invalid User ID');
+        $_SESSION['_flash']['error'] = 'Invalid User ID';
     }
-} else {
-    header('Location: ../read/read_owner.php');
 }
+header('Location: ../read/read_owner.php');
 exit;

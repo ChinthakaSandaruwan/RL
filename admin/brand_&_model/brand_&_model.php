@@ -11,59 +11,63 @@ if (!$user || $user['role_id'] != 2) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
-$activeTab = 'brands'; // Default tab
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+// Retrieve active tab from session or default to 'brands'
+$activeTab = $_SESSION['_flash']['activeTab'] ?? 'brands';
+unset($_SESSION['_flash']);
 
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    // Store active tab for the redirect
+    $nextTab = 'brands'; // Default
     
     // --- BRAND ACTIONS ---
     if ($action === 'add_brand') {
         $brandName = trim($_POST['brand_name'] ?? '');
-        $activeTab = 'brands';
+        $nextTab = 'brands';
         
         if (empty($brandName)) {
-            $errors[] = "Brand name is required.";
+            $_SESSION['_flash']['errors'][] = "Brand name is required.";
         } else {
             try {
                 $stmt = $pdo->prepare("INSERT INTO vehicle_brand (brand_name) VALUES (?)");
                 $stmt->execute([$brandName]);
-                $success = "Brand added successfully!";
+                $_SESSION['_flash']['success'] = "Brand added successfully!";
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) { // Integrity constraint violation (Duplicate)
-                    $errors[] = "Brand '$brandName' already exists.";
+                    $_SESSION['_flash']['errors'][] = "Brand '$brandName' already exists.";
                 } else {
-                    $errors[] = "Error adding brand: " . $e->getMessage();
+                    $_SESSION['_flash']['errors'][] = "Error adding brand: " . $e->getMessage();
                 }
             }
         }
     } elseif ($action === 'edit_brand') {
         $brandId = intval($_POST['brand_id']);
         $brandName = trim($_POST['brand_name'] ?? '');
-        $activeTab = 'brands';
+        $nextTab = 'brands';
 
         if (empty($brandName)) {
-            $errors[] = "Brand name is required.";
+            $_SESSION['_flash']['errors'][] = "Brand name is required.";
         } else {
             try {
                 $stmt = $pdo->prepare("UPDATE vehicle_brand SET brand_name = ? WHERE brand_id = ?");
                 $stmt->execute([$brandName, $brandId]);
-                $success = "Brand updated successfully!";
+                $_SESSION['_flash']['success'] = "Brand updated successfully!";
             } catch (PDOException $e) {
-                $errors[] = "Error updating brand: " . $e->getMessage();
+                $_SESSION['_flash']['errors'][] = "Error updating brand: " . $e->getMessage();
             }
         }
     } elseif ($action === 'delete_brand') {
         $brandId = intval($_POST['brand_id']);
-        $activeTab = 'brands';
+        $nextTab = 'brands';
         try {
             $stmt = $pdo->prepare("DELETE FROM vehicle_brand WHERE brand_id = ?");
             $stmt->execute([$brandId]);
-            $success = "Brand deleted successfully!";
+            $_SESSION['_flash']['success'] = "Brand deleted successfully!";
         } catch (PDOException $e) {
-            $errors[] = "Error deleting brand. Ensure no vehicles are using this brand.";
+            $_SESSION['_flash']['errors'][] = "Error deleting brand. Ensure no vehicles are using this brand.";
         }
     }
 
@@ -71,20 +75,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'add_model') {
         $modelName = trim($_POST['model_name'] ?? '');
         $brandId = intval($_POST['brand_id'] ?? 0);
-        $activeTab = 'models';
+        $nextTab = 'models';
 
         if (empty($modelName) || $brandId <= 0) {
-            $errors[] = "Model name and Brand are required.";
+            $_SESSION['_flash']['errors'][] = "Model name and Brand are required.";
         } else {
             try {
                 $stmt = $pdo->prepare("INSERT INTO vehicle_model (model_name, brand_id) VALUES (?, ?)");
                 $stmt->execute([$modelName, $brandId]);
-                $success = "Model added successfully!";
+                $_SESSION['_flash']['success'] = "Model added successfully!";
             } catch (PDOException $e) {
                  if ($e->getCode() == 23000) {
-                    $errors[] = "Model '$modelName' already exists.";
+                    $_SESSION['_flash']['errors'][] = "Model '$modelName' already exists.";
                 } else {
-                    $errors[] = "Error adding model: " . $e->getMessage();
+                    $_SESSION['_flash']['errors'][] = "Error adding model: " . $e->getMessage();
                 }
             }
         }
@@ -92,30 +96,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $modelId = intval($_POST['model_id']);
         $modelName = trim($_POST['model_name'] ?? '');
         $brandId = intval($_POST['brand_id'] ?? 0);
-        $activeTab = 'models';
+        $nextTab = 'models';
 
         if (empty($modelName) || $brandId <= 0) {
-            $errors[] = "Model name and Brand are required.";
+            $_SESSION['_flash']['errors'][] = "Model name and Brand are required.";
         } else {
             try {
                 $stmt = $pdo->prepare("UPDATE vehicle_model SET model_name = ?, brand_id = ? WHERE model_id = ?");
                 $stmt->execute([$modelName, $brandId, $modelId]);
-                $success = "Model updated successfully!";
+                $_SESSION['_flash']['success'] = "Model updated successfully!";
             } catch (PDOException $e) {
-                $errors[] = "Error updating model: " . $e->getMessage();
+                $_SESSION['_flash']['errors'][] = "Error updating model: " . $e->getMessage();
             }
         }
     } elseif ($action === 'delete_model') {
         $modelId = intval($_POST['model_id']);
-        $activeTab = 'models';
+        $nextTab = 'models';
         try {
             $stmt = $pdo->prepare("DELETE FROM vehicle_model WHERE model_id = ?");
             $stmt->execute([$modelId]);
-            $success = "Model deleted successfully!";
+            $_SESSION['_flash']['success'] = "Model deleted successfully!";
         } catch (PDOException $e) {
-            $errors[] = "Error deleting model.";
+            $_SESSION['_flash']['errors'][] = "Error deleting model.";
         }
     }
+    
+    $_SESSION['_flash']['activeTab'] = $nextTab;
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Data

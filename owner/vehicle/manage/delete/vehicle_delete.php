@@ -10,7 +10,7 @@ if (!$user || !in_array($user['role_id'], [3])) {
 
 $vid = $_GET['id'] ?? 0;
 if (!$vid) { 
-    $_SESSION['error'] = "Invalid vehicle ID.";
+    $_SESSION['_flash']['error'] = "Invalid vehicle ID.";
     header('Location: ../manage.php'); 
     exit; 
 }
@@ -21,7 +21,7 @@ $pdo = get_pdo();
 $stmt = $pdo->prepare("SELECT vehicle_id FROM vehicle WHERE vehicle_id = ? AND owner_id = ?");
 $stmt->execute([$vid, $user['user_id']]);
 if (!$stmt->fetch()) { 
-    $_SESSION['error'] = "Access Denied or Vehicle not found."; 
+    $_SESSION['_flash']['error'] = "Access Denied or Vehicle not found."; 
     header('Location: ../manage.php'); 
     exit; 
 }
@@ -51,11 +51,11 @@ try {
         }
     }
 
-    $_SESSION['success'] = "Vehicle deleted successfully.";
+    $_SESSION['_flash']['success'] = "Vehicle deleted successfully.";
     
 } catch (Exception $e) {
     $pdo->rollBack();
-    $_SESSION['error'] = "Delete failed: " . $e->getMessage();
+    $_SESSION['_flash']['error'] = "Delete failed: " . $e->getMessage();
 }
 
 header('Location: ../manage.php');

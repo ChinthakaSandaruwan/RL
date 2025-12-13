@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Thumbnail click handler
+    // Thumbnail click handler
     window.showSlide = function (index) {
         myCarousel.to(index);
         updateActiveThumb(index);

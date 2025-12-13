@@ -15,14 +15,17 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+// Flash Data
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$old = $_SESSION['_flash']['old'] ?? [];
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 // Check if owner has an active package with available room slots
 $packageCheck = check_owner_package_quota($user['user_id'], 'room');
 if (!$packageCheck['success']) {
-    // Redirect to package purchase page
     $_SESSION['package_required_message'] = $packageCheck['message'];
     header('Location: ' . $packageCheck['redirect_url']);
     exit;
@@ -53,8 +56,10 @@ $meal_types = $stmt->fetchAll();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentErrors = [];
+
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        die('Invalid CSRF Token');
+         die('Invalid CSRF Token');
     }
 
     // Inputs
@@ -81,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validation
     if (!$title || !$price || !$typeId || !$address) {
-        $errors[] = 'Title, Price, Room Type, and Address are required.';
+        $currentErrors[] = 'Title, Price, Room Type, and Address are required.';
     }
 
     // Image Upload - Primary and Gallery
@@ -92,12 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validate image count (min 3, max 15)
         if ($imageCount < 3) {
-            $errors[] = 'Please upload at least 3 images.';
+            $currentErrors[] = 'Please upload at least 3 images.';
         } elseif ($imageCount > 15) {
-            $errors[] = 'Maximum 15 images allowed.';
+            $currentErrors[] = 'Maximum 15 images allowed.';
         }
         
-        if (!$errors) {
+        if (!$currentErrors) {
             $uploadDir = __DIR__ . '/../../../../public/uploads/rooms/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -111,12 +116,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $fileType = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                     
                     if (!in_array($fileType, $validTypes)) {
-                        $errors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only.";
+                        $currentErrors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only.";
                         break;
                     }
                     
                     if ($_FILES['room_images']['size'][$key] > 5 * 1024 * 1024) {
-                        $errors[] = "Image {$fileName} is too large (Max 5MB).";
+                        $currentErrors[] = "Image {$fileName} is too large (Max 5MB).";
                         break;
                     }
                     
@@ -126,17 +131,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (move_uploaded_file($tmpName, $destination)) {
                         $uploadedImages[] = 'public/uploads/rooms/' . $newFileName;
                     } else {
-                        $errors[] = 'Failed to upload image.';
+                        $currentErrors[] = 'Failed to upload image.';
                         break;
                     }
                 }
             }
         }
     } else {
-        $errors[] = 'At least 3 room images are required.';
+        $currentErrors[] = 'At least 3 room images are required.';
     }
 
-    if (!$errors) {
+    if (!$currentErrors) {
         try {
             $pdo->beginTransaction();
             $roomCode = 'ROOM-' . strtoupper(uniqid());
@@ -189,12 +194,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             decrement_package_quota($packageCheck['package_id'], 'room');
 
             $pdo->commit();
-            $success = "Room listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " room slot(s) remaining.";
+            $_SESSION['_flash']['success'] = "Room listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " room slot(s) remaining.";
+             unset($_SESSION['_flash']['old']);
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = "Database Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Database Error: " . $e->getMessage();
+            $_SESSION['_flash']['old'] = $_POST;
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentErrors;
+        $_SESSION['_flash']['old'] = $_POST;
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 <!DOCTYPE html>

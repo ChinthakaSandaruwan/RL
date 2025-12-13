@@ -9,20 +9,21 @@ if (!$user || $user['role_id'] != 1) {
     exit;
 }
 
-$chatMessage = null;
-$chatStatus = 'info';
+$chatMessage = $_SESSION['_flash']['success'] ?? $_SESSION['_flash']['warning'] ?? null;
+$chatStatus = isset($_SESSION['_flash']['success']) ? 'success' : 'warning';
+unset($_SESSION['_flash']['success'], $_SESSION['_flash']['warning']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_chat'])) {
     $action = $_POST['toggle_chat'];
     if ($action === 'enable') {
         set_chat_enabled(true);
-        $chatMessage = 'Live chat has been enabled for the site.';
-        $chatStatus = 'success';
+        $_SESSION['_flash']['success'] = 'Live chat has been enabled for the site.';
     } elseif ($action === 'disable') {
         set_chat_enabled(false);
-        $chatMessage = 'Live chat has been disabled for all users.';
-        $chatStatus = 'warning';
+        $_SESSION['_flash']['warning'] = 'Live chat has been disabled for all users.';
     }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 $chatEnabled = is_chat_enabled();

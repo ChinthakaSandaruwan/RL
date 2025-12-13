@@ -17,7 +17,8 @@ header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
 $errors = [];
-$success = null;
+$success = $_SESSION['_flash']['success'] ?? null;
+unset($_SESSION['_flash']);
 $csrf_token = generate_csrf_token();
 
 // Handle Approve/Reject Actions
@@ -44,8 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             notify_owner_property_status($propInfo['owner_id'], $propInfo['title'], 'approved');
         }
 
+        $_SESSION['_flash']['success'] = 'Property approved successfully!';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/property/approval/property_approval.php?success=approved'));
+        header('Location: ' . app_url('admin/property/approval/property_approval.php'));
         exit;
     } elseif ($action === 'reject') {
         if ($propInfo) {
@@ -58,18 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("DELETE FROM property WHERE property_id = ?");
         $stmt->execute([$propertyId]);
 
+        $_SESSION['_flash']['success'] = 'Property rejected.';
         // Redirect to prevent form resubmission
-        header('Location: ' . app_url('admin/property/approval/property_approval.php?success=rejected'));
+        header('Location: ' . app_url('admin/property/approval/property_approval.php'));
         exit;
-    }
-}
-
-// Handle success messages from GET parameters
-if (isset($_GET['success'])) {
-    if ($_GET['success'] === 'approved') {
-        $success = 'Property approved successfully!';
-    } elseif ($_GET['success'] === 'rejected') {
-        $success = 'Property rejected.';
     }
 }
 

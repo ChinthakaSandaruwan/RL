@@ -10,7 +10,8 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 
 $pdo = get_pdo();
 $message = '';
-$error = '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 $targetUser = null;
 
 if (isset($_GET['id'])) {
@@ -21,8 +22,9 @@ if (isset($_GET['id'])) {
 }
 
 if (!$targetUser) {
-    header('Location: ../read/read_customer.php?error=Customer not found');
-    exit;
+     $_SESSION['_flash']['error'] = 'Customer not found';
+     header('Location: ../read/read_customer.php');
+     exit;
 }
 
 // Fetch Statuses
@@ -31,7 +33,9 @@ $statuses = $pdo->query("SELECT * FROM user_status")->fetchAll();
 // Handle Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = "Invalid CSRF Token";
+         $_SESSION['_flash']['error'] = "Invalid CSRF Token";
+         header("Location: " . $_SERVER['REQUEST_URI']);
+         exit;
     } else {
         $newStatus = intval($_POST['status_id']);
         try {
@@ -40,10 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log status change? (Optional, but good practice)
             
-            header('Location: ../read/read_customer.php?success=Status updated successfully');
+            $_SESSION['_flash']['success'] = 'Status updated successfully';
+            header('Location: ../read/read_customer.php');
             exit;
         } catch (Exception $e) {
-            $error = "Update failed: " . $e->getMessage();
+             $_SESSION['_flash']['error'] = "Update failed: " . $e->getMessage();
+             header("Location: " . $_SERVER['REQUEST_URI']);
+             exit;
         }
     }
 }

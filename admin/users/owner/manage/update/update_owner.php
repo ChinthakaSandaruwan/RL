@@ -9,8 +9,9 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 }
 
 $pdo = get_pdo();
-$errors = [];
-$success = '';
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? '';
+unset($_SESSION['_flash']);
 $csrf_token = generate_csrf_token();
 $targetUser = null;
 
@@ -22,13 +23,16 @@ if (isset($_GET['id'])) {
 }
 
 if (!$targetUser) {
-    header('Location: ../read/read_owner.php?error=Owner not found');
+    $_SESSION['_flash']['error'] = 'Owner not found';
+    header('Location: ../read/read_owner.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentActionErrors = [];
+
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $errors[] = 'Invalid CSRF Token';
+        $currentActionErrors[] = 'Invalid CSRF Token';
     }
 
     $name = trim($_POST['name'] ?? '');
@@ -36,28 +40,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mobile = trim($_POST['mobile'] ?? '');
     $nic = trim($_POST['nic'] ?? '');
     
-    if (!$name || !$email || !$mobile) $errors[] = 'Name, Email and Mobile are required.';
+    if (!$name || !$email || !$mobile) $currentActionErrors[] = 'Name, Email and Mobile are required.';
 
     // Check unique constraints (excluding self)
-    if (empty($errors)) {
+    if (empty($currentActionErrors)) {
         $stmt = $pdo->prepare("SELECT user_id FROM user WHERE email = ? AND user_id != ?");
         $stmt->execute([$email, $targetUser['user_id']]);
-        if ($stmt->fetch()) $errors[] = 'Email is already taken by another user.';
+        if ($stmt->fetch()) $currentActionErrors[] = 'Email is already taken by another user.';
 
          $stmt = $pdo->prepare("SELECT user_id FROM user WHERE mobile_number = ? AND user_id != ?");
         $stmt->execute([$mobile, $targetUser['user_id']]);
-        if ($stmt->fetch()) $errors[] = 'Mobile number is already taken by another user.';
+        if ($stmt->fetch()) $currentActionErrors[] = 'Mobile number is already taken by another user.';
         
         if($nic) {
             $stmt = $pdo->prepare("SELECT user_id FROM user WHERE nic = ? AND user_id != ?");
             $stmt->execute([$nic, $targetUser['user_id']]);
-            if ($stmt->fetch()) $errors[] = 'NIC is already taken by another user.';
+            if ($stmt->fetch()) $currentActionErrors[] = 'NIC is already taken by another user.';
         }
     }
 
     // Image Upload
     $profileImagePath = $targetUser['profile_image'];
-    if (empty($errors) && !empty($_FILES['profile_image']['name'])) {
+    if (empty($currentActionErrors) && !empty($_FILES['profile_image']['name'])) {
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
         $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, $allowed)) {
@@ -67,26 +71,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadDir . $newName)) {
                 $profileImagePath = 'public/uploads/users/' . $newName;
             } else {
-                $errors[] = 'Failed to upload image.';
+                $currentActionErrors[] = 'Failed to upload image.';
             }
         } else {
-            $errors[] = 'Invalid file type.';
+            $currentActionErrors[] = 'Invalid file type.';
         }
     }
 
-    if (empty($errors)) {
+    if (empty($currentActionErrors)) {
         try {
             $stmt = $pdo->prepare("UPDATE user SET name = ?, email = ?, mobile_number = ?, nic = ?, profile_image = ? WHERE user_id = ?");
             $stmt->execute([$name, $email, $mobile, $nic, $profileImagePath, $targetUser['user_id']]);
-            $success = "Owner updated successfully!";
-            // Refresh Data
-            $stmt = $pdo->prepare("SELECT * FROM user WHERE user_id = ?");
-            $stmt->execute([$targetUser['user_id']]);
-            $targetUser = $stmt->fetch();
+            $_SESSION['_flash']['success'] = "Owner updated successfully!";
         } catch (Exception $e) {
-            $errors[] = "System Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "System Error: " . $e->getMessage();
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentActionErrors;
     }
+    
+    // Redirect to self (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 <!DOCTYPE html>

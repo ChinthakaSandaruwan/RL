@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 2) { // Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("INSERT INTO vehicle_brand (brand_name) VALUES (?)");
                 $stmt->execute([$name]);
-                $message = "Brand added successfully!";
+                $_SESSION['_flash']['success'] = "Brand added successfully!";
             } catch (PDOException $e) {
-                $error = "Error adding brand: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error adding brand: " . $e->getMessage();
             }
         } else {
-            $error = "Brand name is required.";
+            $_SESSION['_flash']['error'] = "Brand name is required.";
         }
     } elseif ($action === 'update') {
         $id = intval($_POST['brand_id']);
@@ -36,12 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("UPDATE vehicle_brand SET brand_name = ? WHERE brand_id = ?");
                 $stmt->execute([$name, $id]);
-                $message = "Brand updated successfully!";
+                $_SESSION['_flash']['success'] = "Brand updated successfully!";
             } catch (PDOException $e) {
-                $error = "Error updating brand: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error updating brand: " . $e->getMessage();
             }
         } else {
-            $error = "Invalid data for update.";
+            $_SESSION['_flash']['error'] = "Invalid data for update.";
         }
     } elseif ($action === 'delete') {
         $id = intval($_POST['brand_id']);
@@ -49,12 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("DELETE FROM vehicle_brand WHERE brand_id = ?");
                 $stmt->execute([$id]);
-                $message = "Brand deleted successfully!";
+                $_SESSION['_flash']['success'] = "Brand deleted successfully!";
             } catch (PDOException $e) {
-                $error = "Cannot delete brand because it is assigned to vehicles or models.";
+                $_SESSION['_flash']['error'] = "Cannot delete brand because it is assigned to vehicles or models.";
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Brands

@@ -9,7 +9,8 @@ if (!$user || !in_array($user['role_id'], [1, 2])) {
 }
 
 $pdo = get_pdo();
-$error = '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 $targetUser = null;
 
 if (isset($_GET['id'])) {
@@ -20,7 +21,8 @@ if (isset($_GET['id'])) {
 }
 
 if (!$targetUser) {
-    header('Location: ../read/read_owner.php?error=Owner not found');
+    $_SESSION['_flash']['error'] = 'Owner not found';
+    header('Location: ../read/read_owner.php');
     exit;
 }
 
@@ -28,16 +30,22 @@ $statuses = $pdo->query("SELECT * FROM user_status")->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = "Invalid CSRF Token";
+         $_SESSION['_flash']['error'] = "Invalid CSRF Token";
+         header("Location: " . $_SERVER['REQUEST_URI']);
+         exit;
     } else {
         $newStatus = intval($_POST['status_id']);
         try {
             $stmt = $pdo->prepare("UPDATE user SET status_id = ? WHERE user_id = ?");
             $stmt->execute([$newStatus, $targetUser['user_id']]);
-            header('Location: ../read/read_owner.php?success=Status updated successfully');
+            
+            $_SESSION['_flash']['success'] = 'Status updated successfully';
+            header('Location: ../read/read_owner.php');
             exit;
         } catch (Exception $e) {
-            $error = "Update failed: " . $e->getMessage();
+             $_SESSION['_flash']['error'] = "Update failed: " . $e->getMessage();
+             header("Location: " . $_SERVER['REQUEST_URI']);
+             exit;
         }
     }
 }

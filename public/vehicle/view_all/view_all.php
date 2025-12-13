@@ -304,8 +304,13 @@ $totalVehicles = count($vehicles);
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-auto">
                             <div>
-                                <span class="h4 mb-0 fw-bold" style="color: var(--fern);">LKR <?= number_format($vehicle['price_per_day'], 2) ?></span>
-                                <small class="text-muted">/day</small>
+                                <?php if ($vehicle['pricing_type_id'] == 2): ?>
+                                    <span class="h4 mb-0 fw-bold" style="color: var(--fern);">LKR <?= number_format($vehicle['price_per_km'], 2) ?></span>
+                                    <small class="text-muted">/km</small>
+                                <?php else: ?>
+                                    <span class="h4 mb-0 fw-bold" style="color: var(--fern);">LKR <?= number_format($vehicle['price_per_day'], 2) ?></span>
+                                    <small class="text-muted">/day</small>
+                                <?php endif; ?>
                             </div>
                             <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id=' . $vehicle['vehicle_id']) ?>" 
                                class="btn btn-sm" style="background-color: var(--fern); border-color: var(--fern); color: white;">

@@ -62,11 +62,9 @@ $statusMap = [
 
     <!-- Flash Messages are now handled via SweetAlert in JS below -->
     <?php 
-    $msgSuccess = $_SESSION['success'] ?? null;
-    $msgError = $_SESSION['error'] ?? null;
-    // Clear session messages after capturing
-    if ($msgSuccess) unset($_SESSION['success']);
-    if ($msgError) unset($_SESSION['error']);
+    $msgSuccess = $_SESSION['_flash']['success'] ?? $_SESSION['success'] ?? null;
+    $msgError = $_SESSION['_flash']['error'] ?? $_SESSION['error'] ?? null;
+    unset($_SESSION['_flash'], $_SESSION['success'], $_SESSION['error']);
     ?>
 
     <div class="card shadow-sm border-0">
@@ -77,7 +75,7 @@ $statusMap = [
                         <tr>
                             <th class="ps-4 py-3">Vehicle</th>
                             <th>Type</th>
-                            <th>Price / Day</th>
+                            <th>Price</th>
                             <th>Location</th>
                             <th>Status</th>
                             <th>Created</th>
@@ -106,7 +104,13 @@ $statusMap = [
                                         </div>
                                     </td>
                                     <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($vehicle['type_name'] ?? 'N/A') ?></span></td>
-                                    <td class="fw-medium"><?= number_format($vehicle['price_per_day'], 2) ?></td>
+                                    <td class="fw-medium">
+                                        <?php if ($vehicle['pricing_type_id'] == 2): ?>
+                                            <?= number_format($vehicle['price_per_km'], 2) ?> <small class="text-muted">/km</small>
+                                        <?php else: ?>
+                                            <?= number_format($vehicle['price_per_day'], 2) ?> <small class="text-muted">/day</small>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= htmlspecialchars($vehicle['city_name'] ?? 'Unknown') ?></td>
                                     <td>
                                         <span class="badge <?= $statusMap[$vehicle['status_id']]['class'] ?? 'bg-secondary' ?> rounded-pill px-3">

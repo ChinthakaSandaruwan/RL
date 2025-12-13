@@ -186,6 +186,7 @@ $totalItems = count($propertyItems) + count($roomItems) + count($vehicleItems);
     <?php endif; ?>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= app_url('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') ?>"></script>
 <script src="wishlist.js"></script>
 </body>

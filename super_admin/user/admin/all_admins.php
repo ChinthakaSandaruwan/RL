@@ -9,8 +9,9 @@ if (!$user || $user['role_id'] != 1) { // Super Admin check
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']['success'], $_SESSION['_flash']['error']);
 
 // Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -36,12 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile_number, password_hash, role_id, status_id) VALUES (?, ?, ?, ?, 2, ?)");
                 $stmt->execute([$name, $email, $mobile, $passwordHash, $status_id]);
-                $message = "Admin added successfully!";
+                $_SESSION['_flash']['success'] = "Admin added successfully!";
             } catch (Exception $e) {
-                $error = "Error adding admin: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error adding admin: " . $e->getMessage();
             }
         } else {
-            $error = "All fields are required.";
+             $_SESSION['_flash']['error'] = "All fields are required.";
         }
     } elseif ($action === 'update') {
         $id = intval($_POST['user_id']);
@@ -61,12 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stmt = $pdo->prepare("UPDATE user SET name = ?, email = ?, mobile_number = ?, status_id = ? WHERE user_id = ? AND role_id = 2");
                 $stmt->execute([$name, $email, $mobile, $status_id, $id]);
-                $message = "Admin updated successfully!";
+                $_SESSION['_flash']['success'] = "Admin updated successfully!";
             } catch (Exception $e) {
-                $error = "Error updating admin: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error updating admin: " . $e->getMessage();
             }
         } else {
-            $error = "Invalid data.";
+            $_SESSION['_flash']['error'] = "Invalid data.";
         }
     } elseif ($action === 'delete') {
         $id = intval($_POST['user_id']);
@@ -74,12 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare("DELETE FROM user WHERE user_id = ? AND role_id = 2");
                 $stmt->execute([$id]);
-                $message = "Admin deleted successfully!";
+                $_SESSION['_flash']['success'] = "Admin deleted successfully!";
             } catch (Exception $e) {
-                $error = "Error deleting admin: " . $e->getMessage();
+                $_SESSION['_flash']['error'] = "Error deleting admin: " . $e->getMessage();
             }
         }
     }
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 // Fetch Admins

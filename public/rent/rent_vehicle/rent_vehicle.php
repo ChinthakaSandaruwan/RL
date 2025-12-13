@@ -174,18 +174,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <img src="<?= $imgUrl ?>" class="card-img-top" alt="Vehicle" style="height: 200px; object-fit: cover;">
                         <div class="card-body">
                             <h5 class="card-title fw-bold text-hunter-green"><?= htmlspecialchars($vehicle['brand_name'] . ' ' . $vehicle['model_name']) ?></h5>
-                            <p class="text-muted small mb-3"><?= htmlspecialchars($vehicle['title']) ?></p>
-                            
                             <ul class="list-group list-group-flush small">
                                 <li class="list-group-item d-flex justify-content-between px-0 bg-transparent">
-                                    <span>Rate (Per Day)</span>
-                                    <span class="fw-bold">LKR <?= number_format($vehicle['price_per_day'], 2) ?></span>
+                                    <?php if ($vehicle['pricing_type_id'] == 2): ?>
+                                        <span>Rate (Per KM)</span>
+                                        <span class="fw-bold">LKR <?= number_format($vehicle['price_per_km'], 2) ?></span>
+                                    <?php else: ?>
+                                        <span>Rate (Per Day)</span>
+                                        <span class="fw-bold">LKR <?= number_format($vehicle['price_per_day'], 2) ?></span>
+                                    <?php endif; ?>
                                 </li>
                                 <?php if ($vehicle['is_driver_available']): ?>
                                 <li class="list-group-item d-flex justify-content-between px-0 bg-transparent">
                                     <span>Driver Fee (Per Day)</span>
                                     <span class="fw-bold">LKR <?= number_format($vehicle['driver_cost_per_day'], 2) ?></span>
                                 </li>
+                                <?php else: ?>
+                                    <li class="list-group-item px-0 bg-transparent">
+                                         <span class="badge bg-danger bg-opacity-10 text-danger w-100 py-2">
+                                            <i class="bi bi-person-x-fill me-1"></i> No Driver Available
+                                         </span>
+                                    </li>
                                 <?php endif; ?>
                             </ul>
                         </div>

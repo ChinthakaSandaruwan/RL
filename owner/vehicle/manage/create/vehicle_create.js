@@ -120,8 +120,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Driver details toggle
     const driverCheck = document.getElementById('driverCheck');
     if (driverCheck) {
+        const costInput = document.getElementById('driverCost');
+
+        // Initial check
+        costInput.disabled = !driverCheck.checked;
+
         driverCheck.addEventListener('change', function () {
-            const costInput = document.getElementById('driverCost');
             costInput.disabled = !this.checked;
             if (!this.checked) costInput.value = '';
         });
@@ -193,26 +197,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputKm = document.getElementById('inputKmPrice');
 
     if (radioDaily && radioKm) {
-        function updatePricingUI() {
+        function updatePricingUI(isInit = false) {
             if (radioDaily.checked) {
                 containerDaily.style.display = 'block';
                 containerKm.style.display = 'none';
                 inputDaily.required = true;
                 inputKm.required = false;
-                inputKm.value = ''; // Clear value
+                if (!isInit) inputKm.value = ''; // Clear only on change
             } else {
                 containerDaily.style.display = 'none';
                 containerKm.style.display = 'block';
                 inputDaily.required = false;
                 inputKm.required = true;
-                inputDaily.value = ''; // Clear value
+                if (!isInit) inputDaily.value = ''; // Clear only on change
             }
         }
 
-        radioDaily.addEventListener('change', updatePricingUI);
-        radioKm.addEventListener('change', updatePricingUI);
+        radioDaily.addEventListener('change', () => updatePricingUI(false));
+        radioKm.addEventListener('change', () => updatePricingUI(false));
 
         // Initialize
-        updatePricingUI();
+        updatePricingUI(true);
     }
 });

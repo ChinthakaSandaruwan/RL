@@ -10,8 +10,9 @@ if (!$user || $user['role_id'] != 1) {
 }
 
 $pdo = get_pdo();
-$message = '';
-$error = '';
+$message = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']['success'], $_SESSION['_flash']['error']);
 $searchQuery = $_GET['search'] ?? '';
 
 
@@ -22,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'], $_POST['ne
     
     // Prevent changing own role or other Super Admins
     if ($userId == $user['user_id']) {
-        $error = "You cannot change your own role.";
+        $_SESSION['_flash']['error'] = "You cannot change your own role.";
     } else {
         // Check if target user is super admin
         $stmt = $pdo->prepare("SELECT role_id FROM user WHERE user_id = ?");
@@ -30,16 +31,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'], $_POST['ne
         $targetUserRole = $stmt->fetchColumn();
         
         if ($targetUserRole == 1) {
-            $error = "You cannot change the role of another Super Admin.";
+            $_SESSION['_flash']['error'] = "You cannot change the role of another Super Admin.";
         } else {
             $stmt = $pdo->prepare("UPDATE user SET role_id = ? WHERE user_id = ?");
             if ($stmt->execute([$newRole, $userId])) {
-                $message = "User role updated successfully.";
+                $_SESSION['_flash']['success'] = "User role updated successfully.";
             } else {
-                $error = "Failed to update user role.";
+                $_SESSION['_flash']['error'] = "Failed to update user role.";
             }
         }
     }
+    // Redirect to preserve search if possible, or just self. 
+    // To preserve search, we need to grab the referer or current URL query.
+    // $_SERVER['REQUEST_URI'] includes query string.
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Users based on search

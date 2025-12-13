@@ -139,9 +139,16 @@ if (empty($recProperties) && empty($recRooms) && empty($recVehicles)) {
                             <div class="recommendation-features">
                                 <span class="recommendation-feature"><i class="bi bi-speedometer2"></i> <?= $item['year'] ?></span>
                                 <span class="recommendation-feature"><i class="bi bi-fuel-pump"></i> <?= $item['transmission_type_id'] == 1 ? 'Auto' : 'Manual' ?></span>
+                                <?php if($item['is_driver_available']): ?>
+                                    <span class="recommendation-feature text-info"><i class="bi bi-person-check"></i> Driver</span>
+                                <?php endif; ?>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="recommendation-price text-warning text-dark">Rs. <?= number_format($item['price_per_day']) ?>/day</span>
+                                <?php if ($item['pricing_type_id'] == 2): ?>
+                                    <span class="recommendation-price text-warning text-dark">Rs. <?= number_format($item['price_per_km']) ?>/km</span>
+                                <?php else: ?>
+                                    <span class="recommendation-price text-warning text-dark">Rs. <?= number_format($item['price_per_day']) ?>/day</span>
+                                <?php endif; ?>
                                 <a href="<?= app_url('public/vehicle/view/vehicle_view.php?id=' . $item['vehicle_id']) ?>" class="btn btn-outline-warning btn-sm stretched-link">View</a>
                             </div>
                         </div>

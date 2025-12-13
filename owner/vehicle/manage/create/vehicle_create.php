@@ -15,14 +15,17 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 $pdo = get_pdo();
-$errors = [];
-$success = null;
+// Flash Data
+$errors = $_SESSION['_flash']['errors'] ?? [];
+$success = $_SESSION['_flash']['success'] ?? null;
+$old = $_SESSION['_flash']['old'] ?? [];
+unset($_SESSION['_flash']);
+
 $csrf_token = generate_csrf_token();
 
 // Check if owner has an active package with available vehicle slots
 $packageCheck = check_owner_package_quota($user['user_id'], 'vehicle');
 if (!$packageCheck['success']) {
-    // Redirect to package purchase page
     $_SESSION['package_required_message'] = $packageCheck['message'];
     header('Location: ' . $packageCheck['redirect_url']);
     exit;
@@ -69,15 +72,17 @@ $cities = $stmt->fetchAll();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $currentErrors = [];
+
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        die('Invalid CSRF Token');
+         die('Invalid CSRF Token');
     }
 
     // Inputs
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
     // Vehicle Details
-    $typeId = intval($_POST['type_id'] ?? 0); // Added missing type_id
+    $typeId = intval($_POST['type_id'] ?? 0); 
     $modelId = intval($_POST['model_id'] ?? 0);
     
     // Handle Color Input (Text -> ID)
@@ -121,22 +126,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $districtId = intval($_POST['district_id'] ?? 0);
     $cityId = intval($_POST['city_id'] ?? 0);
 
-
-
     // Validation
-// Features
-    // Removed unused variables as per request $ac, $gps etc.
     if (!$title || !$typeId || !$modelId || !$colorId || !$address) {
-        $errors[] = 'Title, Type, Model, Color, and Address are required.';
+        $currentErrors[] = 'Title, Type, Model, Color, and Address are required.';
     }
     if ($pricingTypeId == 1 && $pricePerDay <= 0) {
-        $errors[] = 'Daily Price is required.';
+        $currentErrors[] = 'Daily Price is required.';
     }
     if ($pricingTypeId == 2 && $pricePerKm <= 0) {
-        $errors[] = 'Price Per KM is required.';
+        $currentErrors[] = 'Price Per KM is required.';
     }
     if ($year < 1900 || $year > 2100) {
-        $errors[] = 'Please enter a valid vehicle year.';
+        $currentErrors[] = 'Please enter a valid vehicle year.';
     }
 
     // Image Upload - Primary and Gallery
@@ -147,12 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validate image count (min 3, max 15)
         if ($imageCount < 3) {
-            $errors[] = 'Please upload at least 3 images.';
+            $currentErrors[] = 'Please upload at least 3 images.';
         } elseif ($imageCount > 15) {
-            $errors[] = 'Maximum 15 images allowed.';
+            $currentErrors[] = 'Maximum 15 images allowed.';
         }
         
-        if (!$errors) {
+        if (!$currentErrors) {
             $uploadDir = __DIR__ . '/../../../../public/uploads/vehicles/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -171,12 +172,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mimeType = $finfo->file($tmpName);
 
                     if (!in_array($fileType, $validTypes) || !in_array($mimeType, $allowedMimes)) {
-                        $errors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only. (Detected: $mimeType)";
+                        $currentErrors[] = "Invalid image type for {$fileName}. JPG, PNG, WEBP only. (Detected: $mimeType)";
                         break;
                     }
                     
                     if ($_FILES['vehicle_images']['size'][$key] > 5 * 1024 * 1024) {
-                        $errors[] = "Image {$fileName} is too large (Max 5MB).";
+                        $currentErrors[] = "Image {$fileName} is too large (Max 5MB).";
                         break;
                     }
                     
@@ -186,17 +187,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (move_uploaded_file($tmpName, $destination)) {
                         $uploadedImages[] = 'public/uploads/vehicles/' . $newFileName;
                     } else {
-                        $errors[] = 'Failed to upload image.';
+                        $currentErrors[] = 'Failed to upload image.';
                         break;
                     }
                 }
             }
         }
     } else {
-        $errors[] = 'At least 3 vehicle images are required.';
+        $currentErrors[] = 'At least 3 vehicle images are required.';
     }
 
-    if (!$errors) {
+    if (!$currentErrors) {
         $pdo->beginTransaction();
         try {
             $vehicleCode = 'VEH-' . strtoupper(uniqid());
@@ -235,12 +236,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             decrement_package_quota($packageCheck['package_id'], 'vehicle');
 
             $pdo->commit();
-            $success = "Vehicle listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " vehicle slot(s) remaining.";
+            $_SESSION['_flash']['success'] = "Vehicle listed successfully! It is pending approval. You have " . ($packageCheck['remaining'] - 1) . " vehicle slot(s) remaining.";
+             unset($_SESSION['_flash']['old']);
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = "Database Error: " . $e->getMessage();
+            $_SESSION['_flash']['errors'][] = "Database Error: " . $e->getMessage();
+            $_SESSION['_flash']['old'] = $_POST;
         }
+    } else {
+        $_SESSION['_flash']['errors'] = $currentErrors;
+         $_SESSION['_flash']['old'] = $_POST;
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -328,15 +338,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-4">
                             <div class="col-md-12">
                                 <label class="form-label">Vehicle Title <span class="text-danger">*</span></label>
-                                <input type="text" name="title" class="form-control" placeholder="e.g. 2020 Toyota Prius" required>
+                                <input type="text" name="title" class="form-control" placeholder="e.g. 2020 Toyota Prius" required value="<?= htmlspecialchars($old['title'] ?? '') ?>">
                             </div>
                             
                             <div class="col-md-6">
                                 <label class="form-label">Vehicle Type <span class="text-danger">*</span></label>
                                 <select name="type_id" class="form-select" required>
-                                    <option value="" selected disabled>Select Type</option>
+                                    <option value="" disabled <?= !isset($old['type_id']) ? 'selected' : '' ?>>Select Type</option>
                                     <?php foreach ($vehicleTypes as $type): ?>
-                                        <option value="<?= $type['type_id'] ?>"><?= htmlspecialchars($type['type_name']) ?></option>
+                                        <option value="<?= $type['type_id'] ?>" <?= (isset($old['type_id']) && $old['type_id'] == $type['type_id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($type['type_name']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -344,10 +356,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-6">
                                 <label class="form-label">Pricing Type <span class="text-danger">*</span></label>
                                 <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption1" value="1" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption1" value="1" autocomplete="off" <?= (!isset($old['pricing_type_id']) || $old['pricing_type_id'] == 1) ? 'checked' : '' ?>>
                                     <label class="btn btn-outline-success" for="priceOption1">Daily (Per Day)</label>
 
-                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption2" value="2" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceOption2" value="2" autocomplete="off" <?= (isset($old['pricing_type_id']) && $old['pricing_type_id'] == 2) ? 'checked' : '' ?>>
                                     <label class="btn btn-outline-success" for="priceOption2">Price Per KM</label>
                                 </div>
                             </div>
@@ -355,17 +367,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-6">
                                 <div id="dailyPriceContainer">
                                     <label class="form-label">Daily Price (LKR) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" name="price_per_day" class="form-control" id="inputDailyPrice">
+                                    <input type="number" step="0.01" name="price_per_day" class="form-control" id="inputDailyPrice" value="<?= htmlspecialchars($old['price_per_day'] ?? '') ?>">
                                 </div>
                                 <div id="kmPriceContainer" style="display:none;">
                                     <label class="form-label">Price Per KM (LKR) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" name="price_per_km" class="form-control" id="inputKmPrice">
+                                    <input type="number" step="0.01" name="price_per_km" class="form-control" id="inputKmPrice" value="<?= htmlspecialchars($old['price_per_km'] ?? '') ?>">
                                 </div>
                             </div>
                             
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea name="description" class="form-control" rows="4" placeholder="Describe the vehicle..."></textarea>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Describe the vehicle..."><?= htmlspecialchars($old['description'] ?? '') ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -381,51 +393,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-6">
                                 <label class="form-label">Brand (Make) <span class="text-danger">*</span></label>
                                 <select name="brand_id" id="brand" class="form-select" required>
-                                    <option value="" selected disabled>Select Brand</option>
+                                    <option value="" disabled <?= !isset($old['brand_id']) ? 'selected' : '' ?>>Select Brand</option>
                                     <?php foreach ($brands as $brand): ?>
-                                        <option value="<?= $brand['brand_id'] ?>"><?= htmlspecialchars($brand['brand_name']) ?></option>
+                                        <option value="<?= $brand['brand_id'] ?>" <?= (isset($old['brand_id']) && $old['brand_id'] == $brand['brand_id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($brand['brand_name']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Model <span class="text-danger">*</span></label>
-                                <select name="model_id" id="model" class="form-select" required disabled>
+                                <select name="model_id" id="model" class="form-select" required <?= isset($old['model_id']) ? '' : 'disabled' ?>>
                                     <option value="" selected>Select Brand first</option>
+                                    <?php 
+                                    // Pre-populate if brand was selected
+                                    if (isset($old['model_id'], $old['brand_id'])) {
+                                        foreach ($models as $m) {
+                                            if ($m['brand_id'] == $old['brand_id']) {
+                                                $selected = ($m['model_id'] == $old['model_id']) ? 'selected' : '';
+                                                echo "<option value='{$m['model_id']}' $selected>" . htmlspecialchars($m['model_name']) . "</option>";
+                                            }
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Year <span class="text-danger">*</span></label>
-                                <input type="number" name="year" class="form-control" min="1900" max="2099" required>
+                                <input type="number" name="year" class="form-control" min="1900" max="2099" required value="<?= htmlspecialchars($old['year'] ?? '') ?>">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Fuel Type <span class="text-danger">*</span></label>
                                 <select name="fuel_type_id" class="form-select" required>
-                                    <option value="" selected disabled>Select Fuel Type</option>
+                                    <option value="" disabled <?= !isset($old['fuel_type_id']) ? 'selected' : '' ?>>Select Fuel Type</option>
                                     <?php foreach ($fuelTypes as $type): ?>
-                                        <option value="<?= $type['type_id'] ?>"><?= htmlspecialchars($type['type_name']) ?></option>
+                                        <option value="<?= $type['type_id'] ?>" <?= (isset($old['fuel_type_id']) && $old['fuel_type_id'] == $type['type_id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($type['type_name']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Transmission <span class="text-danger">*</span></label>
                                 <select name="transmission_type_id" class="form-select" required>
-                                    <option value="" selected disabled>Select Transmission</option>
+                                    <option value="" disabled <?= !isset($old['transmission_type_id']) ? 'selected' : '' ?>>Select Transmission</option>
                                     <?php foreach ($transmissionTypes as $type): ?>
-                                        <option value="<?= $type['type_id'] ?>"><?= htmlspecialchars($type['type_name']) ?></option>
+                                        <option value="<?= $type['type_id'] ?>" <?= (isset($old['transmission_type_id']) && $old['transmission_type_id'] == $type['type_id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($type['type_name']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Number of Seats</label>
-                                <input type="number" name="seats" class="form-control" min="1">
+                                <input type="number" name="seats" class="form-control" min="1" value="<?= htmlspecialchars($old['seats'] ?? '') ?>">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">License Plate</label>
-                                <input type="text" name="license_plate" class="form-control" placeholder="ABC-1234">
+                                <input type="text" name="license_plate" class="form-control" placeholder="ABC-1234" value="<?= htmlspecialchars($old['license_plate'] ?? '') ?>">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Color <span class="text-danger">*</span></label>
-                                <input type="text" name="color" class="form-control" placeholder="e.g. Red, Metallic Blue" required list="colorList">
+                                <input type="text" name="color" class="form-control" placeholder="e.g. Red, Metallic Blue" required list="colorList" value="<?= htmlspecialchars($old['color'] ?? '') ?>">
                                 <datalist id="colorList">
                                     <?php foreach ($colors as $color): ?>
                                         <option value="<?= htmlspecialchars($color['color_name']) ?>">
@@ -438,13 +467,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-check feature-checkbox-card">
-                                    <input class="form-check-input" type="checkbox" name="is_driver_available" id="driverCheck">
+                                    <input class="form-check-input" type="checkbox" name="is_driver_available" id="driverCheck" <?= isset($old['is_driver_available']) ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="driverCheck">Driver Available</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Driver Cost Per Day (LKR)</label>
-                                <input type="number" step="0.01" name="driver_cost_per_day" class="form-control" id="driverCost" disabled>
+                                <input type="number" step="0.01" name="driver_cost_per_day" class="form-control" id="driverCost" disabled value="<?= htmlspecialchars($old['driver_cost_per_day'] ?? '') ?>">
                             </div>
 
                         </div>
@@ -461,40 +490,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-4">
                                 <label class="form-label">Province <span class="text-danger">*</span></label>
                                 <select name="province_id" id="province" class="form-select" required>
-                                    <option value="" selected disabled>Select Province</option>
+                                    <option value="" disabled <?= !isset($old['province_id']) ? 'selected' : '' ?>>Select Province</option>
                                     <?php foreach ($provinces as $province): ?>
-                                        <option value="<?= $province['id'] ?>"><?= htmlspecialchars($province['name_en']) ?></option>
+                                        <option value="<?= $province['id'] ?>" <?= (isset($old['province_id']) && $old['province_id'] == $province['id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($province['name_en']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">District <span class="text-danger">*</span></label>
-                                <select name="district_id" id="district" class="form-select" required disabled>
+                                <select name="district_id" id="district" class="form-select" required <?= isset($old['district_id']) ? '' : 'disabled' ?>>
                                     <option value="" selected>Select Province first</option>
+                                    <?php 
+                                    if (isset($old['district_id'], $old['province_id'])) {
+                                        foreach ($districts as $d) {
+                                            if ($d['province_id'] == $old['province_id']) {
+                                                $selected = ($d['id'] == $old['district_id']) ? 'selected' : '';
+                                                echo "<option value='{$d['id']}' $selected>" . htmlspecialchars($d['name_en']) . "</option>";
+                                            }
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">City <span class="text-danger">*</span></label>
-                                <select name="city_id" id="city" class="form-select" required disabled>
+                                <select name="city_id" id="city" class="form-select" required <?= isset($old['city_id']) ? '' : 'disabled' ?>>
                                     <option value="" selected>Select District first</option>
+                                    <?php 
+                                    if (isset($old['city_id'], $old['district_id'])) {
+                                        foreach ($cities as $c) {
+                                            if ($c['district_id'] == $old['district_id']) {
+                                                $selected = ($c['id'] == $old['city_id']) ? 'selected' : '';
+                                                echo "<option value='{$c['id']}' $selected>" . htmlspecialchars($c['name_en']) . "</option>";
+                                            }
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="mb-4">
                             <label class="form-label">Pickup Address <span class="text-danger">*</span></label>
-                            <input type="text" name="address" class="form-control" placeholder="Street Address" required>
+                            <input type="text" name="address" class="form-control" placeholder="Street Address" required value="<?= htmlspecialchars($old['address'] ?? '') ?>">
                         </div>
                         
                         <div class="mb-4">
                             <label class="form-label">Google Map Link</label>
-                            <input type="url" name="google_map_link" class="form-control" placeholder="https://maps.google.com/...">
+                            <input type="url" name="google_map_link" class="form-control" placeholder="https://maps.google.com/..." value="<?= htmlspecialchars($old['google_map_link'] ?? '') ?>">
                             <div class="form-text">Paste the Google Maps link for the pickup location</div>
                         </div>
                         
                         <div class="mb-4">
                             <label class="form-label">Postal Code</label>
-                            <input type="text" name="postal_code" class="form-control" placeholder="Postal Code">
+                            <input type="text" name="postal_code" class="form-control" placeholder="Postal Code" value="<?= htmlspecialchars($old['postal_code'] ?? '') ?>">
                         </div>
                         
                         <div class="mb-3">

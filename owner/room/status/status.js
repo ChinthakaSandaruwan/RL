@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', function () {
         fd.append('id', id);
         fd.append('status_id', newStatus);
 
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fd.append('csrf_token', token);
+
         fetch('status.php', {
             method: 'POST',
             body: fd

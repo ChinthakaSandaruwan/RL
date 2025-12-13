@@ -10,8 +10,16 @@ if (!$user || $user['role_id'] != 3) {
 
 $pdo = get_pdo();
 
+$csrf_token = generate_csrf_token();
+
 // Handle AJAX Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_action'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Invalid CSRF Token']);
+        exit;
+    }
+
     ob_clean();
     header('Content-Type: application/json');
     try {
@@ -67,6 +75,7 @@ $requests = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Vehicle Rent Approval - Rental Lanka</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= $csrf_token ?>">
     <link rel="stylesheet" href="<?= app_url('bootstrap-5.3.8-dist/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="rent_approval.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

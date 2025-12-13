@@ -11,7 +11,7 @@ if (!$user || $user['role_id'] != 1) {
 }
 
 // Handle Backup Generation
-if (isset($_POST['backup'])) {
+if (isset($_GET['backup'])) {
     try {
         $pdo = get_pdo();
         
@@ -114,7 +114,7 @@ if (isset($_POST['backup'])) {
                         <strong>Warning:</strong> Ensure that no critical operations are running before starting the backup. Large databases may take some time to download.
                     </div>
 
-                    <form method="post" action="">
+                    <form method="get" action="">
                         <input type="hidden" name="backup" value="true">
                         <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
                             <button type="submit" class="btn btn-primary btn-lg" onclick="return confirm('Are you sure you want to download a database backup?');">

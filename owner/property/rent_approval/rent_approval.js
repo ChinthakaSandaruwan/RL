@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('request_action', action);
         formData.append('rent_id', rentId);
 
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        formData.append('csrf_token', token);
+
         fetch('rent_approval.php', {
             method: 'POST',
             body: formData

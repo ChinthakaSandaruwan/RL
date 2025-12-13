@@ -21,8 +21,9 @@ $stmt = $pdo->prepare("
 $stmt->execute();
 $owners = $stmt->fetchAll();
 
-$success = $_GET['success'] ?? '';
-$error = $_GET['error'] ?? '';
+$success = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

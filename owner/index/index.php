@@ -37,6 +37,25 @@ $activeListings = $pdo->prepare("SELECT
 $activeListings->execute([$user['user_id'], $user['user_id'], $user['user_id']]);
 $active = $activeListings->fetchColumn();
 
+// Get pending rent requests
+$pendingPropertyRents = $pdo->prepare("SELECT COUNT(*) FROM property_rent pr 
+    JOIN property p ON pr.property_id = p.property_id 
+    WHERE p.owner_id = ? AND pr.status_id = 2");
+$pendingPropertyRents->execute([$user['user_id']]);
+$pendingProperties = $pendingPropertyRents->fetchColumn();
+
+$pendingRoomRents = $pdo->prepare("SELECT COUNT(*) FROM room_rent rr 
+    JOIN room r ON rr.room_id = r.room_id 
+    WHERE r.owner_id = ? AND rr.status_id = 2");
+$pendingRoomRents->execute([$user['user_id']]);
+$pendingRooms = $pendingRoomRents->fetchColumn();
+
+$pendingVehicleRents = $pdo->prepare("SELECT COUNT(*) FROM vehicle_rent vr 
+    JOIN vehicle v ON vr.vehicle_id = v.vehicle_id 
+    WHERE v.owner_id = ? AND vr.status_id = 2");
+$pendingVehicleRents->execute([$user['user_id']]);
+$pendingVehicles = $pendingVehicleRents->fetchColumn();
+
 // Get active package quotas
 $stmt = $pdo->prepare("
     SELECT 
@@ -208,16 +227,25 @@ $hasActivePackage = ($packageQuota && ($packageQuota['total_properties'] > 0 || 
                 <div class="col-md-4">
                     <a href="<?= app_url('owner/property/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
                         <i class="bi bi-calendar-check"></i> Property Requests
+                        <?php if ($pendingProperties > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingProperties ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a href="<?= app_url('owner/room/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
                         <i class="bi bi-calendar-check"></i> Room Requests
+                        <?php if ($pendingRooms > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingRooms ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a href="<?= app_url('owner/vehicle/rent_approval/rent_approval.php') ?>" class="btn btn-outline-danger w-100 py-3">
                         <i class="bi bi-calendar-check"></i> Vehicle Requests
+                        <?php if ($pendingVehicles > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $pendingVehicles ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
             </div>

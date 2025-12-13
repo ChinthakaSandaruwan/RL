@@ -13,14 +13,15 @@ if (!$currentUser || !in_array($currentUser['role_id'], [1, 2])) {
 }
 
 $pdo = get_pdo();
-$success = '';
-$error = '';
+$success = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Protection (Basic)
     if (!isset($_POST['csrf_token']) || $_SESSION['csrf_token'] !== $_POST['csrf_token']) {
-        $error = "Invalid CSRF token.";
+        $_SESSION['_flash']['error'] = "Invalid CSRF token.";
     } else {
         $action = $_POST['action'] ?? '';
         $typeName = trim($_POST['type_name'] ?? '');
@@ -28,43 +29,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'add') {
             if (empty($typeName)) {
-                $error = "Type name is required.";
+                $_SESSION['_flash']['error'] = "Type name is required.";
             } else {
                 // Check if exists
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM property_type WHERE type_name = ?");
                 $stmt->execute([$typeName]);
                 if ($stmt->fetchColumn() > 0) {
-                    $error = "Property type already exists.";
+                    $_SESSION['_flash']['error'] = "Property type already exists.";
                 } else {
                     $stmt = $pdo->prepare("INSERT INTO property_type (type_name) VALUES (?)");
                     if ($stmt->execute([$typeName])) {
-                        $success = "Property type added successfully.";
+                        $_SESSION['_flash']['success'] = "Property type added successfully.";
                     } else {
-                        $error = "Failed to add property type.";
+                        $_SESSION['_flash']['error'] = "Failed to add property type.";
                     }
                 }
             }
         } elseif ($action === 'update') {
             if (empty($typeName) || $typeId <= 0) {
-                $error = "Invalid data provided.";
+                $_SESSION['_flash']['error'] = "Invalid data provided.";
             } else {
                 // Check if name is taken by another ID
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM property_type WHERE type_name = ? AND type_id != ?");
                 $stmt->execute([$typeName, $typeId]);
                 if ($stmt->fetchColumn() > 0) {
-                    $error = "Property type name already exists.";
+                    $_SESSION['_flash']['error'] = "Property type name already exists.";
                 } else {
                     $stmt = $pdo->prepare("UPDATE property_type SET type_name = ? WHERE type_id = ?");
                     if ($stmt->execute([$typeName, $typeId])) {
-                        $success = "Property type updated successfully.";
+                        $_SESSION['_flash']['success'] = "Property type updated successfully.";
                     } else {
-                        $error = "Failed to update property type.";
+                        $_SESSION['_flash']['error'] = "Failed to update property type.";
                     }
                 }
             }
         } elseif ($action === 'delete') {
             if ($typeId <= 0) {
-                $error = "Invalid type ID.";
+                $_SESSION['_flash']['error'] = "Invalid type ID.";
             } else {
                 // Check usage
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM property WHERE property_type_id = ?");
@@ -72,18 +73,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $count = $stmt->fetchColumn();
 
                 if ($count > 0) {
-                    $error = "Cannot delete this type. It is currently assigned to $count propertie(s).";
+                    $_SESSION['_flash']['error'] = "Cannot delete this type. It is currently assigned to $count propertie(s).";
                 } else {
                     $stmt = $pdo->prepare("DELETE FROM property_type WHERE type_id = ?");
                     if ($stmt->execute([$typeId])) {
-                        $success = "Property type deleted successfully.";
+                        $_SESSION['_flash']['success'] = "Property type deleted successfully.";
                     } else {
-                        $error = "Failed to delete property type.";
+                        $_SESSION['_flash']['error'] = "Failed to delete property type.";
                     }
                 }
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Generate new CSRF token

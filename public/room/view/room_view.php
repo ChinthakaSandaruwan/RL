@@ -66,6 +66,11 @@ if (empty($images)) {
     $images[] = ['image_path' => 'public/assets/images/placeholder-room.jpg', 'primary_image' => 1];
 }
 
+// Fetch Booked Dates
+$stmt_booked = $pdo->prepare("SELECT checkin_date, checkout_date, status_id FROM room_rent WHERE room_id = ? AND status_id IN (1, 2) ORDER BY checkin_date ASC");
+$stmt_booked->execute([$room_id]);
+$booked_dates_list = $stmt_booked->fetchAll(PDO::FETCH_ASSOC);
+
 $user = current_user();
 ?>
 <!DOCTYPE html>
@@ -197,6 +202,29 @@ $user = current_user();
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <h5 class="fw-bold mb-3">Unavailable Dates</h5>
+                    <div class="mb-5 bg-white p-4 border rounded">
+                        <?php if (empty($booked_dates_list)): ?>
+                            <p class="text-success mb-0"><i class="bi bi-calendar-check me-2"></i>This room is fully available.</p>
+                        <?php else: ?>
+                            <p class="text-muted small mb-3">The following dates are currently booked or pending approval:</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <?php foreach ($booked_dates_list as $bk): ?>
+                                    <?php 
+                                        $dStart = date('M d', strtotime($bk['checkin_date']));
+                                        $dEnd = date('M d, Y', strtotime($bk['checkout_date']));
+                                        $badgeClass = ($bk['status_id'] == 1) ? 'bg-danger' : 'bg-warning text-dark';
+                                        $statusText = ($bk['status_id'] == 1) ? 'Booked' : 'Pending';
+                                    ?>
+                                    <span class="badge <?= $badgeClass ?> p-2 fw-normal" style="font-size: 0.9rem;">
+                                        <i class="bi bi-calendar-x me-1"></i> <?= $dStart ?> - <?= $dEnd ?>
+                                        <span class="ps-2 border-start border-light border-opacity-50 ms-2 small opacity-75"><?= $statusText ?></span>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
                         <?php endif; ?>
                     </div>
 

@@ -22,8 +22,9 @@ $stmt->execute();
 $customers = $stmt->fetchAll();
 
 // Get flash messages if any (passed via session usually, or GET params for simple deleted action)
-$success = $_GET['success'] ?? '';
-$error = $_GET['error'] ?? '';
+$success = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

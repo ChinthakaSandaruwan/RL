@@ -10,20 +10,21 @@ if (!$currentUser || !in_array($currentUser['role_id'], [1, 2])) {
 }
 
 $pdo = get_pdo();
-$success = '';
-$error = '';
+$success = $_SESSION['_flash']['success'] ?? '';
+$error = $_SESSION['_flash']['error'] ?? '';
+unset($_SESSION['_flash']);
 $csrf_token = generate_csrf_token();
 
 // Handle Delete Action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = "Invalid CSRF Token";
+        $_SESSION['_flash']['error'] = "Invalid CSRF Token";
     } else {
         $adminIdToDelete = intval($_POST['admin_id']);
         
         // Prevent deleting self
         if ($adminIdToDelete === $currentUser['user_id']) {
-            $error = "You cannot delete your own account.";
+            $_SESSION['_flash']['error'] = "You cannot delete your own account.";
         } else {
             // Check if target is Super Admin (Role 1) - Only Super Admin can delete Super Admin
             $stmt = $pdo->prepare("SELECT role_id FROM user WHERE user_id = ?");
@@ -31,18 +32,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $targetRole = $stmt->fetchColumn();
             
             if ($targetRole == 1 && $currentUser['role_id'] != 1) {
-                $error = "You do not have permission to delete a Super Admin.";
+                $_SESSION['_flash']['error'] = "You do not have permission to delete a Super Admin.";
             } else {
                 try {
                     $stmt = $pdo->prepare("DELETE FROM user WHERE user_id = ?");
                     $stmt->execute([$adminIdToDelete]);
-                    $success = "Admin removed successfully.";
+                    $_SESSION['_flash']['success'] = "Admin removed successfully.";
                 } catch (Exception $e) {
-                    $error = "Error: " . $e->getMessage();
+                    $_SESSION['_flash']['error'] = "Error: " . $e->getMessage();
                 }
             }
         }
     }
+    
+    // Redirect (PRG)
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 // Fetch Admins (Role 1 & 2)
