@@ -283,15 +283,15 @@ $csrf = generate_csrf_token();
                     </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
-                             <div class="col-md-6">
+                            <div class="col-md-6">
                                 <label class="form-label">Pricing Type</label>
-                                <select name="pricing_type_id" class="form-select">
-                                    <?php foreach($pricingTypes as $pt): ?>
-                                        <option value="<?= $pt['type_id'] ?>" <?= $pt['type_id'] == $vehicle['pricing_type_id'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($pt['type_name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceType1" value="1" <?= $vehicle['pricing_type_id'] == 1 ? 'checked' : '' ?>>
+                                    <label class="btn btn-outline-success" for="priceType1">Daily</label>
+
+                                    <input type="radio" class="btn-check" name="pricing_type_id" id="priceType2" value="2" <?= $vehicle['pricing_type_id'] == 2 ? 'checked' : '' ?>>
+                                    <label class="btn btn-outline-success" for="priceType2">Per KM</label>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Security Deposit (LKR)</label>
@@ -299,12 +299,14 @@ $csrf = generate_csrf_token();
                             </div>
                             
                             <div class="col-md-6">
-                                <label class="form-label">Price Per Day (LKR)</label>
-                                <input type="number" step="0.01" name="price_day" class="form-control" value="<?= $vehicle['price_per_day'] ?>">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Price Per KM (LKR)</label>
-                                <input type="number" step="0.01" name="price_km" class="form-control" value="<?= $vehicle['price_per_km'] ?>">
+                                <div id="dailyPriceContainer" style="<?= $vehicle['pricing_type_id'] == 1 ? '' : 'display:none;' ?>">
+                                    <label class="form-label">Price Per Day (LKR) *</label>
+                                    <input type="number" step="0.01" name="price_day" class="form-control" value="<?= $vehicle['price_per_day'] ?>">
+                                </div>
+                                <div id="kmPriceContainer" style="<?= $vehicle['pricing_type_id'] == 2 ? '' : 'display:none;' ?>">
+                                    <label class="form-label">Price Per KM (LKR) *</label>
+                                    <input type="number" step="0.01" name="price_km" class="form-control" value="<?= $vehicle['price_per_km'] ?>">
+                                </div>
                             </div>
 
                             <div class="col-12 mt-4">
@@ -495,6 +497,30 @@ document.addEventListener('DOMContentLoaded', function() {
         driverChk.addEventListener('change', function() {
             driverCost.disabled = !this.checked;
         });
+    }
+
+    // --- Pricing Logic ---
+    const p1 = document.getElementById('priceType1');
+    const p2 = document.getElementById('priceType2');
+    const c1 = document.getElementById('dailyPriceContainer');
+    const c2 = document.getElementById('kmPriceContainer');
+    const inpDay = document.querySelector('input[name="price_day"]');
+    const inpKm = document.querySelector('input[name="price_km"]');
+
+    function togglePrice() {
+        if (p1.checked) {
+            c1.style.display = 'block';
+            c2.style.display = 'none';
+            if(inpKm) inpKm.value = ''; // Clean inactive
+        } else {
+            c1.style.display = 'none';
+            c2.style.display = 'block';
+            if(inpDay) inpDay.value = ''; // Clean inactive
+        }
+    }
+    if (p1 && p2) {
+        p1.addEventListener('change', togglePrice);
+        p2.addEventListener('change', togglePrice);
     }
 });
 </script>
